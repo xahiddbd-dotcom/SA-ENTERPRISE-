@@ -1,0 +1,115 @@
+import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
+import {
+  Zap,
+  ShieldCheck,
+  Users,
+  Printer,
+  HeartHandshake,
+  Headphones,
+  CheckCircle2,
+  Sparkles
+} from 'lucide-react';
+
+export const TrustSection: React.FC = () => {
+  const { language, t } = useLanguage();
+
+  const trustItems = [
+    {
+      icon: Zap,
+      titleBn: 'দ্রুত সেবা ও ইনস্ট্যান্ট ডেলিভারি',
+      titleEn: 'Superfast Service & Delivery',
+      descBn: 'ফটো ল্যাব প্রিন্ট ও জরুরি কম্পোজ ৫-১০ মিনিটের মধ্যে প্রস্তুত করে দেওয়া হয়।',
+      descEn: 'Instant 5-10 minute passport photo printing and urgent typing support.'
+    },
+    {
+      icon: ShieldCheck,
+      titleBn: '১০০% নির্ভুল অনলাইন আবেদন',
+      titleEn: 'Accurate Online Form Fill-up',
+      descBn: 'অভিজ্ঞ অপারেটর দ্বারা সতর্কতার সাথে কলেজ ভর্তি, সরকারি চাকরি ও ডিফেন্স ফরম পূরণ।',
+      descEn: 'Meticulous verification of quotas, codes, and documents to prevent errors.'
+    },
+    {
+      icon: Users,
+      titleBn: 'অভিজ্ঞ ও দক্ষ অপারেটর টিম',
+      titleEn: 'Experienced Technical Staff',
+      descBn: 'গত ৮ বছর ধরে ফার্মগেটে হাজারো শিক্ষার্থী ও চাকরিপ্রার্থীদের নির্ভরযোগ্য সেবা।',
+      descEn: '8+ years of dedicated service assisting students and job candidates.'
+    },
+    {
+      icon: Printer,
+      titleBn: 'আধুনিক কম্পিউটার ও ফটো ল্যাব',
+      titleEn: 'Modern Laser & Photo Lab',
+      descBn: 'হাই-রেজ্যুলেশন লেজার প্রিন্টার, ওয়াটারপ্রুফ ফটো পেপার এবং ভারী ফটোকপি সুবিধা।',
+      descEn: 'High-DPI laser printing, waterproof studio photo paper, and heavy duty copiers.'
+    },
+    {
+      icon: HeartHandshake,
+      titleBn: 'শিক্ষার্থীবান্ধব সাশ্রয়ী মূল্য',
+      titleEn: 'Student-Friendly Pricing',
+      descBn: 'তেজগাঁও কলেজ ও ফার্মগেটের শিক্ষার্থীদের জন্য বিশেষ প্যাকেজ ও ডিসকাউন্ট।',
+      descEn: 'Special affordable packages and seasonal discounts for college students.'
+    },
+    {
+      icon: Headphones,
+      titleBn: 'সহজ ও সরাসরি যোগাযোগ',
+      titleEn: 'Direct Phone & WhatsApp Support',
+      descBn: 'হোয়াটসঅ্যাপে ফাইল পাঠিয়ে সরাসরি প্রিন্ট ও পেমেন্ট করার সুব্যবস্থা।',
+      descEn: 'Send documents via WhatsApp or Email and pick up freshly printed copies anytime.'
+    }
+  ];
+
+  return (
+    <section id="trust-section" className="py-16 bg-neutral-900/60 border-y border-neutral-800">
+      <div className="container mx-auto px-4">
+        <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>{language === 'bn' ? 'আমাদের বিশেষত্ব ও বিশ্বাসযোগ্যতা' : 'Why We Are Trusted'}</span>
+          </div>
+
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+            {t('why_saiful_title')}
+          </h2>
+
+          <p className="text-neutral-400 text-xs sm:text-sm">
+            {language === 'bn'
+              ? 'আমরা প্রতিটি গ্রাহকের সময়, ডকুমেন্ট নিরাপত্তা ও তথ্যের গোপনীয়তাকে সর্বোচ্চ অগ্রাধিকার দিই।'
+              : 'Prioritizing document safety, data privacy, and prompt assistance for every client.'}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {trustItems.map((item, idx) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={idx}
+                className="bg-neutral-950/80 border border-neutral-800/80 hover:border-emerald-500/30 rounded-2xl p-6 transition-all hover:bg-neutral-900/60 flex flex-col justify-between"
+              >
+                <div className="space-y-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <Icon className="w-5 h-5" />
+                  </div>
+
+                  <h3 className="text-base font-bold text-white leading-snug">
+                    {language === 'bn' ? item.titleBn : item.titleEn}
+                  </h3>
+
+                  <p className="text-xs text-neutral-400 leading-relaxed">
+                    {language === 'bn' ? item.descBn : item.descEn}
+                  </p>
+                </div>
+
+                <div className="pt-4 mt-2 flex items-center gap-1 text-[11px] text-emerald-400 font-medium">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{language === 'bn' ? 'গ্যারান্টিযুক্ত সেবা' : 'Verified Quality'}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};

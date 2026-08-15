@@ -1,0 +1,6 @@
+{
+  "name": "Saiful Enterprise",
+  "description": "Bilingual digital service center, online application hub, POS, e-commerce, staff ID management, and WordPress-style admin platform for Saiful Enterprise.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
