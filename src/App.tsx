@@ -9,6 +9,8 @@ import { Hero } from './components/public/Hero';
 import { TejgaonSpecial } from './components/public/TejgaonSpecial';
 import { ServicesSection } from './components/public/ServicesSection';
 import { ShopSection } from './components/public/ShopSection';
+import { ProductSlider } from './components/public/ProductSlider';
+import { TeamSection } from './components/public/TeamSection';
 import { ApplicationTracker } from './components/public/ApplicationTracker';
 import { TrustSection } from './components/public/TrustSection';
 import { ContactSection } from './components/public/ContactSection';
@@ -87,12 +89,24 @@ const MainLayout: React.FC = () => {
         {activeTab === 'home' && (
           <>
             <Hero setActiveTab={setActiveTab} />
+            {/* 30-35s Auto Product Slider */}
+            <ProductSlider openCart={() => setIsCartOpen(true)} />
             <TejgaonSpecial onSelectService={() => setActiveTab('services')} />
             <ServicesSection onOpenTrackerWithId={handleOpenTrackerWithId} />
             <ShopSection openCart={() => setIsCartOpen(true)} />
+            {/* Staff & Founder Profiles Section */}
+            <TeamSection />
             <TrustSection />
             <ContactSection />
           </>
+        )}
+
+        {/* ABOUT & TEAM */}
+        {activeTab === 'about' && (
+          <div className="space-y-8 pt-4">
+            <TeamSection />
+            <TrustSection />
+          </div>
         )}
 
         {/* SERVICES CATALOG */}

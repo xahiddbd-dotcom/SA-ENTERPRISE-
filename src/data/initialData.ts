@@ -568,12 +568,27 @@ export const initialStaff: User[] = [
     employeeId: "SE-ADMIN-01",
     designation: "Founder & Managing Director",
     designationBn: "প্রতিষ্ঠাতা ও স্বত্বাধিকারী",
+    bio: "Visionary entrepreneur leading Saiful Enterprise since 2018. Expert in digital public services, academic admissions, high-speed press printing, and B2B paper distribution across Dhaka.",
+    bioBn: "২০১৮ সাল থেকে সাইফুল এন্টারপ্রাইজ পরিচালনা করছেন। ডিজিটাল নাগরিক সেবা, তেজগাঁও কলেজ ভর্তি ফরম, প্রিন্টিং ও পেপার সাপ্লাই ব্যবস্থাপনায় অত্যন্ত অভিজ্ঞ।",
+    skills: ["Business Operations", "Digital Governance", "Paper Import & B2B Sales", "Client Management"],
+    skillsBn: ["ব্যবসায়িক পরিচালনা", "ডিজিটাল সেবা", "কাগজ আমদানি ও সাপ্লাই", "গ্রাহক সেবা"],
+    socialLinks: {
+      phone: "01540004966",
+      whatsapp: "01540004966",
+      facebook: "https://facebook.com/saifulenterprise.bd",
+      linkedin: "https://linkedin.com",
+      email: "admin@saifulenterprise.com"
+    },
     joiningDate: "2018-01-01",
     bloodGroup: "B+",
     emergencyContact: "01517992585",
     address: "Farmgate, Tejgaon, Dhaka",
     isActive: true,
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80"
+    isBlocked: false,
+    salary: 85000,
+    shift: "Day & Management Shift",
+    performanceScore: 99,
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80"
   },
   {
     id: "usr_manager",
@@ -583,14 +598,29 @@ export const initialStaff: User[] = [
     phone: "01517992585",
     role: "manager",
     employeeId: "SE-EMP-001",
-    designation: "Senior Branch Manager & Operator",
-    designationBn: "সিনিয়র ব্রাঞ্চ ম্যানেজার ও অপারেটর",
+    designation: "Senior Branch Manager & Head Operator",
+    designationBn: "সিনিয়র ব্রাঞ্চ ম্যানেজার ও হেড অপারেটর",
+    bio: "5+ years of hands-on leadership at Tejgaon Branch. Specialist in government application verification, BMET immigration cards, and high-volume press printing workflows.",
+    bioBn: "তেজগাঁও ব্রাঞ্চের ৫ বছরের অভিজ্ঞ ম্যানেজার। সরকারি ও জাতীয় বিশ্ববিদ্যালয় আবেদন, বিএমইটি ইমিগ্রেশন ও জরুরি ফটোকপি সেবা পরিচালনায় পারদর্শী।",
+    skills: ["Branch Supervision", "POS Cashiering", "BMET Smart Cards", "Emergency Photo Studio"],
+    skillsBn: ["শাখা পরিচালনা", "পিওএস ক্যাশিয়ার", "বিএমইটি স্মার্ট কার্ড", "জরুরি ফটো স্টুডিও"],
+    socialLinks: {
+      phone: "01517992585",
+      whatsapp: "01517992585",
+      facebook: "https://facebook.com",
+      linkedin: "https://linkedin.com",
+      email: "staff@saifulenterprise.com"
+    },
     joiningDate: "2020-03-15",
     bloodGroup: "O+",
     emergencyContact: "01819000000",
     address: "Indira Road, Tejgaon, Dhaka",
     isActive: true,
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80"
+    isBlocked: false,
+    salary: 28000,
+    shift: "Morning (08:00 AM - 04:00 PM)",
+    performanceScore: 96,
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80"
   },
   {
     id: "usr_operator_1",
@@ -602,12 +632,26 @@ export const initialStaff: User[] = [
     employeeId: "SE-EMP-002",
     designation: "Online Application Specialist",
     designationBn: "অনলাইন আবেদন স্পেশালিস্ট",
+    bio: "Master typist and portal submission expert. Handled over 15,000+ Tejgaon College and Ministry job applications with 100% accuracy.",
+    bioBn: "তেজগাঁও কলেজ ভর্তি ও সরকারি চাকরির ফরম পূরণে বিশেষজ্ঞ। দ্রুত টাইপিং ও ডকুমেন্ট প্রসেসিংয়ে দক্ষ।",
+    skills: ["College Admissions", "Job Application", "Bengali Typing (Bijoy/Avro)", "PDF Formatting"],
+    skillsBn: ["কলেজ ভর্তি", "চাকরির আবেদন", "বাংলা টাইপিং (বিজয়/অভ্র)", "পিডিএফ এডিটিং"],
+    socialLinks: {
+      phone: "01788112233",
+      whatsapp: "01788112233",
+      facebook: "https://facebook.com",
+      email: "tanvir@saifulenterprise.com"
+    },
     joiningDate: "2022-06-01",
     bloodGroup: "A+",
     emergencyContact: "01788112244",
     address: "Monipuripara, Farmgate, Dhaka",
     isActive: true,
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop&q=80"
+    isBlocked: false,
+    salary: 22000,
+    shift: "Evening (02:00 PM - 10:00 PM)",
+    performanceScore: 94,
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80"
   },
   {
     id: "usr_accountant",
@@ -619,12 +663,113 @@ export const initialStaff: User[] = [
     employeeId: "SE-EMP-003",
     designation: "Accounts & Customer Support",
     designationBn: "অ্যাকাউন্টস ও কাস্টমার সাপোর্ট",
+    bio: "Financial manager handling daily ledger, paper invoice reconciliation, and customer helpline assistance.",
+    bioBn: "দৈনিক আয়-ব্যয় খতিয়ান, ভেন্ডর ইনভয়েস ও হেল্পলাইনে গ্রাহকদের তথ্য সহায়তা প্রদান করেন।",
+    skills: ["Accounts Ledger", "Billing & Invoicing", "Customer Support", "Inventory Auditing"],
+    skillsBn: ["হিসাব খাতা", "বিল ও ইনভয়েস", "গ্রাহক সেবা", "স্টক অডিট"],
+    socialLinks: {
+      phone: "01955334455",
+      whatsapp: "01955334455",
+      email: "nusrat@saifulenterprise.com"
+    },
     joiningDate: "2023-01-10",
     bloodGroup: "AB+",
     emergencyContact: "01955334466",
     address: "Green Road, Dhaka",
     isActive: true,
-    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop&q=80"
+    isBlocked: false,
+    salary: 20000,
+    shift: "General (09:30 AM - 05:30 PM)",
+    performanceScore: 92,
+    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80"
+  }
+];
+
+export const initialCustomers: User[] = [
+  {
+    id: "usr_cust_01",
+    name: "Kamrul Hasan",
+    nameBn: "কামরুল হাসান",
+    email: "kamrul@gmail.com",
+    phone: "01712345678",
+    role: "customer",
+    address: "Tejgaon College Hostel, Indira Road, Dhaka",
+    authProvider: "phone_otp",
+    isPhoneVerified: true,
+    isEmailVerified: true,
+    isActive: true,
+    isBlocked: false,
+    registeredAt: "2026-08-01T10:00:00Z",
+    customerNotes: "Regular college student - orders Double A 70 GSM paper reams and thesis prints.",
+    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80",
+    socialLinks: {
+      phone: "01712345678",
+      whatsapp: "01712345678",
+      facebook: "https://facebook.com"
+    }
+  },
+  {
+    id: "usr_cust_02",
+    name: "Anisur Rahman",
+    nameBn: "আনিসুর রহমান",
+    email: "anisur.corporate@gmail.com",
+    phone: "01811223344",
+    role: "customer",
+    address: "House 14, Road 4, Dhanmondi, Dhaka",
+    authProvider: "google",
+    isPhoneVerified: true,
+    isEmailVerified: true,
+    isActive: true,
+    isBlocked: false,
+    registeredAt: "2026-08-05T14:30:00Z",
+    customerNotes: "Corporate bulk buyer - Paper One A4 boxes for law consultancy firm.",
+    avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=200&auto=format&fit=crop&q=80",
+    socialLinks: {
+      phone: "01811223344",
+      whatsapp: "01811223344"
+    }
+  },
+  {
+    id: "usr_cust_03",
+    name: "Dr. Shahed Chowdhury",
+    nameBn: "ডা: শাহেদ চৌধুরী",
+    email: "dr.shahed@hospital.bd",
+    phone: "01999887766",
+    role: "customer",
+    address: "Green Life Hospital Area, Green Road, Dhaka",
+    authProvider: "phone_otp",
+    isPhoneVerified: true,
+    isEmailVerified: false,
+    isActive: true,
+    isBlocked: false,
+    registeredAt: "2026-08-10T11:15:00Z",
+    customerNotes: "Requires medical report printing paper and lamination pouches.",
+    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80",
+    socialLinks: {
+      phone: "01999887766",
+      whatsapp: "01999887766"
+    }
+  },
+  {
+    id: "usr_cust_04",
+    name: "Tanzeem Akhtar",
+    nameBn: "তানজিম আক্তার",
+    email: "tanzeem.akhtar@yahoo.com",
+    phone: "01622334455",
+    role: "customer",
+    address: "Monipuripara Gate 2, Tejgaon, Dhaka",
+    authProvider: "email_password",
+    isPhoneVerified: true,
+    isEmailVerified: true,
+    isActive: true,
+    isBlocked: false,
+    registeredAt: "2026-08-12T16:45:00Z",
+    customerNotes: "HSC candidate - Tejgaon college online admission applicant.",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=80",
+    socialLinks: {
+      phone: "01622334455",
+      whatsapp: "01622334455"
+    }
   }
 ];
 
@@ -723,11 +868,53 @@ export const initialApplications: Application[] = [
     deadline: "2026-08-20",
     notes: "Application submitted successfully to NU portal for Tejgaon College BBA department.",
     customerNotes: "Roll: 402911, Reg: 191022394",
+    timeline: [
+      {
+        id: "tl_1",
+        status: "new",
+        title: "Application Received & Logged",
+        titleBn: "আবেদন গ্রহণ ও নথিবদ্ধকরণ সম্পন্ন",
+        description: "Application details, SSC transcript copy and photo received via online desk.",
+        descriptionBn: "অনলাইন ডেস্কের মাধ্যমে আবেদনকারীর তথ্য, মার্কশীটের কপি ও ছবি সংরক্ষিত হয়েছে।",
+        updatedBy: "System Desk",
+        timestamp: "2026-08-14T08:45:00Z"
+      },
+      {
+        id: "tl_2",
+        status: "processing",
+        title: "Verification & Data Entry by Operator",
+        titleBn: "অপারেটর দ্বারা তথ্য যাচাই ও ডাটা এন্ট্রি",
+        description: "Assigned to Tanvir Ahmed. Verified SSC GPA and Tejgaon College subject eligibility.",
+        descriptionBn: "তানভীর আহমেদকে দায়িত্ব অর্পণ করা হয়েছে। তেজগাঁও কলেজ বিবিএ ডিপার্টমেন্টের যোগ্যতা যাচাই সম্পন্ন।",
+        updatedBy: "Tanvir Ahmed (Operator)",
+        timestamp: "2026-08-14T09:05:00Z"
+      },
+      {
+        id: "tl_3",
+        status: "submitted",
+        title: "Final Submission to NU Gateway",
+        titleBn: "জাতীয় বিশ্ববিদ্যালয় পোর্টালে অনলাইন সাবমিশন",
+        description: "Form uploaded and verified with registration code. Online submission successful.",
+        descriptionBn: "রেজিস্ট্রেশন কোড সহ ফরম জাতীয় বিশ্ববিদ্যালয় পোর্টালে সাবমিট করা হয়েছে।",
+        updatedBy: "Tanvir Ahmed (Operator)",
+        timestamp: "2026-08-14T09:15:00Z"
+      },
+      {
+        id: "tl_4",
+        status: "completed",
+        title: "Admission Slip Ready for Download & Pickup",
+        titleBn: "ভর্তি কনফার্মেশন স্লিপ ডাউনলোড ও প্রিন্টের জন্য প্রস্তুত",
+        description: "Official acknowledgment slip generated with barcode. Available in tracker and printed at counter.",
+        descriptionBn: "অফিসিয়াল ভর্তি কনফার্মেশন স্লিপ প্রস্তুত করা হয়েছে। কাউন্টার থেকে প্রিন্ট সংগ্রহ করা যাবে।",
+        updatedBy: "Tanvir Ahmed (Operator)",
+        timestamp: "2026-08-14T09:20:00Z"
+      }
+    ],
     documents: [
       {
         id: "doc_1",
         name: "SSC_Marksheet_Sakib.pdf",
-        url: "#",
+        url: "https://images.unsplash.com/photo-1568667256549-094345857637?w=600&auto=format&fit=crop&q=80",
         type: "pdf",
         uploadedAt: "2026-08-14T09:00:00Z",
         uploadedBy: "Customer"
@@ -735,7 +922,7 @@ export const initialApplications: Application[] = [
       {
         id: "doc_2",
         name: "Admission_Confirmation_Slip.pdf",
-        url: "#",
+        url: "https://images.unsplash.com/photo-1618042164219-62c820f10723?w=600&auto=format&fit=crop&q=80",
         type: "pdf",
         uploadedAt: "2026-08-14T09:20:00Z",
         uploadedBy: "Tanvir Ahmed"
@@ -752,6 +939,7 @@ export const initialApplications: Application[] = [
     serviceNameBn: "অনলাইন পুলিশ ক্লিয়ারেন্স সার্টিফিকেট আবেদন",
     applicantName: "Farhana Yasmin",
     applicantPhone: "01511223344",
+    applicantEmail: "farhana.y@gmail.com",
     category: "Government",
     status: "processing",
     paymentStatus: "paid",
@@ -762,11 +950,33 @@ export const initialApplications: Application[] = [
     assignedStaffName: "Md. Rafiqul Hassan",
     deadline: "2026-08-22",
     notes: "Challan verified. Uploaded ward commissioner certificate.",
+    timeline: [
+      {
+        id: "tl_21",
+        status: "new",
+        title: "Police Clearance Request Received",
+        titleBn: "পুলিশ ক্লিয়ারেন্স আবেদন নথিভুক্ত হয়েছে",
+        description: "Passport scan, NID copy and address verification submitted.",
+        descriptionBn: "পাসপোর্ট স্ক্যান কপি ও ঠিকানা যাচাইয়ের জন্য প্রাথমিক তথ্য গ্রহণ করা হয়েছে।",
+        updatedBy: "System Desk",
+        timestamp: "2026-08-15T01:50:00Z"
+      },
+      {
+        id: "tl_22",
+        status: "processing",
+        title: "Treasury Challan ৳500 Verified & Uploaded",
+        titleBn: "ট্রেজারি চালান ৳৫০০ কোড যাচাই ও পোর্টালে আপলোড",
+        description: "e-Challan payment confirmed at Sonali Bank. Files currently in review before police station routing.",
+        descriptionBn: "সোনালী ব্যাংক ই-চালান পেমেন্ট যাচাই সম্পন্ন। স্থানীয় তেজগাঁও থানায় ফরোয়ার্ডের প্রস্তুতি চলছে।",
+        updatedBy: "Md. Rafiqul Hassan (Branch Manager)",
+        timestamp: "2026-08-15T02:10:00Z"
+      }
+    ],
     documents: [
       {
         id: "doc_3",
         name: "Passport_Scan_Farhana.jpg",
-        url: "#",
+        url: "https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop&q=80",
         type: "image",
         uploadedAt: "2026-08-15T02:00:00Z",
         uploadedBy: "Customer"
@@ -790,6 +1000,18 @@ export const initialApplications: Application[] = [
     amount: 200,
     paidAmount: 0,
     customerNotes: "Applying for GD Soldier batch.",
+    timeline: [
+      {
+        id: "tl_31",
+        status: "new",
+        title: "Army Recruitment Intake Created",
+        titleBn: "সেনাবাহিনী সৈনিক আবেদনের ড্রাফট তৈরি হয়েছে",
+        description: "Awaiting applicant physical measurement data and photo crop at counter.",
+        descriptionBn: "কাউন্টারে ছবি ও শিক্ষাগত তথ্যের ভেরিফিকেশন ও পেমেন্ট বাকি আছে।",
+        updatedBy: "Counter Reception",
+        timestamp: "2026-08-15T02:05:00Z"
+      }
+    ],
     documents: [],
     createdAt: "2026-08-15T02:05:00Z",
     updatedAt: "2026-08-15T02:05:00Z"

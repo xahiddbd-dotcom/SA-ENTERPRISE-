@@ -24,6 +24,7 @@ import {
   initialGsmOptions,
   initialProducts,
   initialStaff,
+  initialCustomers,
   initialOrders,
   initialApplications,
   initialExpenses,
@@ -72,8 +73,9 @@ interface DataContextType {
 
   // Applications
   applications: Application[];
-  createApplication: (appData: Omit<Application, 'id' | 'applicationNumber' | 'createdAt' | 'updatedAt' | 'documents'> & { documents?: any[] }) => Application;
-  updateApplicationStatus: (appId: string, status: ApplicationStatus, notes?: string) => void;
+  createApplication: (appData: Omit<Application, 'id' | 'applicationNumber' | 'createdAt' | 'updatedAt' | 'documents'> & { documents?: any[]; timeline?: any[] }) => Application;
+  updateApplicationStatus: (appId: string, status: ApplicationStatus, notes?: string, updatedBy?: string) => void;
+  addApplicationTimelineEvent: (appId: string, event: { status: ApplicationStatus; title: string; titleBn: string; description: string; descriptionBn: string; updatedBy?: string; notes?: string }) => void;
   assignStaffToApplication: (appId: string, staffId: string, staffName: string) => void;
   addApplicationDocument: (appId: string, doc: { name: string; url: string; type: string; uploadedBy: string }) => void;
 
@@ -82,6 +84,14 @@ interface DataContextType {
   addStaffMember: (member: Omit<User, 'id'>) => User;
   updateStaffMember: (id: string, updates: Partial<User>) => void;
   deleteStaffMember: (id: string) => void;
+  toggleBlockStaff: (id: string, reason?: string) => void;
+
+  // Customers Management
+  customers: User[];
+  addCustomer: (customer: Omit<User, 'id'> | User) => User;
+  updateCustomer: (id: string, updates: Partial<User>) => void;
+  deleteCustomer: (id: string) => void;
+  toggleBlockCustomer: (id: string, reason?: string) => void;
 
   // POS Sales & Invoices
   posSales: POSSale[];
@@ -142,6 +152,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [staff, setStaff] = useState<User[]>(() => {
     const saved = localStorage.getItem('se_staff');
     return saved ? JSON.parse(saved) : initialStaff;
+  });
+
+  const [customers, setCustomers] = useState<User[]>(() => {
+    const saved = localStorage.getItem('se_customers');
+    return saved ? JSON.parse(saved) : initialCustomers;
   });
 
   const [orders, setOrders] = useState<Order[]>(() => {
@@ -219,6 +234,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => { localStorage.setItem('se_gsm_options', JSON.stringify(gsmOptions)); }, [gsmOptions]);
   useEffect(() => { localStorage.setItem('se_products', JSON.stringify(products)); }, [products]);
   useEffect(() => { localStorage.setItem('se_staff', JSON.stringify(staff)); }, [staff]);
+  useEffect(() => { localStorage.setItem('se_customers', JSON.stringify(customers)); }, [customers]);
   useEffect(() => { localStorage.setItem('se_orders', JSON.stringify(orders)); }, [orders]);
   useEffect(() => { localStorage.setItem('se_applications', JSON.stringify(applications)); }, [applications]);
   useEffect(() => { localStorage.setItem('se_expenses', JSON.stringify(expenses)); }, [expenses]);
@@ -387,12 +403,26 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Applications
-  const createApplication = (appData: Omit<Application, 'id' | 'applicationNumber' | 'createdAt' | 'updatedAt' | 'documents'> & { documents?: any[] }) => {
+  const createApplication = (appData: Omit<Application, 'id' | 'applicationNumber' | 'createdAt' | 'updatedAt' | 'documents'> & { documents?: any[]; timeline?: any[] }) => {
     const applicationNumber = `APP-${new Date().getFullYear()}-${String(applications.length + 1).padStart(4, '0')}`;
+    const initialTimeline = appData.timeline || [
+      {
+        id: `tl_${Date.now()}`,
+        status: 'new',
+        title: 'Application Received',
+        titleBn: 'আবেদন নথিভুক্ত হয়েছে',
+        description: `Application for ${appData.serviceName} received at digital desk.`,
+        descriptionBn: `${appData.serviceNameBn || appData.serviceName} সেবার জন্য আবেদন জমা হয়েছে।`,
+        updatedBy: 'System Online Desk',
+        timestamp: new Date().toISOString()
+      }
+    ];
+
     const newApp: Application = {
       ...appData,
       id: `app_${Date.now()}`,
       applicationNumber,
+      timeline: initialTimeline,
       documents: appData.documents || [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -412,12 +442,95 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return newApp;
   };
 
-  const updateApplicationStatus = (appId: string, status: ApplicationStatus, notes?: string) => {
+  const addApplicationTimelineEvent = (
+    appId: string,
+    event: { status: ApplicationStatus; title: string; titleBn: string; description: string; descriptionBn: string; updatedBy?: string; notes?: string }
+  ) => {
     setApplications(prev => prev.map(app => {
       if (app.id === appId) {
+        const newEvent = {
+          id: `tl_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          status: event.status,
+          title: event.title,
+          titleBn: event.titleBn,
+          description: event.description,
+          descriptionBn: event.descriptionBn,
+          updatedBy: event.updatedBy || 'Staff Operator',
+          timestamp: new Date().toISOString(),
+          notes: event.notes
+        };
+        const currentTimeline = app.timeline || [];
+        return {
+          ...app,
+          status: event.status,
+          timeline: [...currentTimeline, newEvent],
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return app;
+    }));
+  };
+
+  const updateApplicationStatus = (appId: string, status: ApplicationStatus, notes?: string, updatedBy?: string) => {
+    const titlesMap: Record<ApplicationStatus, { en: string; bn: string; descEn: string; descBn: string }> = {
+      new: {
+        en: 'Application Received & Queued',
+        bn: 'আবেদন নথিভুক্ত ও কিউতে সংরক্ষিত',
+        descEn: 'Application details recorded.',
+        descBn: 'আবেদনের প্রাথমিক তথ্য নথিভুক্ত করা হয়েছে।'
+      },
+      processing: {
+        en: 'In Processing & Document Verification',
+        bn: 'যাচাই ও প্রক্রিয়াকরণ চলছে',
+        descEn: 'Operator is verifying details and preparing portal submission.',
+        descBn: 'অপারেটর কর্তৃক তথ্য ও ডকুমেন্ট যাচাই করে সাবমিশনের জন্য প্রস্তুত করা হচ্ছে।'
+      },
+      submitted: {
+        en: 'Form Submitted to Official Portal',
+        bn: 'অফিসিয়াল পোর্টালে অনলাইন দাখিল সম্পন্ন',
+        descEn: 'Successfully submitted to the government/academic authority server.',
+        descBn: 'কর্তৃপক্ষের নির্দিষ্ট সার্ভারে অনলাইন দাখিল সম্পন্ন হয়েছে।'
+      },
+      completed: {
+        en: 'Work Completed & Ready for Delivery',
+        bn: 'কাজ সম্পন্ন ও ডেলিভারির জন্য প্রস্তুত',
+        descEn: 'Official slip or certificate processed and ready for customer.',
+        descBn: 'কাঙ্ক্ষিত সনদ বা কনফার্মেশন স্লিপ তৈরি সম্পন্ন হয়েছে এবং ডাউনলোডের জন্য উন্মুক্ত।'
+      },
+      delivered: {
+        en: 'Handed Over / Delivered to Applicant',
+        bn: 'গ্রাহককে ডেলিভারি ও হস্তান্তর সম্পন্ন',
+        descEn: 'Printed document/slip collected by or sent to customer.',
+        descBn: 'গ্রাহকের নিকট প্রিন্টেড কপি বা অনলাইন ফাইল হস্তান্তর করা হয়েছে।'
+      },
+      cancelled: {
+        en: 'Application Cancelled / Rejected',
+        bn: 'আবেদন বাতিল বা তথ্য অমিল',
+        descEn: 'Application could not be processed due to incomplete data or client request.',
+        descBn: 'অসম্পূর্ণ তথ্য বা ফি সংক্রান্ত কারণে আবেদনটি স্থগিত বা বাতিল করা হয়েছে।'
+      }
+    };
+
+    setApplications(prev => prev.map(app => {
+      if (app.id === appId) {
+        const info = titlesMap[status] || titlesMap.processing;
+        const newEvent = {
+          id: `tl_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          status,
+          title: info.en,
+          titleBn: info.bn,
+          description: notes || info.descEn,
+          descriptionBn: notes || info.descBn,
+          updatedBy: updatedBy || app.assignedStaffName || 'Staff Operator',
+          timestamp: new Date().toISOString(),
+          notes
+        };
+        const currentTimeline = app.timeline || [];
+
         return {
           ...app,
           status,
+          timeline: [...currentTimeline, newEvent],
           ...(notes ? { notes } : {}),
           updatedAt: new Date().toISOString()
         };
@@ -482,6 +595,76 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteStaffMember = (id: string) => {
     setStaff(prev => prev.filter(s => s.id !== id));
     logActivity('Staff Removed', `Removed staff member ID ${id}`);
+  };
+
+  const toggleBlockStaff = (id: string, reason?: string) => {
+    setStaff(prev => prev.map(s => {
+      if (s.id === id) {
+        const nextBlocked = !s.isBlocked;
+        logActivity(
+          nextBlocked ? 'Staff Blocked' : 'Staff Unblocked',
+          `Staff member ${s.name} (${s.employeeId}) ${nextBlocked ? 'blocked' : 'unblocked'}. ${reason ? `Reason: ${reason}` : ''}`
+        );
+        return {
+          ...s,
+          isBlocked: nextBlocked,
+          blockReason: nextBlocked ? (reason || 'Blocked by Super Admin') : undefined
+        };
+      }
+      return s;
+    }));
+  };
+
+  // Customers Management CRUD
+  const addCustomer = (customerData: Omit<User, 'id'> | User): User => {
+    const newCustomer: User = {
+      ...customerData,
+      id: (customerData as User).id || `usr_cust_${Date.now()}`,
+      role: 'customer',
+      isActive: true,
+      isBlocked: (customerData as User).isBlocked ?? false,
+      registeredAt: (customerData as User).registeredAt || new Date().toISOString()
+    };
+    setCustomers(prev => {
+      // Avoid duplicate by phone or email
+      const existingIdx = prev.findIndex(c => (c.phone && c.phone === newCustomer.phone) || (c.email && c.email === newCustomer.email));
+      if (existingIdx >= 0) {
+        const updated = [...prev];
+        updated[existingIdx] = { ...updated[existingIdx], ...newCustomer };
+        return updated;
+      }
+      return [newCustomer, ...prev];
+    });
+    logActivity('Customer Registered', `New customer profile created: ${newCustomer.name} (${newCustomer.phone})`);
+    return newCustomer;
+  };
+
+  const updateCustomer = (id: string, updates: Partial<User>) => {
+    setCustomers(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+    logActivity('Customer Profile Updated', `Updated customer ID ${id}`);
+  };
+
+  const deleteCustomer = (id: string) => {
+    setCustomers(prev => prev.filter(c => c.id !== id));
+    logActivity('Customer Deleted', `Deleted customer ID ${id}`);
+  };
+
+  const toggleBlockCustomer = (id: string, reason?: string) => {
+    setCustomers(prev => prev.map(c => {
+      if (c.id === id) {
+        const nextBlocked = !c.isBlocked;
+        logActivity(
+          nextBlocked ? 'Customer Suspended' : 'Customer Reactivated',
+          `Customer ${c.name} (${c.phone}) ${nextBlocked ? 'suspended' : 'reactivated'}. ${reason ? `Reason: ${reason}` : ''}`
+        );
+        return {
+          ...c,
+          isBlocked: nextBlocked,
+          blockReason: nextBlocked ? (reason || 'Account suspended by Administrator') : undefined
+        };
+      }
+      return c;
+    }));
   };
 
   // POS Sales
@@ -680,6 +863,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         productsCount: products.length,
         applicationsCount: applications.length,
         ordersCount: orders.length,
+        customersCount: customers.length,
         staffCount: staff.length,
         posSalesCount: posSales.length,
         expensesCount: expenses.length
@@ -690,6 +874,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       gsmOptions,
       products,
       staff,
+      customers,
       orders,
       applications,
       expenses,
@@ -725,6 +910,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.staff && Array.isArray(data.staff)) {
         setStaff(data.staff);
         localStorage.setItem('se_staff', JSON.stringify(data.staff));
+      }
+      if (data.customers && Array.isArray(data.customers)) {
+        setCustomers(data.customers);
+        localStorage.setItem('se_customers', JSON.stringify(data.customers));
       }
       if (data.orders && Array.isArray(data.orders)) {
         setOrders(data.orders);
@@ -787,12 +976,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         applications,
         createApplication,
         updateApplicationStatus,
+        addApplicationTimelineEvent,
         assignStaffToApplication,
         addApplicationDocument,
         staff,
         addStaffMember,
         updateStaffMember,
         deleteStaffMember,
+        toggleBlockStaff,
+        customers,
+        addCustomer,
+        updateCustomer,
+        deleteCustomer,
+        toggleBlockCustomer,
         posSales,
         recordPOSSale,
         invoices,

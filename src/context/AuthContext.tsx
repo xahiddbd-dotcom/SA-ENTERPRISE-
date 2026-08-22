@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, UserRole } from '../types';
-import { initialStaff } from '../data/initialData';
+import { User, UserRole, SocialLinks } from '../types';
+import { initialStaff, initialCustomers } from '../data/initialData';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -13,8 +13,18 @@ interface AuthContextType {
   isCustomer: boolean;
   loginAdmin: (emailOrPhone: string, password: string) => Promise<{ success: boolean; message?: string }>;
   loginStaff: (employeeIdOrPhone: string, password: string) => Promise<{ success: boolean; message?: string }>;
-  loginCustomer: (emailOrPhone: string, password: string) => Promise<{ success: boolean; message?: string }>;
-  registerCustomer: (name: string, phone: string, email?: string, address?: string) => Promise<{ success: boolean; message?: string }>;
+  loginCustomer: (emailOrPhone: string, password?: string) => Promise<{ success: boolean; message?: string }>;
+  loginWithGoogle: (googleUser?: { name: string; email: string; avatar?: string }) => Promise<{ success: boolean; message?: string }>;
+  registerCustomer: (
+    name: string,
+    phone: string,
+    email?: string,
+    address?: string,
+    password?: string,
+    authProvider?: 'phone_otp' | 'google' | 'email_password'
+  ) => Promise<{ success: boolean; message?: string }>;
+  updateCurrentUserProfile: (updates: Partial<User>) => Promise<{ success: boolean; message?: string }>;
+  deleteOwnAccount: () => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   hasPermission: (permissionName: string) => boolean;
 }
@@ -31,7 +41,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Failed to parse user', e);
       }
     }
-    // Default to guest
     return null;
   });
 
@@ -66,6 +75,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return initialStaff;
   };
 
+  const getCombinedCustomers = (): User[] => {
+    try {
+      const stored = localStorage.getItem('se_customers');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Error reading stored customers', e);
+    }
+    return initialCustomers;
+  };
+
+  const saveCustomerToStorage = (customer: User) => {
+    try {
+      const currentList = getCombinedCustomers();
+      const existingIdx = currentList.findIndex(c => c.id === customer.id || (customer.phone && c.phone === customer.phone) || (customer.email && c.email === customer.email));
+      let updated: User[];
+      if (existingIdx >= 0) {
+        updated = [...currentList];
+        updated[existingIdx] = { ...updated[existingIdx], ...customer };
+      } else {
+        updated = [customer, ...currentList];
+      }
+      localStorage.setItem('se_customers', JSON.stringify(updated));
+    } catch (e) {
+      console.error('Failed to save customer to storage', e);
+    }
+  };
+
   const loginAdmin = async (emailOrPhone: string, password: string): Promise<{ success: boolean; message?: string }> => {
     const cleanId = emailOrPhone.trim().toLowerCase();
     const cleanPass = password.trim();
@@ -75,7 +116,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     
     // Master Admin credentials check (User Name: Admin, Password: J@hid2045)
-    // Accept variations in capitalization, whitespace, or admin identifier (including email sent9696@gmail.com, saiful, 01540004966)
     const isMasterPassword = cleanPass === 'J@hid2045' || cleanPass.toLowerCase() === 'j@hid2045' || cleanPass === 'admin123' || cleanPass === 'admin' || cleanPass === '123456';
     const isMasterUsername = !cleanId || cleanId === 'admin' || cleanId === 'admin@saifulenterprise.com' || cleanId === 'sent9696@gmail.com' || cleanId === '01540004966' || cleanId === 'saiful' || cleanId === 'se-admin-01' || cleanId === 'jahid' || cleanId === 'superadmin' || cleanId === 'administrator';
 
@@ -88,13 +128,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: cleanId.includes('@') ? cleanId : 'admin@saifulenterprise.com',
         phone: '01540004966',
         role: 'super_admin',
-        permissions: ['all', 'manage_all', 'services', 'products', 'orders', 'applications', 'pos', 'staff', 'settings', 'backup', 'finance', 'reports']
+        isActive: true,
+        isBlocked: false,
+        permissions: ['all', 'manage_all', 'services', 'products', 'orders', 'applications', 'pos', 'staff', 'customers', 'settings', 'backup', 'finance', 'reports']
       };
       setCurrentUser(user);
       return { success: true };
     }
 
-    // If correct master password was given, always grant master admin even if username was customized
     if (isMasterPassword) {
       const user: User = {
         ...initialStaff[0],
@@ -103,26 +144,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         nameBn: 'অ্যাডমিন ইউজার',
         email: cleanId.includes('@') ? cleanId : 'admin@saifulenterprise.com',
         role: 'super_admin',
-        permissions: ['all', 'manage_all', 'services', 'products', 'orders', 'applications', 'pos', 'staff', 'settings', 'backup', 'finance', 'reports']
+        isActive: true,
+        isBlocked: false,
+        permissions: ['all', 'manage_all', 'services', 'products', 'orders', 'applications', 'pos', 'staff', 'customers', 'settings', 'backup', 'finance', 'reports']
       };
       setCurrentUser(user);
       return { success: true };
     }
 
-    // Check registered admin or management staff from database/localStorage
+    // Check staff accounts with admin role
     const staffList = getCombinedStaff();
     const foundStaff = staffList.find(
       s => (s.email?.toLowerCase() === cleanId || s.phone === cleanId || s.employeeId?.toLowerCase() === cleanId || s.name.toLowerCase() === cleanId) &&
       (s.role === 'super_admin' || s.role === 'admin' || s.role === 'manager')
     );
 
-    if (foundStaff && (cleanPass === 'J@hid2045' || cleanPass.toLowerCase() === 'j@hid2045' || cleanPass === 'admin123' || cleanPass === 'staff123' || cleanPass === '123456' || cleanPass === 'admin')) {
-      setCurrentUser({
-        ...foundStaff,
-        role: 'super_admin',
-        permissions: ['all', 'manage_all', 'services', 'products', 'orders', 'applications', 'pos', 'staff', 'settings', 'backup', 'finance', 'reports']
-      });
-      return { success: true };
+    if (foundStaff) {
+      if (foundStaff.isBlocked) {
+        return { success: false, message: `Account Blocked: ${foundStaff.blockReason || 'Your admin access has been blocked. Contact Super Admin.'}` };
+      }
+
+      if (cleanPass === 'J@hid2045' || cleanPass.toLowerCase() === 'j@hid2045' || cleanPass === 'admin123' || cleanPass === 'staff123' || cleanPass === '123456' || cleanPass === 'admin') {
+        setCurrentUser({
+          ...foundStaff,
+          role: 'super_admin',
+          permissions: ['all', 'manage_all', 'services', 'products', 'orders', 'applications', 'pos', 'staff', 'customers', 'settings', 'backup', 'finance', 'reports']
+        });
+        return { success: true };
+      }
     }
 
     return { success: false, message: 'Invalid Admin Credentials. Required: Username: Admin | Password: J@hid2045' };
@@ -136,62 +185,208 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, message: 'Please provide Employee ID and password' };
     }
 
-    // Check staff accounts
-    if ((cleanId === 'staff@saifulenterprise.com' || cleanId === 'se-emp-001' || cleanId === '01517992585' || cleanId === 'staff') && (cleanPass === 'staff123' || cleanPass === 'admin123' || cleanPass === '123456')) {
-      const staffUser: User = initialStaff[1]; // Md. Rafiqul Hassan
-      setCurrentUser(staffUser);
-      return { success: true };
-    }
-
     const staffList = getCombinedStaff();
     const matched = staffList.find(
       s => s.employeeId?.toLowerCase() === cleanId || s.phone === cleanId || s.email?.toLowerCase() === cleanId || s.name.toLowerCase() === cleanId
     );
 
-    if (matched && (cleanPass === 'staff123' || cleanPass === 'admin123' || cleanPass === '123456')) {
-      setCurrentUser(matched);
+    if (matched) {
+      if (matched.isBlocked) {
+        return { success: false, message: `Access Suspended: ${matched.blockReason || 'This staff account is currently blocked by Administrator.'}` };
+      }
+
+      if (cleanPass === 'staff123' || cleanPass === 'admin123' || cleanPass === '123456' || cleanPass === 'J@hid2045') {
+        setCurrentUser(matched);
+        return { success: true };
+      }
+    }
+
+    // Fallback default staff
+    if ((cleanId === 'staff@saifulenterprise.com' || cleanId === 'se-emp-001' || cleanId === '01517992585' || cleanId === 'staff') && (cleanPass === 'staff123' || cleanPass === 'admin123' || cleanPass === '123456' || cleanPass === 'J@hid2045')) {
+      const staffUser: User = initialStaff[1];
+      if (staffUser.isBlocked) {
+        return { success: false, message: 'This staff account has been blocked.' };
+      }
+      setCurrentUser(staffUser);
       return { success: true };
     }
 
     return { success: false, message: 'Invalid Employee ID or Password.' };
   };
 
-  const loginCustomer = async (emailOrPhone: string, password: string): Promise<{ success: boolean; message?: string }> => {
+  const loginCustomer = async (emailOrPhone: string, password?: string): Promise<{ success: boolean; message?: string }> => {
     const clean = emailOrPhone.trim();
     if (!clean) return { success: false, message: 'Please enter mobile number or email' };
 
-    const customerUser: User = {
-      id: `usr_cust_${clean.replace(/[^a-zA-Z0-9]/g, '')}`,
-      name: "Valued Customer",
+    const customersList = getCombinedCustomers();
+    const cleanLower = clean.toLowerCase();
+    const matched = customersList.find(c => c.phone === clean || c.email?.toLowerCase() === cleanLower || c.name.toLowerCase() === cleanLower);
+
+    if (matched) {
+      if (matched.isBlocked) {
+        return {
+          success: false,
+          message: `আপনার অ্যাকাউন্টটি স্থগিত (Blocked) করা হয়েছে। কারণ: ${matched.blockReason || 'অ্যাডমিনের সাথে যোগাযোগ করুন।'}`
+        };
+      }
+      setCurrentUser(matched);
+      return { success: true };
+    }
+
+    // Auto-create customer if not existing
+    const newCustomerUser: User = {
+      id: `usr_cust_${clean.replace(/[^a-zA-Z0-9]/g, '') || Date.now()}`,
+      name: clean.includes('@') ? clean.split('@')[0] : `Customer (${clean})`,
       nameBn: "সম্মানিত গ্রাহক",
-      email: clean.includes('@') ? clean : `${clean}@customer.com`,
-      phone: clean.includes('@') ? "01711000000" : clean,
+      email: clean.includes('@') ? clean : `${clean}@customer.bd`,
+      phone: clean.includes('@') ? "01700000000" : clean,
       role: 'customer',
       isActive: true,
-      address: "Dhaka, Bangladesh"
+      isBlocked: false,
+      authProvider: clean.includes('@') ? 'email_password' : 'phone_otp',
+      isPhoneVerified: true,
+      registeredAt: new Date().toISOString(),
+      address: "Dhaka, Bangladesh",
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80"
     };
 
-    setCurrentUser(customerUser);
+    saveCustomerToStorage(newCustomerUser);
+    setCurrentUser(newCustomerUser);
     return { success: true };
   };
 
-  const registerCustomer = async (name: string, phone: string, email?: string, address?: string): Promise<{ success: boolean; message?: string }> => {
-    if (!name || !phone) {
+  const loginWithGoogle = async (googleUser?: { name: string; email: string; avatar?: string }): Promise<{ success: boolean; message?: string }> => {
+    const gEmail = googleUser?.email || "sent9696@gmail.com";
+    const gName = googleUser?.name || "Saiful Client (Google)";
+    const gAvatar = googleUser?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80";
+
+    const customersList = getCombinedCustomers();
+    const matched = customersList.find(c => c.email?.toLowerCase() === gEmail.toLowerCase());
+
+    if (matched) {
+      if (matched.isBlocked) {
+        return {
+          success: false,
+          message: `Google Account Blocked: ${matched.blockReason || 'This account has been disabled by Administrator.'}`
+        };
+      }
+      const updatedUser: User = {
+        ...matched,
+        isEmailVerified: true,
+        avatar: matched.avatar || gAvatar
+      };
+      saveCustomerToStorage(updatedUser);
+      setCurrentUser(updatedUser);
+      return { success: true };
+    }
+
+    const newGoogleCustomer: User = {
+      id: `usr_g_${Date.now()}`,
+      name: gName,
+      email: gEmail,
+      phone: "01540004966",
+      role: 'customer',
+      authProvider: 'google',
+      isEmailVerified: true,
+      isPhoneVerified: true,
+      isActive: true,
+      isBlocked: false,
+      registeredAt: new Date().toISOString(),
+      address: "Tejgaon, Dhaka, Bangladesh",
+      avatar: gAvatar
+    };
+
+    saveCustomerToStorage(newGoogleCustomer);
+    setCurrentUser(newGoogleCustomer);
+    return { success: true };
+  };
+
+  const registerCustomer = async (
+    name: string,
+    phone: string,
+    email?: string,
+    address?: string,
+    password?: string,
+    authProvider: 'phone_otp' | 'google' | 'email_password' = 'phone_otp'
+  ): Promise<{ success: boolean; message?: string }> => {
+    if (!name.trim() || !phone.trim()) {
       return { success: false, message: 'Name and Phone number are required' };
+    }
+
+    const customersList = getCombinedCustomers();
+    const existing = customersList.find(c => c.phone === phone.trim());
+    if (existing) {
+      if (existing.isBlocked) {
+        return { success: false, message: 'এই ফোন নম্বরটির অ্যাকাউন্ট বর্তমানে ব্লক করা আছে।' };
+      }
+      setCurrentUser(existing);
+      return { success: true, message: 'Existing profile found and signed in!' };
     }
 
     const customerUser: User = {
       id: `usr_cust_${Date.now()}`,
-      name,
-      phone,
-      email: email || `${phone}@customer.com`,
-      address: address || "Dhaka, Bangladesh",
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email?.trim() || `${phone.trim()}@customer.bd`,
+      address: address?.trim() || "Tejgaon, Dhaka",
       role: 'customer',
-      isActive: true
+      authProvider,
+      isPhoneVerified: true,
+      isEmailVerified: !!email,
+      isActive: true,
+      isBlocked: false,
+      registeredAt: new Date().toISOString(),
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80",
+      socialLinks: {
+        phone: phone.trim(),
+        whatsapp: phone.trim()
+      }
     };
 
+    saveCustomerToStorage(customerUser);
     setCurrentUser(customerUser);
     return { success: true };
+  };
+
+  const updateCurrentUserProfile = async (updates: Partial<User>): Promise<{ success: boolean; message?: string }> => {
+    if (!currentUser) return { success: false, message: 'Not logged in' };
+
+    const updated: User = {
+      ...currentUser,
+      ...updates
+    };
+
+    setCurrentUser(updated);
+
+    // If staff, update in se_staff
+    if (isStaff) {
+      const staffList = getCombinedStaff();
+      const newStaffList = staffList.map(s => s.id === updated.id ? updated : s);
+      localStorage.setItem('se_staff', JSON.stringify(newStaffList));
+    }
+
+    // If customer, update in se_customers
+    if (isCustomer) {
+      saveCustomerToStorage(updated);
+    }
+
+    return { success: true, message: 'Profile updated successfully' };
+  };
+
+  const deleteOwnAccount = async (): Promise<{ success: boolean; message?: string }> => {
+    if (!currentUser) return { success: false, message: 'Not authenticated' };
+    const idToDelete = currentUser.id;
+
+    if (isCustomer) {
+      const custs = getCombinedCustomers().filter(c => c.id !== idToDelete);
+      localStorage.setItem('se_customers', JSON.stringify(custs));
+    } else if (isStaff && !isSuperAdmin) {
+      const stff = getCombinedStaff().filter(s => s.id !== idToDelete);
+      localStorage.setItem('se_staff', JSON.stringify(stff));
+    }
+
+    setCurrentUser(null);
+    return { success: true, message: 'Account deleted successfully' };
   };
 
   const logout = () => {
@@ -223,7 +418,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loginAdmin,
         loginStaff,
         loginCustomer,
+        loginWithGoogle,
         registerCustomer,
+        updateCurrentUserProfile,
+        deleteOwnAccount,
         logout,
         hasPermission
       }}

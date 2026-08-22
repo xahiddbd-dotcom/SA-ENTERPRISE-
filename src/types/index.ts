@@ -10,6 +10,17 @@ export interface Permission {
   category: 'dashboard' | 'services' | 'products' | 'orders' | 'applications' | 'staff' | 'pos' | 'inventory' | 'expenses' | 'reports' | 'cms' | 'settings';
 }
 
+export interface SocialLinks {
+  phone?: string;
+  whatsapp?: string;
+  facebook?: string;
+  linkedin?: string;
+  email?: string;
+  twitter?: string;
+  website?: string;
+  instagram?: string;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -22,11 +33,27 @@ export interface User {
   employeeId?: string;
   designation?: string;
   designationBn?: string;
+  bio?: string;
+  bioBn?: string;
+  skills?: string[];
+  skillsBn?: string[];
+  socialLinks?: SocialLinks;
   joiningDate?: string;
   emergencyContact?: string;
   bloodGroup?: string;
   isActive: boolean;
+  isBlocked?: boolean;
+  blockReason?: string;
+  authProvider?: 'phone_otp' | 'google' | 'email_password' | 'admin_created';
+  isPhoneVerified?: boolean;
+  isEmailVerified?: boolean;
+  registeredAt?: string;
+  customerNotes?: string;
   permissions?: string[];
+  shift?: string;
+  salary?: number;
+  performanceScore?: number;
+  password?: string;
 }
 
 export interface ServiceCategory {
@@ -190,6 +217,18 @@ export interface ApplicationDocument {
   uploadedBy: string;
 }
 
+export interface ApplicationTimelineEvent {
+  id: string;
+  status: ApplicationStatus;
+  title: string;
+  titleBn: string;
+  description: string;
+  descriptionBn: string;
+  updatedBy: string;
+  timestamp: string;
+  notes?: string;
+}
+
 export interface Application {
   id: string;
   applicationNumber: string;
@@ -207,9 +246,11 @@ export interface Application {
   amount: number;
   paidAmount: number;
   documents: ApplicationDocument[];
+  timeline?: ApplicationTimelineEvent[];
   assignedStaffId?: string;
   assignedStaffName?: string;
   deadline?: string;
+  estimatedCompletionDate?: string;
   notes?: string;
   customerNotes?: string;
   createdAt: string;

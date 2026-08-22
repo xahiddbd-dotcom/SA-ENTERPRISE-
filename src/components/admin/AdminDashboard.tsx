@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Service, Product, StaffMember, Application, Order, ApplicationStatus } from '../../types';
+import { Service, Product, StaffMember, Application, Order, ApplicationStatus, User } from '../../types';
 import { POSCounter } from '../pos/POSCounter';
 import { DatabaseBackup } from './DatabaseBackup';
+import { CustomerManagement } from './CustomerManagement';
+import { ADMIN_THEMES, AdminThemeKey } from './AdminTheme';
+import { AdminThemeSwitcher } from './AdminThemeSwitcher';
 import {
   LayoutDashboard,
   Layers,
@@ -13,6 +16,8 @@ import {
   ShoppingBag,
   Calculator,
   Users,
+  UserCheck,
+  Ban,
   Settings,
   Database,
   Plus,
@@ -44,7 +49,10 @@ import {
   Receipt,
   PieChart,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  History,
+  Palette,
+  Sparkles
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -65,22 +73,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
   const {
     services, addService, updateService, deleteService,
     products, addProduct, updateProduct, deleteProduct,
-    applications, updateApplicationStatus,
+    applications, updateApplicationStatus, addApplicationTimelineEvent,
     orders, updateOrderStatus,
     invoices,
-    staff, addStaffMember, updateStaffMember, deleteStaffMember,
+    staff, addStaffMember, updateStaffMember, deleteStaffMember, toggleBlockStaff,
+    customers, addCustomer, updateCustomer, deleteCustomer, toggleBlockCustomer,
     settings, updateSettings
   } = useData();
   const { currentUser, logout } = useAuth();
 
+  // Admin Theme state
+  const [adminTheme, setAdminTheme] = useState<AdminThemeKey>(() => {
+    const saved = localStorage.getItem('se_admin_theme_choice');
+    return (saved && (saved in ADMIN_THEMES)) ? (saved as AdminThemeKey) : 'emerald';
+  });
+
+  const handleThemeChange = (newTheme: AdminThemeKey) => {
+    setAdminTheme(newTheme);
+    localStorage.setItem('se_admin_theme_choice', newTheme);
+  };
+
+  const currentThemeConfig = ADMIN_THEMES[adminTheme] || ADMIN_THEMES.emerald;
+
+  // Timeline Inspection Modal for Applications
+  const [selectedAppForTimeline, setSelectedAppForTimeline] = useState<Application | null>(null);
+  const [timelineNewStatus, setTimelineNewStatus] = useState<ApplicationStatus>('processing');
+  const [timelineNewTitle, setTimelineNewTitle] = useState('');
+  const [timelineNewTitleBn, setTimelineNewTitleBn] = useState('');
+  const [timelineNewDesc, setTimelineNewDesc] = useState('');
+  const [timelineNewDescBn, setTimelineNewDescBn] = useState('');
+
   const [activeMenu, setActiveMenu] = useState<
-    'overview' | 'services' | 'products' | 'applications' | 'orders' | 'pos' | 'finance' | 'staff' | 'settings' | 'backup'
+    'overview' | 'services' | 'products' | 'applications' | 'orders' | 'pos' | 'finance' | 'customers' | 'staff' | 'settings' | 'backup'
   >('overview');
 
   // Modals & form states
   const [editingService, setEditingService] = useState<Partial<Service> | null>(null);
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
-  const [editingStaff, setEditingStaff] = useState<Partial<StaffMember> | null>(null);
+  const [editingStaff, setEditingStaff] = useState<Partial<User> | null>(null);
+  const [staffSkillsInput, setStaffSkillsInput] = useState('');
 
   // Search and filter states
   const [serviceSearch, setServiceSearch] = useState('');
@@ -230,8 +261,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
     e.preventDefault();
     if (!editingStaff?.name || !editingStaff?.employeeId) return;
 
+    const parsedSkills = staffSkillsInput
+      ? staffSkillsInput.split(',').map(s => s.trim()).filter(Boolean)
+      : (editingStaff.skills || []);
+
     if (editingStaff.id) {
-      updateStaffMember(editingStaff.id, editingStaff);
+      updateStaffMember(editingStaff.id, {
+        ...editingStaff,
+        skills: parsedSkills
+      });
     } else {
       addStaffMember({
         employeeId: editingStaff.employeeId,
@@ -242,12 +280,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
         email: editingStaff.email || 'staff@saifulenterprise.com',
         shift: editingStaff.shift || 'Morning (8:00 AM - 4:00 PM)',
         salary: Number(editingStaff.salary || 18000),
+        bio: editingStaff.bio || 'Digital service specialist at Saiful Enterprise.',
+        bioBn: editingStaff.bioBn || 'সাইফুল এন্টারপ্রাইজ ডিজিটাল সেবা বিশেষজ্ঞ।',
+        skills: parsedSkills.length ? parsedSkills : ['Photoshop', 'Online Admission', 'BMET', 'POS Billing'],
+        socialLinks: editingStaff.socialLinks || { phone: editingStaff.phone, whatsapp: editingStaff.phone },
+        avatar: editingStaff.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80',
         joiningDate: new Date().toISOString().split('T')[0],
         status: 'active',
-        performanceScore: 95
+        performanceScore: 95,
+        isBlocked: false
       });
     }
     setEditingStaff(null);
+    setStaffSkillsInput('');
   };
 
   // Quick stock adjustment helper
@@ -292,13 +337,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
   });
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-neutral-950">
+    <div className={`min-h-screen ${currentThemeConfig.mainBg} ${currentThemeConfig.textPrimary} flex flex-col font-sans selection:bg-emerald-500 selection:text-neutral-950 transition-colors duration-200`}>
       {/* Top Standalone Admin Master Bar */}
-      <header className="bg-neutral-900 border-b border-neutral-800 sticky top-0 z-40 px-4 py-2.5 shadow-xl">
+      <header className={`${currentThemeConfig.headerBg} border-b ${currentThemeConfig.borderColor} sticky top-0 z-40 px-4 py-2.5 shadow-xl transition-colors duration-200`}>
         <div className="container mx-auto flex items-center justify-between gap-3">
           {/* Brand & Mode Tag */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white font-black shadow-lg shadow-emerald-950">
+            <div className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${currentThemeConfig.primaryGradient} flex items-center justify-center text-white font-black shadow-lg shadow-black/40`}>
               SE
             </div>
             <div>
@@ -306,8 +351,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                 <span className="font-extrabold text-sm sm:text-base text-white leading-none">
                   Saiful Enterprise
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold uppercase tracking-wider">
-                  Master CMS
+                <span className={`px-2 py-0.5 rounded-full ${currentThemeConfig.badgeBg} border ${currentThemeConfig.borderColor} text-[10px] font-mono font-bold uppercase tracking-wider`}>
+                  {currentThemeConfig.name} CMS
                 </span>
               </div>
               <p className="text-[11px] text-neutral-400 font-mono flex items-center gap-1.5 mt-0.5">
@@ -321,7 +366,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
           <div className="hidden md:flex items-center gap-2">
             <button
               onClick={() => setActiveMenu('pos')}
-              className="px-3 py-1.5 rounded-xl bg-emerald-950/80 border border-emerald-500/40 hover:bg-emerald-900 text-emerald-300 text-xs font-bold flex items-center gap-1.5 shadow-md transition-all active:scale-95"
+              className={`px-3 py-1.5 rounded-xl ${currentThemeConfig.badgeBg} border ${currentThemeConfig.borderColor} text-xs font-bold flex items-center gap-1.5 shadow-md transition-all active:scale-95`}
             >
               <Calculator className="w-3.5 h-3.5" />
               <span>{language === 'bn' ? 'ক্যাশ কাউন্টার (POS)' : 'POS Terminal'}</span>
@@ -329,7 +374,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
 
             <button
               onClick={() => setActiveMenu('applications')}
-              className="relative px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
+              className="relative px-3 py-1.5 rounded-xl bg-neutral-800/80 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
             >
               <FileCheck className="w-3.5 h-3.5 text-amber-400" />
               <span>{language === 'bn' ? 'আবেদন তালিকা' : 'Applications'}</span>
@@ -342,7 +387,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
 
             <button
               onClick={() => setActiveMenu('products')}
-              className="relative px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
+              className="relative px-3 py-1.5 rounded-xl bg-neutral-800/80 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
             >
               <Package className="w-3.5 h-3.5 text-teal-400" />
               <span>{language === 'bn' ? 'পেপার স্টক' : 'Inventory'}</span>
@@ -355,7 +400,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
 
             <button
               onClick={() => setActiveMenu('finance')}
-              className="px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
+              className="px-3 py-1.5 rounded-xl bg-neutral-800/80 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
             >
               <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
               <span>{language === 'bn' ? 'হিসাব ও ব্যয়' : 'Accounts'}</span>
@@ -364,6 +409,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
 
           {/* Right Action Tools */}
           <div className="flex items-center gap-2">
+            {/* Admin Theme Switcher Dropdown */}
+            <AdminThemeSwitcher
+              currentTheme={adminTheme}
+              onSelectTheme={handleThemeChange}
+              variant="header-dropdown"
+            />
+
             {/* View Live Storefront Button */}
             {onExitToStore && (
               <button
@@ -416,11 +468,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
       {/* Main Admin Workspace with Sidebar */}
       <div className="flex-1 flex flex-col lg:flex-row">
         {/* Responsive WordPress/Shopify-style Sidebar */}
-        <aside className="w-full lg:w-64 bg-neutral-900 border-r border-neutral-800 p-4 shrink-0 flex flex-col justify-between">
+        <aside className={`w-full lg:w-64 ${currentThemeConfig.sidebarBg} border-r ${currentThemeConfig.borderColor} p-4 shrink-0 flex flex-col justify-between transition-colors duration-200`}>
           <div className="space-y-6">
             {/* Quick Admin Profile Card */}
-            <div className="p-3.5 rounded-2xl bg-neutral-950 border border-neutral-800 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 font-black flex items-center justify-center">
+            <div className="p-3.5 rounded-2xl bg-neutral-950/60 border border-neutral-800/80 flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${currentThemeConfig.primaryGradient} text-white font-black flex items-center justify-center shadow-md`}>
                 SA
               </div>
               <div className="overflow-hidden">
@@ -442,6 +494,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                 { id: 'orders', label: language === 'bn' ? 'দোকান অর্ডার' : 'E-Commerce Orders', icon: ShoppingBag, badge: orders.length },
                 { id: 'pos', label: language === 'bn' ? 'পস ক্যাশিয়ার কাউন্টার' : 'POS Cashier Terminal', icon: Calculator },
                 { id: 'finance', label: language === 'bn' ? 'হিসাব ও ব্যয় খাতা' : 'Finance & Accounts', icon: DollarSign },
+                { id: 'customers', label: language === 'bn' ? 'কাস্টমার একাউন্টস' : 'Customer Database', icon: UserCheck, badge: customers.length },
                 { id: 'staff', label: language === 'bn' ? 'স্টাফ ও অপারেটর' : 'Staff & Roles', icon: Users, badge: staff.length },
                 { id: 'settings', label: language === 'bn' ? 'ব্যবসায়িক সেটিংস' : 'Business Settings', icon: Settings },
                 { id: 'backup', label: language === 'bn' ? 'ডাটাবেজ ব্যাকআপ' : 'Database Backup', icon: Database }
@@ -455,8 +508,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                     onClick={() => setActiveMenu(item.id as any)}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all ${
                       isActive
-                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950 font-bold'
-                        : 'text-neutral-400 hover:text-white hover:bg-neutral-850'
+                        ? currentThemeConfig.activeSidebarItem
+                        : currentThemeConfig.inactiveSidebarItem
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -1058,7 +1111,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                         {(['new', 'processing', 'submitted', 'completed', 'delivered'] as ApplicationStatus[]).map(st => (
                           <button
                             key={st}
-                            onClick={() => updateApplicationStatus(app.id, st)}
+                            onClick={() => updateApplicationStatus(app.id, st, undefined, currentUser?.name || 'Admin')}
                             className={`px-2.5 py-1 rounded-lg font-bold text-[10px] uppercase transition-all ${
                               app.status === st ? 'bg-emerald-600 text-white shadow-md' : 'bg-neutral-800 text-neutral-400 hover:text-white'
                             }`}
@@ -1068,17 +1121,35 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                         ))}
                       </div>
 
-                      <a
-                        href={`https://wa.me/88${app.applicantPhone}?text=${encodeURIComponent(
-                          `হ্যালো ${app.applicantName}, সাইফুল এন্টারপ্রাইজ থেকে জানাচ্ছি: আপনার আবেদন #${app.applicationNumber} (${app.serviceName}) এর বর্তমান স্ট্যাটাস: ${app.status.toUpperCase()}। ধন্যবাদ!`
-                        )}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-3.5 py-1.5 rounded-xl bg-emerald-950 border border-emerald-500/40 text-emerald-300 text-xs font-bold hover:bg-emerald-900 flex items-center gap-1.5 transition-colors shadow-md"
-                      >
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        <span>WhatsApp Notify</span>
-                      </a>
+                      <div className="flex items-center gap-2">
+                        {/* View & Edit Timeline Button */}
+                        <button
+                          onClick={() => {
+                            setSelectedAppForTimeline(app);
+                            setTimelineNewStatus(app.status);
+                            setTimelineNewTitle('');
+                            setTimelineNewTitleBn('');
+                            setTimelineNewDesc('');
+                            setTimelineNewDescBn('');
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-emerald-400 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                        >
+                          <History className="w-3.5 h-3.5" />
+                          <span>{language === 'bn' ? 'হিস্টোরি ও টাইমলাইন' : 'Timeline & Logs'} ({app.timeline?.length || 1})</span>
+                        </button>
+
+                        <a
+                          href={`https://wa.me/88${app.applicantPhone}?text=${encodeURIComponent(
+                            `হ্যালো ${app.applicantName}, সাইফুল এন্টারপ্রাইজ থেকে জানাচ্ছি: আপনার আবেদন #${app.applicationNumber} (${app.serviceName}) এর বর্তমান স্ট্যাটাস: ${app.status.toUpperCase()}। ধন্যবাদ!`
+                          )}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3.5 py-1.5 rounded-xl bg-emerald-950 border border-emerald-500/40 text-emerald-300 text-xs font-bold hover:bg-emerald-900 flex items-center gap-1.5 transition-colors shadow-md"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          <span>WhatsApp</span>
+                        </a>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1281,32 +1352,47 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
             </div>
           )}
 
-          {/* VIEW 8: STAFF MANAGEMENT */}
+          {/* VIEW 8: CUSTOMER MANAGEMENT */}
+          {activeMenu === 'customers' && (
+            <CustomerManagement />
+          )}
+
+          {/* VIEW 9: STAFF & OPERATOR MANAGEMENT */}
           {activeMenu === 'staff' && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-neutral-800">
                 <div>
-                  <h1 className="text-2xl font-extrabold text-white">
-                    {language === 'bn' ? 'স্টাফ ও অপারেটর টিম ম্যানেজমেন্ট' : 'Staff & Operator Management'}
+                  <h1 className="text-2xl font-extrabold text-white flex items-center gap-2">
+                    <Users className="w-6 h-6 text-emerald-400" />
+                    <span>{language === 'bn' ? 'স্টাফ ও অপারেটর টিম ম্যানেজমেন্ট' : 'Staff & Operator Management'}</span>
                   </h1>
-                  <p className="text-xs text-neutral-400">
+                  <p className="text-xs text-neutral-400 mt-0.5">
                     {language === 'bn'
-                      ? 'অপারেটর একাউন্ট, পারমিশন, শিফট ও বেতন নিয়ন্ত্রণ।'
-                      : 'Manage operator accounts, assigned shifts, base salaries, and performance scores.'}
+                      ? 'অপারেটর ও স্টাফ একাউন্ট তৈরি, ব্লক/আনব্লক, সোশ্যাল মিডিয়া, ফোন ও হোয়াটসঅ্যাপ নম্বর ও পারমিশন নিয়ন্ত্রণ।'
+                      : 'Manage staff & operator accounts, block/unblock credentials, bio, phone, WhatsApp & social media profiles.'}
                   </p>
                 </div>
                 <button
-                  onClick={() => setEditingStaff({
-                    employeeId: `SE-EMP-00${staff.length + 1}`,
-                    name: '',
-                    nameBn: '',
-                    role: 'service_operator',
-                    phone: '',
-                    email: '',
-                    shift: 'Morning (8:00 AM - 4:00 PM)',
-                    salary: 18000
-                  })}
-                  className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950"
+                  id="admin-add-staff-btn"
+                  onClick={() => {
+                    setEditingStaff({
+                      employeeId: `SE-EMP-00${staff.length + 1}`,
+                      name: '',
+                      nameBn: '',
+                      role: 'service_operator',
+                      phone: '',
+                      email: '',
+                      shift: 'Morning (8:00 AM - 4:00 PM)',
+                      salary: 18000,
+                      bio: '',
+                      bioBn: '',
+                      skills: ['Photoshop', 'Online Admission', 'BMET', 'POS Billing'],
+                      socialLinks: {},
+                      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80'
+                    });
+                    setStaffSkillsInput('Photoshop, Online Admission, BMET, POS Billing');
+                  }}
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:brightness-110 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950"
                 >
                   <Plus className="w-4 h-4" />
                   <span>{language === 'bn' ? 'নতুন কর্মী যুক্ত করুন' : 'Add Staff Member'}</span>
@@ -1315,47 +1401,140 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {staff.map(member => (
-                  <div key={member.id} className="p-5 rounded-2xl bg-neutral-900 border border-neutral-800 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 font-bold flex items-center justify-center">
-                          {member.name.charAt(0)}
+                  <div
+                    key={member.id}
+                    className={`p-5 rounded-3xl border flex flex-col justify-between space-y-4 transition-all ${
+                      member.isBlocked
+                        ? 'bg-rose-950/20 border-rose-500/40'
+                        : 'bg-neutral-900 border-neutral-800 hover:border-neutral-700 shadow-xl'
+                    }`}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={member.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80'}
+                            alt={member.name}
+                            referrerPolicy="no-referrer"
+                            className="w-12 h-12 rounded-2xl object-cover border border-neutral-700 shrink-0"
+                          />
+                          <div className="overflow-hidden">
+                            <h3 className="text-sm font-bold text-white truncate">
+                              {member.name}
+                            </h3>
+                            {member.nameBn && (
+                              <span className="text-[11px] text-neutral-400 block truncate">
+                                {member.nameBn}
+                              </span>
+                            )}
+                            <span className="text-[10px] font-mono text-emerald-400 block">
+                              {member.employeeId}
+                            </span>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="text-sm font-bold text-white">{member.name}</h3>
-                          <span className="text-[10px] font-mono text-neutral-400">{member.employeeId}</span>
+
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 uppercase font-bold border border-emerald-500/30">
+                            {member.role.replace('_', ' ')}
+                          </span>
+                          {member.isBlocked && (
+                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-950 text-rose-300 border border-rose-500/30 uppercase font-bold">
+                              Suspended
+                            </span>
+                          )}
                         </div>
                       </div>
 
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 uppercase font-bold border border-emerald-500/30">
-                        {member.role}
-                      </span>
+                      {/* Bio */}
+                      {member.bio && (
+                        <p className="text-xs text-neutral-300 line-clamp-2">
+                          {member.bio}
+                        </p>
+                      )}
+
+                      {/* Info Block */}
+                      <div className="space-y-1.5 text-xs bg-neutral-950 p-3 rounded-2xl border border-neutral-850">
+                        <div className="flex items-center justify-between text-neutral-300">
+                          <span>Phone:</span>
+                          <span className="font-mono text-white font-bold">{member.phone}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-neutral-300">
+                          <span>Shift:</span>
+                          <span className="text-neutral-300 truncate max-w-[150px]">{member.shift}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-neutral-300">
+                          <span>Salary:</span>
+                          <span className="font-mono text-emerald-400 font-bold">৳{member.salary?.toLocaleString()}/mo</span>
+                        </div>
+                      </div>
+
+                      {/* Skills */}
+                      {member.skills && member.skills.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {member.skills.map((sk, idx) => (
+                            <span key={idx} className="px-2 py-0.5 rounded-md bg-neutral-950 text-[10px] text-emerald-400 border border-neutral-800">
+                              {sk}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
-                    <div className="space-y-1.5 text-xs bg-neutral-950 p-3 rounded-xl border border-neutral-850">
-                      <p className="text-neutral-300"><strong>Phone:</strong> {member.phone}</p>
-                      <p className="text-neutral-300"><strong>Shift:</strong> {member.shift}</p>
-                      <p className="text-neutral-300"><strong>Salary:</strong> ৳{member.salary.toLocaleString()}/mo</p>
-                      <p className="text-neutral-300"><strong>Performance:</strong> {member.performanceScore}%</p>
-                    </div>
+                    <div className="flex items-center justify-between gap-2 pt-3 border-t border-neutral-800">
+                      {/* Direct Phone & WhatsApp */}
+                      <div className="flex items-center gap-1.5">
+                        <a
+                          href={`tel:${member.phone}`}
+                          className="p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-emerald-400 transition-colors"
+                          title="Call Staff"
+                        >
+                          <Phone className="w-3.5 h-3.5" />
+                        </a>
+                        <a
+                          href={`https://wa.me/88${member.socialLinks?.whatsapp || member.phone}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-2 rounded-xl bg-emerald-950 hover:bg-emerald-900 border border-emerald-500/30 text-emerald-300 transition-colors"
+                          title="WhatsApp Chat"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
 
-                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-neutral-800">
-                      <button
-                        onClick={() => setEditingStaff(member)}
-                        className="p-2 rounded-lg bg-neutral-800 text-emerald-400 hover:bg-neutral-700"
-                        title="Edit Staff"
-                      >
-                        <Edit className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (confirm(`Remove staff member ${member.name}?`)) deleteStaffMember(member.id);
-                        }}
-                        className="p-2 rounded-lg bg-neutral-800 text-rose-400 hover:bg-rose-900/40"
-                        title="Delete Staff"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => {
+                            setEditingStaff(member);
+                            setStaffSkillsInput((member.skills || []).join(', '));
+                          }}
+                          className="p-2 rounded-xl bg-neutral-800 text-emerald-400 hover:bg-neutral-700"
+                          title="Edit Staff Member"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          onClick={() => toggleBlockStaff(member.id, member.isBlocked ? '' : 'Account suspended by administrator')}
+                          className={`p-2 rounded-xl border transition-colors ${
+                            member.isBlocked
+                              ? 'bg-emerald-950 border-emerald-500/40 text-emerald-300'
+                              : 'bg-rose-950/50 border-rose-500/40 text-rose-300'
+                          }`}
+                          title={member.isBlocked ? 'Unblock Staff' : 'Block / Suspend Staff'}
+                        >
+                          <Ban className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            if (confirm(`Remove staff member ${member.name}?`)) deleteStaffMember(member.id);
+                          }}
+                          className="p-2 rounded-xl bg-neutral-800 text-rose-400 hover:bg-rose-900/40"
+                          title="Delete Staff"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1365,16 +1544,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
 
           {/* VIEW 9: BUSINESS & CMS SETTINGS */}
           {activeMenu === 'settings' && (
-            <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="space-y-8 animate-in fade-in duration-200">
               <div className="pb-4 border-b border-neutral-800">
                 <h1 className="text-2xl font-extrabold text-white">
                   {language === 'bn' ? 'ওয়েবসাইট ও ব্যবসায়িক সেটিংস' : 'Business Information & Site Settings'}
                 </h1>
                 <p className="text-xs text-neutral-400">
                   {language === 'bn'
-                    ? 'দোকানের নাম, ঠিকানা, বিকাশ/হোয়াটসঅ্যাপ নাম্বার ও টপ নোটিশ আপডেট করুন।'
-                    : 'Update shop address, hotline, bKash numbers, and top announcement text.'}
+                    ? 'দোকানের নাম, ঠিকানা, বিকাশ/হোয়াটসঅ্যাপ নাম্বার, থিম ও টপ নোটিশ আপডেট করুন।'
+                    : 'Update shop address, hotline, bKash numbers, admin theme, and top announcement text.'}
                 </p>
+              </div>
+
+              {/* ADMIN THEME PICKER (SETTINGS GRID) */}
+              <div className="p-6 rounded-3xl bg-neutral-900 border border-neutral-800 shadow-xl space-y-4">
+                <AdminThemeSwitcher
+                  currentTheme={adminTheme}
+                  onSelectTheme={handleThemeChange}
+                  variant="settings-grid"
+                />
               </div>
 
               {settingsSaved && (
@@ -1732,51 +1920,331 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
 
       {/* MODAL: Staff Editor */}
       {editingStaff && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-neutral-900 border border-neutral-800 w-full max-w-md rounded-2xl p-6 space-y-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-neutral-900 border border-neutral-800 w-full max-w-lg rounded-3xl p-6 space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center pb-2 border-b border-neutral-800">
-              <h3 className="text-base font-bold text-white">{editingStaff.id ? 'Edit Staff' : 'Add Staff Member'}</h3>
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Users className="w-4 h-4 text-emerald-400" />
+                <span>{editingStaff.id ? 'Edit Staff Profile' : 'Add Staff Member'}</span>
+              </h3>
               <button onClick={() => setEditingStaff(null)} className="text-neutral-400 hover:text-white"><X className="w-5 h-5" /></button>
             </div>
 
-            <form onSubmit={handleSaveStaff} className="space-y-3">
-              <div>
-                <label className="text-xs text-neutral-400 block mb-1">Staff Name</label>
-                <input
-                  required
-                  type="text"
-                  value={editingStaff.name || ''}
-                  onChange={e => setEditingStaff({ ...editingStaff, name: e.target.value })}
-                  className="w-full px-3 py-1.5 bg-neutral-950 border border-neutral-700 rounded-lg text-xs text-white"
-                />
+            <form onSubmit={handleSaveStaff} className="space-y-3.5 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-neutral-400 block mb-1 font-semibold">Staff Name (English) *</label>
+                  <input
+                    required
+                    type="text"
+                    value={editingStaff.name || ''}
+                    onChange={e => setEditingStaff({ ...editingStaff, name: e.target.value })}
+                    className="w-full px-3 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-neutral-400 block mb-1 font-semibold">Staff Name (Bangla)</label>
+                  <input
+                    type="text"
+                    value={editingStaff.nameBn || ''}
+                    onChange={e => setEditingStaff({ ...editingStaff, nameBn: e.target.value })}
+                    className="w-full px-3 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="text-xs text-neutral-400 block mb-1">Employee ID</label>
+                  <label className="text-neutral-400 block mb-1 font-semibold">Employee ID *</label>
                   <input
                     required
                     type="text"
                     value={editingStaff.employeeId || ''}
                     onChange={e => setEditingStaff({ ...editingStaff, employeeId: e.target.value })}
-                    className="w-full px-3 py-1.5 bg-neutral-950 border border-neutral-700 rounded-lg text-xs font-mono text-white"
+                    className="w-full px-3 py-2 bg-neutral-950 border border-neutral-700 rounded-xl font-mono text-white focus:outline-none focus:border-emerald-500"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-neutral-400 block mb-1">Phone</label>
+                  <label className="text-neutral-400 block mb-1 font-semibold">Role / Designation</label>
+                  <select
+                    value={editingStaff.role || 'service_operator'}
+                    onChange={e => setEditingStaff({ ...editingStaff, role: e.target.value as any })}
+                    className="w-full px-3 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="super_admin">Founder / Master Admin</option>
+                    <option value="admin">Store Admin</option>
+                    <option value="manager">Operations Manager</option>
+                    <option value="service_operator">Service Operator</option>
+                    <option value="cashier">POS Cashier / Accountant</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-neutral-400 block mb-1 font-semibold">Base Salary (৳)</label>
+                  <input
+                    type="number"
+                    value={editingStaff.salary || 18000}
+                    onChange={e => setEditingStaff({ ...editingStaff, salary: Number(e.target.value) })}
+                    className="w-full px-3 py-2 bg-neutral-950 border border-neutral-700 rounded-xl font-mono text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-neutral-400 block mb-1 font-semibold">Phone Number *</label>
                   <input
                     required
                     type="text"
                     value={editingStaff.phone || ''}
                     onChange={e => setEditingStaff({ ...editingStaff, phone: e.target.value })}
-                    className="w-full px-3 py-1.5 bg-neutral-950 border border-neutral-700 rounded-lg text-xs font-mono text-white"
+                    className="w-full px-3 py-2 bg-neutral-950 border border-neutral-700 rounded-xl font-mono text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-neutral-400 block mb-1 font-semibold">WhatsApp Number</label>
+                  <input
+                    type="text"
+                    value={editingStaff.socialLinks?.whatsapp || editingStaff.phone || ''}
+                    onChange={e => setEditingStaff({
+                      ...editingStaff,
+                      socialLinks: { ...editingStaff.socialLinks, whatsapp: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 bg-neutral-950 border border-neutral-700 rounded-xl font-mono text-white focus:outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
 
-              <div className="pt-2 flex justify-end gap-2">
-                <button type="button" onClick={() => setEditingStaff(null)} className="px-4 py-2 rounded-lg bg-neutral-800 text-xs text-neutral-300">Cancel</button>
-                <button type="submit" className="px-5 py-2 rounded-lg bg-emerald-600 text-white font-bold text-xs">Save Staff</button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-neutral-400 block mb-1 font-semibold">Email Address</label>
+                  <input
+                    type="email"
+                    value={editingStaff.email || ''}
+                    onChange={e => setEditingStaff({ ...editingStaff, email: e.target.value })}
+                    className="w-full px-3 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-neutral-400 block mb-1 font-semibold">Shift Timing</label>
+                  <input
+                    type="text"
+                    value={editingStaff.shift || 'Morning (8:00 AM - 4:00 PM)'}
+                    onChange={e => setEditingStaff({ ...editingStaff, shift: e.target.value })}
+                    className="w-full px-3 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-neutral-400 block mb-1 font-semibold">Avatar Image URL</label>
+                <input
+                  type="text"
+                  placeholder="https://images.unsplash.com/..."
+                  value={editingStaff.avatar || ''}
+                  onChange={e => setEditingStaff({ ...editingStaff, avatar: e.target.value })}
+                  className="w-full px-3 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-neutral-400 block mb-1 font-semibold">Bio / Description</label>
+                <textarea
+                  rows={2}
+                  value={editingStaff.bio || ''}
+                  onChange={e => setEditingStaff({ ...editingStaff, bio: e.target.value })}
+                  className="w-full px-3 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-neutral-400 block mb-1 font-semibold">Skills & Expertise (Comma-separated)</label>
+                <input
+                  type="text"
+                  placeholder="Photoshop, Online Admission, BMET, POS Billing, Laser Print"
+                  value={staffSkillsInput}
+                  onChange={e => setStaffSkillsInput(e.target.value)}
+                  className="w-full px-3 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2 border-t border-neutral-800">
+                <button type="button" onClick={() => setEditingStaff(null)} className="px-4 py-2 rounded-xl bg-neutral-800 text-xs text-neutral-300">Cancel</button>
+                <button type="submit" className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-950">Save Staff Member</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: APPLICATION TIMELINE & PROGRESS MILESTONE LOGGER */}
+      {selectedAppForTimeline && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-neutral-900 border border-neutral-800 text-neutral-100 w-full max-w-2xl rounded-3xl p-6 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex justify-between items-start pb-4 border-b border-neutral-800">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 font-bold">
+                    {selectedAppForTimeline.applicationNumber}
+                  </span>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-neutral-800 text-neutral-300 font-bold uppercase">
+                    {selectedAppForTimeline.status}
+                  </span>
+                </div>
+                <h3 className="text-lg font-extrabold text-white mt-1">
+                  {selectedAppForTimeline.serviceName}
+                </h3>
+                <p className="text-xs text-neutral-400">
+                  {language === 'bn' ? 'আবেদনকারী:' : 'Applicant:'} {selectedAppForTimeline.applicantName} ({selectedAppForTimeline.applicantPhone})
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedAppForTimeline(null)}
+                className="p-1.5 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Existing Timeline Logs */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-2">
+                <History className="w-4 h-4 text-emerald-400" />
+                <span>{language === 'bn' ? 'রেকর্ডকৃত টাইমলাইন হিস্টোরি' : 'Logged Timeline Progression'}</span>
+              </h4>
+
+              <div className="space-y-3 pl-3">
+                {selectedAppForTimeline.timeline && selectedAppForTimeline.timeline.length > 0 ? (
+                  selectedAppForTimeline.timeline.map((ev, i) => (
+                    <div key={ev.id || i} className="relative pl-6 pb-3 border-l-2 border-emerald-500/30 last:border-l-transparent last:pb-0">
+                      <div className="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-neutral-900" />
+                      <div className="bg-neutral-950 border border-neutral-850 p-3 rounded-xl space-y-1 text-xs">
+                        <div className="flex items-center justify-between">
+                          <strong className="text-white">{ev.titleBn || ev.title}</strong>
+                          <span className="text-[10px] text-neutral-400 font-mono">
+                            {new Date(ev.timestamp).toLocaleString()}
+                          </span>
+                        </div>
+                        <p className="text-neutral-300 text-[11px]">{ev.descriptionBn || ev.description}</p>
+                        {ev.updatedBy && (
+                          <span className="text-[10px] text-emerald-400 block pt-0.5">
+                            • {ev.updatedBy}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-neutral-500 italic">No timeline entries logged yet.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Add New Milestone Form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!timelineNewTitle && !timelineNewTitleBn) return;
+
+                const eventPayload = {
+                  status: timelineNewStatus,
+                  title: timelineNewTitle || timelineNewTitleBn,
+                  titleBn: timelineNewTitleBn || timelineNewTitle,
+                  description: timelineNewDesc || timelineNewDescBn || 'Status updated by desk operator',
+                  descriptionBn: timelineNewDescBn || timelineNewDesc || 'অপারেটর কর্তৃক অগ্রগতি আপডেট করা হয়েছে',
+                  updatedBy: currentUser?.name ? `${currentUser.name} (Operator)` : 'Store Operator'
+                };
+
+                addApplicationTimelineEvent(selectedAppForTimeline.id, eventPayload);
+                
+                // Update local modal state
+                const updatedList = applications.find(a => a.id === selectedAppForTimeline.id);
+                if (updatedList) {
+                  setSelectedAppForTimeline({
+                    ...updatedList,
+                    status: timelineNewStatus,
+                    timeline: [...(updatedList.timeline || []), {
+                      id: `tl_${Date.now()}`,
+                      ...eventPayload,
+                      timestamp: new Date().toISOString()
+                    }]
+                  });
+                }
+
+                setTimelineNewTitle('');
+                setTimelineNewTitleBn('');
+                setTimelineNewDesc('');
+                setTimelineNewDescBn('');
+              }}
+              className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 space-y-3"
+            >
+              <h5 className="text-xs font-bold text-white flex items-center gap-1.5">
+                <Plus className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{language === 'bn' ? 'নতুন টাইমলাইন ধাপ / নোট যুক্ত করুন' : 'Append New Progress Milestone'}</span>
+              </h5>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div>
+                  <label className="text-neutral-400 block mb-1">Set Application Status</label>
+                  <select
+                    value={timelineNewStatus}
+                    onChange={(e) => setTimelineNewStatus(e.target.value as ApplicationStatus)}
+                    className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-xl text-white font-bold"
+                  >
+                    <option value="new">NEW (Received)</option>
+                    <option value="processing">PROCESSING (Verification)</option>
+                    <option value="submitted">SUBMITTED (Portal Uploaded)</option>
+                    <option value="completed">COMPLETED (Slip Ready)</option>
+                    <option value="delivered">DELIVERED (Handed Over)</option>
+                    <option value="cancelled">CANCELLED</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-neutral-400 block mb-1">Step Title (Bangla) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="যেমন: ই-চালান ভেরিফিকেশন সম্পন্ন"
+                    value={timelineNewTitleBn}
+                    onChange={e => setTimelineNewTitleBn(e.target.value)}
+                    className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-xl text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div>
+                  <label className="text-neutral-400 block mb-1">Step Title (English)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. e-Challan Code Verified"
+                    value={timelineNewTitle}
+                    onChange={e => setTimelineNewTitle(e.target.value)}
+                    className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-xl text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-neutral-400 block mb-1">Progress Details (Bangla)</label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: সোনালী ব্যাংক চালান কোড যাচাই করে পোর্টালে আপলোড করা হয়েছে।"
+                    value={timelineNewDescBn}
+                    onChange={e => setTimelineNewDescBn(e.target.value)}
+                    className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-xl text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-950 flex items-center gap-1.5"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{language === 'bn' ? 'টাইমলাইনে যোগ করুন' : 'Log Milestone'}</span>
+                </button>
               </div>
             </form>
           </div>
