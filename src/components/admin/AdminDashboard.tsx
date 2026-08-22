@@ -6,6 +6,8 @@ import { Service, Product, StaffMember, Application, Order, ApplicationStatus, U
 import { POSCounter } from '../pos/POSCounter';
 import { DatabaseBackup } from './DatabaseBackup';
 import { CustomerManagement } from './CustomerManagement';
+import { HeroSlidesManager } from './HeroSlidesManager';
+import { SEOMetaManager } from './SEOMetaManager';
 import { ADMIN_THEMES, AdminThemeKey } from './AdminTheme';
 import { AdminThemeSwitcher } from './AdminThemeSwitcher';
 import {
@@ -52,7 +54,8 @@ import {
   ArrowDownRight,
   History,
   Palette,
-  Sparkles
+  Sparkles,
+  Image as ImageIcon
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -78,6 +81,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
     invoices,
     staff, addStaffMember, updateStaffMember, deleteStaffMember, toggleBlockStaff,
     customers, addCustomer, updateCustomer, deleteCustomer, toggleBlockCustomer,
+    heroSlides,
     settings, updateSettings
   } = useData();
   const { currentUser, logout } = useAuth();
@@ -104,7 +108,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
   const [timelineNewDescBn, setTimelineNewDescBn] = useState('');
 
   const [activeMenu, setActiveMenu] = useState<
-    'overview' | 'services' | 'products' | 'applications' | 'orders' | 'pos' | 'finance' | 'customers' | 'staff' | 'settings' | 'backup'
+    'overview' | 'services' | 'products' | 'applications' | 'orders' | 'pos' | 'finance' | 'customers' | 'staff' | 'hero_slides' | 'seo_meta' | 'settings' | 'backup'
   >('overview');
 
   // Modals & form states
@@ -496,6 +500,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                 { id: 'finance', label: language === 'bn' ? 'হিসাব ও ব্যয় খাতা' : 'Finance & Accounts', icon: DollarSign },
                 { id: 'customers', label: language === 'bn' ? 'কাস্টমার একাউন্টস' : 'Customer Database', icon: UserCheck, badge: customers.length },
                 { id: 'staff', label: language === 'bn' ? 'স্টাফ ও অপারেটর' : 'Staff & Roles', icon: Users, badge: staff.length },
+                { id: 'hero_slides', label: language === 'bn' ? 'হিরো ব্যাকগ্রাউন্ড ছবি' : 'Hero Photo Carousel', icon: ImageIcon, badge: heroSlides.length },
+                { id: 'seo_meta', label: language === 'bn' ? 'এসইও ও মেটা ট্যাগ' : 'Dynamic SEO & Meta', icon: Globe },
                 { id: 'settings', label: language === 'bn' ? 'ব্যবসায়িক সেটিংস' : 'Business Settings', icon: Settings },
                 { id: 'backup', label: language === 'bn' ? 'ডাটাবেজ ব্যাকআপ' : 'Database Backup', icon: Database }
               ].map(item => {
@@ -1676,6 +1682,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                   </button>
                 </div>
               </form>
+            </div>
+          )}
+
+          {/* VIEW: HERO PHOTO CAROUSEL CMS */}
+          {activeMenu === 'hero_slides' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              <HeroSlidesManager />
+            </div>
+          )}
+
+          {/* VIEW: DYNAMIC SEO & META CMS */}
+          {activeMenu === 'seo_meta' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              <SEOMetaManager />
             </div>
           )}
 

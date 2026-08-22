@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
+import { RobotVerification } from '../common/RobotVerification';
 import {
   Shield,
   User,
-  FileCheck,
   Lock,
   Mail,
   Phone,
@@ -14,16 +14,13 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
-  KeyRound,
   Smartphone,
-  Sparkles,
-  Send,
-  RotateCcw
+  Send
 } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
-  initialMode?: 'login' | 'register' | 'staff' | 'admin';
+  initialMode?: 'login' | 'register' | 'admin';
   onClose: () => void;
   onSuccess: (targetView?: string) => void;
 }
@@ -35,11 +32,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onSuccess
 }) => {
   const { language } = useLanguage();
-  const { loginAdmin, loginStaff, loginCustomer, loginWithGoogle, registerCustomer } = useAuth();
+  const { loginAdmin, loginCustomer, loginWithGoogle, registerCustomer } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'customer' | 'admin' | 'staff' | 'phone_otp'>('customer');
+  const [activeTab, setActiveTab] = useState<'customer' | 'admin'>('customer');
   const [authSubMode, setAuthSubMode] = useState<'login' | 'register'>('login');
   
+  // Robot Verification state
+  const [isRobotVerified, setIsRobotVerified] = useState(false);
+
   // Form fields
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -64,8 +64,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     
     if (initialMode === 'admin') {
       setActiveTab('admin');
-    } else if (initialMode === 'staff') {
-      setActiveTab('staff');
     } else if (initialMode === 'register') {
       setActiveTab('customer');
       setAuthSubMode('register');
@@ -81,6 +79,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setSuccessMsg(null);
     setOtpSent(false);
     setOtpCode('');
+    setIsRobotVerified(false);
   }, [initialMode, isOpen]);
 
   // Timer countdown for OTP
@@ -98,6 +97,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   // Send OTP
   const handleSendOtp = () => {
+    if (!isRobotVerified) {
+      setErrorMsg(language === 'bn' ? 'অনুগ্রহ করে "আমি রোবট নই" (I am not a robot) ভেরিফিকেশন সম্পন্ন করুন।' : 'Please complete the "I\'m not a robot" verification first.');
+      return;
+    }
+
     if (!phone || phone.length < 11) {
       setErrorMsg(language === 'bn' ? 'অনুগ্রহ করে সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (যেমন: 017XXXXXXXX)' : 'Please enter a valid 11-digit Bangladeshi phone number');
       return;
@@ -117,6 +121,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   // Verify OTP & Register/Login
   const handleVerifyOtpAndLogin = async () => {
+    if (!isRobotVerified) {
+      setErrorMsg(language === 'bn' ? 'অনুগ্রহ করে "আমি রোবট নই" (I am not a robot) ভেরিফিকেশন সম্পন্ন করুন।' : 'Please complete the "I\'m not a robot" verification first.');
+      return;
+    }
+
     if (!otpCode || otpCode.trim().length !== 4) {
       setErrorMsg(language === 'bn' ? 'সঠিক ৪ ডিজিটের ওটিপি কোড লিখুন' : 'Please enter the 4-digit OTP code');
       return;
@@ -187,6 +196,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     e.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);
+
+    if (!isRobotVerified) {
+      setErrorMsg(language === 'bn' ? 'অনুগ্রহ করে "আমি রোবট নই" (I am not a robot) ভেরিফিকেশন সম্পন্ন করুন।' : 'Please complete the "I\'m not a robot" verification first.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -197,14 +212,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           onClose();
         } else {
           setErrorMsg(res.message || 'Admin authentication failed');
-        }
-      } else if (activeTab === 'staff') {
-        const res = await loginStaff(identifier, password);
-        if (res.success) {
-          onSuccess('staff');
-          onClose();
-        } else {
-          setErrorMsg(res.message || 'Staff authentication failed');
         }
       } else if (activeTab === 'customer') {
         if (authSubMode === 'register') {
@@ -259,8 +266,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600/30 to-teal-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center shadow-md shadow-emerald-950">
               {activeTab === 'admin' ? (
                 <Shield className="w-5 h-5" />
-              ) : activeTab === 'staff' ? (
-                <FileCheck className="w-5 h-5" />
               ) : (
                 <User className="w-5 h-5" />
               )}
@@ -269,11 +274,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <h3 className="text-sm sm:text-base font-bold text-white leading-tight">
                 {activeTab === 'admin'
                   ? (language === 'bn' ? 'অ্যাডমিন CMS প্যানেল' : 'Admin CMS Portal')
-                  : activeTab === 'staff'
-                  ? (language === 'bn' ? 'স্টাফ ও অপারেটর পোর্টাল' : 'Staff & Operator Login')
                   : (authSubMode === 'register' 
-                      ? (language === 'bn' ? 'নতুন কাস্টমার একাউন্ট খুলুন' : 'Create Customer Account')
-                      : (language === 'bn' ? 'কাস্টমার লগইন ও একাউন্ট' : 'Customer Account Login'))}
+                      ? (language === 'bn' ? 'নতুন কাস্টমার একাউন্ট তৈরি (Signup)' : 'Create Customer Account (Signup)')
+                      : (language === 'bn' ? 'কাস্টমার লগইন (Signin)' : 'Customer Login (Signin)'))}
               </h3>
               <span className="text-[11px] text-neutral-400">
                 {language === 'bn' ? 'সাইফুল এন্টারপ্রাইজ ডিজিটাল সার্ভিস ও পেপার স্টোর' : 'Saiful Enterprise Secure Portal'}
@@ -290,12 +293,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
         </div>
 
-        {/* Primary Role Tabs */}
-        <div className="grid grid-cols-3 bg-neutral-950/90 p-1.5 border-b border-neutral-800 text-xs font-semibold">
+        {/* Primary Tabs: Customer vs Admin */}
+        <div className="grid grid-cols-2 bg-neutral-950/90 p-1.5 border-b border-neutral-800 text-xs font-semibold">
           <button
             type="button"
             id="auth-tab-customer"
-            onClick={() => { setActiveTab('customer'); setErrorMsg(null); setSuccessMsg(null); }}
+            onClick={() => { setActiveTab('customer'); setErrorMsg(null); setSuccessMsg(null); setIsRobotVerified(false); }}
             className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
               activeTab === 'customer'
                 ? 'bg-emerald-600 text-white shadow-md'
@@ -303,27 +306,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             }`}
           >
             <User className="w-3.5 h-3.5" />
-            <span>{language === 'bn' ? 'গ্রাহক (Customer)' : 'Customer'}</span>
-          </button>
-
-          <button
-            type="button"
-            id="auth-tab-staff"
-            onClick={() => { setActiveTab('staff'); setErrorMsg(null); setSuccessMsg(null); }}
-            className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 'staff'
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'text-neutral-400 hover:text-white hover:bg-neutral-800/50'
-            }`}
-          >
-            <FileCheck className="w-3.5 h-3.5" />
-            <span>{language === 'bn' ? 'স্টাফ পোর্টাল' : 'Staff'}</span>
+            <span>{language === 'bn' ? 'গ্রাহক / কাস্টমার একাউন্ট' : 'Customer Portal'}</span>
           </button>
 
           <button
             type="button"
             id="auth-tab-admin"
-            onClick={() => { setActiveTab('admin'); setErrorMsg(null); setSuccessMsg(null); }}
+            onClick={() => { setActiveTab('admin'); setErrorMsg(null); setSuccessMsg(null); setIsRobotVerified(false); }}
             className={`py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
               activeTab === 'admin'
                 ? 'bg-emerald-600 text-white shadow-md'
@@ -331,7 +320,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             }`}
           >
             <Shield className="w-3.5 h-3.5" />
-            <span>{language === 'bn' ? 'অ্যাডমিন CMS' : 'Admin'}</span>
+            <span>{language === 'bn' ? 'অ্যাডমিন CMS' : 'Admin CMS'}</span>
           </button>
         </div>
 
@@ -397,29 +386,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="flex-1 h-px bg-neutral-800" />
               </div>
 
-              {/* Sub-Tabs: Login vs Register */}
+              {/* Sub-Tabs: Signin vs Signup */}
               <div className="flex rounded-xl bg-neutral-950 p-1 border border-neutral-800 text-xs font-semibold">
                 <button
                   type="button"
-                  onClick={() => { setAuthSubMode('login'); setErrorMsg(null); }}
+                  id="submode-signin-btn"
+                  onClick={() => { setAuthSubMode('login'); setErrorMsg(null); setIsRobotVerified(false); }}
                   className={`flex-1 py-2 rounded-lg transition-all ${
                     authSubMode === 'login' ? 'bg-neutral-800 text-emerald-400 shadow-sm' : 'text-neutral-400 hover:text-white'
                   }`}
                 >
-                  {language === 'bn' ? 'মোবাইল / আইডি দিয়ে লগইন' : 'Sign In with Mobile/Email'}
+                  {language === 'bn' ? 'লগইন (Sign In)' : 'Sign In'}
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setAuthSubMode('register'); setErrorMsg(null); }}
+                  id="submode-signup-btn"
+                  onClick={() => { setAuthSubMode('register'); setErrorMsg(null); setIsRobotVerified(false); }}
                   className={`flex-1 py-2 rounded-lg transition-all ${
                     authSubMode === 'register' ? 'bg-neutral-800 text-emerald-400 shadow-sm' : 'text-neutral-400 hover:text-white'
                   }`}
                 >
-                  {language === 'bn' ? 'নতুন একাউন্ট খুলুন (OTP ভেরিফাইড)' : 'Create Account (Phone OTP)'}
+                  {language === 'bn' ? 'নতুন সাইন-আপ (Sign Up)' : 'Sign Up'}
                 </button>
               </div>
 
-              {/* Customer Registration with Phone OTP */}
+              {/* Customer Registration with Phone OTP and Robot Verification */}
               {authSubMode === 'register' ? (
                 <div className="space-y-3.5">
                   <div>
@@ -467,39 +458,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     </div>
                   </div>
 
-                  {otpSent && (
-                    <div className="p-3.5 rounded-2xl bg-neutral-950 border border-emerald-500/40 space-y-2 animate-in fade-in">
-                      <div className="flex items-center justify-between text-xs text-emerald-300">
-                        <span className="flex items-center gap-1">
-                          <Smartphone className="w-3.5 h-3.5" />
-                          <span>{language === 'bn' ? '৪ ডিজিটের OTP কোড লিখুন:' : 'Enter 4-digit OTP code:'}</span>
-                        </span>
-                        <span className="font-mono font-bold bg-emerald-950/80 px-2 py-0.5 rounded text-emerald-400 border border-emerald-500/30">
-                          Code: {generatedOtp}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          maxLength={4}
-                          value={otpCode}
-                          onChange={e => setOtpCode(e.target.value)}
-                          placeholder="4966"
-                          className="w-full text-center tracking-widest text-lg font-mono font-bold py-2 bg-neutral-900 border border-neutral-700 rounded-xl text-white focus:outline-none focus:border-emerald-400"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleVerifyOtpAndLogin}
-                          disabled={loading || otpCode.length !== 4}
-                          className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-xs shrink-0 flex items-center gap-1.5 disabled:opacity-50"
-                        >
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>{language === 'bn' ? 'ভেরিফাই ও সম্পন্ন' : 'Verify & Join'}</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-semibold text-neutral-300 mb-1">
@@ -527,12 +485,54 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     </div>
                   </div>
 
+                  {/* "I'm not a robot" Verification on Signup */}
+                  <div className="pt-1">
+                    <RobotVerification
+                      id="signup-robot-check"
+                      isVerified={isRobotVerified}
+                      onVerify={setIsRobotVerified}
+                    />
+                  </div>
+
+                  {otpSent && (
+                    <div className="p-3.5 rounded-2xl bg-neutral-950 border border-emerald-500/40 space-y-2 animate-in fade-in">
+                      <div className="flex items-center justify-between text-xs text-emerald-300">
+                        <span className="flex items-center gap-1">
+                          <Smartphone className="w-3.5 h-3.5" />
+                          <span>{language === 'bn' ? '৪ ডিজিটের OTP কোড লিখুন:' : 'Enter 4-digit OTP code:'}</span>
+                        </span>
+                        <span className="font-mono font-bold bg-emerald-950/80 px-2 py-0.5 rounded text-emerald-400 border border-emerald-500/30">
+                          Code: {generatedOtp}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          maxLength={4}
+                          value={otpCode}
+                          onChange={e => setOtpCode(e.target.value)}
+                          placeholder="4966"
+                          className="w-full text-center tracking-widest text-lg font-mono font-bold py-2 bg-neutral-900 border border-neutral-700 rounded-xl text-white focus:outline-none focus:border-emerald-400"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleVerifyOtpAndLogin}
+                          disabled={loading || otpCode.length !== 4 || !isRobotVerified}
+                          className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-xs shrink-0 flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>{language === 'bn' ? 'ভেরিফাই ও সম্পন্ন' : 'Verify & Join'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {!otpSent && (
                     <button
                       type="button"
                       onClick={handleSendOtp}
-                      disabled={loading}
-                      className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950 transition-all hover:scale-[1.01]"
+                      disabled={loading || !isRobotVerified}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950 transition-all hover:scale-[1.01] disabled:opacity-50"
                     >
                       <Smartphone className="w-4 h-4" />
                       <span>{language === 'bn' ? 'মোবাইল নম্বর যাচাই করে একাউন্ট তৈরি করুন' : 'Verify Phone & Create Account'}</span>
@@ -540,7 +540,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   )}
                 </div>
               ) : (
-                /* Customer Login Form */
+                /* Customer Login Form with "I'm not a robot" */
                 <form onSubmit={handleSubmit} className="space-y-3.5">
                   <div>
                     <label className="block text-xs font-semibold text-neutral-300 mb-1">
@@ -559,10 +559,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     </div>
                   </div>
 
+                  {/* "I'm not a robot" Verification on Signin */}
+                  <div className="pt-1">
+                    <RobotVerification
+                      id="signin-robot-check"
+                      isVerified={isRobotVerified}
+                      onVerify={setIsRobotVerified}
+                    />
+                  </div>
+
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950 transition-all hover:scale-[1.01]"
+                    disabled={loading || !isRobotVerified}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950 transition-all hover:scale-[1.01] disabled:opacity-50"
                   >
                     <span>{language === 'bn' ? 'গ্রাহক অ্যাকাউন্টে লগইন করুন' : 'Sign In as Customer'}</span>
                     <ArrowRight className="w-4 h-4" />
@@ -585,81 +594,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </form>
               )}
             </div>
-          )}
-
-          {/* STAFF & OPERATOR LOGIN */}
-          {activeTab === 'staff' && (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                  {language === 'bn' ? 'এমপ্লয়ি আইডি / মোবাইল / ইমেইল' : 'Employee ID / Mobile / Email'}
-                </label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    required
-                    value={identifier}
-                    onChange={e => setIdentifier(e.target.value)}
-                    placeholder="SE-EMP-001 or 01517992585"
-                    className="w-full pl-9 pr-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs sm:text-sm text-neutral-100 font-mono focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                  {language === 'bn' ? 'পাসওয়ার্ড' : 'Password'}
-                </label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="staff123"
-                    className="w-full pl-9 pr-10 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs sm:text-sm text-neutral-100 font-mono focus:outline-none focus:border-emerald-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-200"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950 transition-all hover:scale-[1.01]"
-              >
-                <span>{language === 'bn' ? 'স্টাফ পোর্টালে লগইন করুন' : 'Sign In as Staff'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-
-              <div className="p-3 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-between text-xs text-neutral-400 font-mono">
-                <div>
-                  <span className="text-neutral-500">ID: </span>
-                  <strong className="text-emerald-400">SE-EMP-001</strong>
-                  <span className="mx-2 text-neutral-600">|</span>
-                  <span className="text-neutral-500">Pass: </span>
-                  <strong className="text-emerald-400">staff123</strong>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIdentifier('SE-EMP-001');
-                    setPassword('staff123');
-                  }}
-                  className="text-emerald-400 hover:text-emerald-300 font-sans text-[11px] underline"
-                >
-                  Fill
-                </button>
-              </div>
-            </form>
           )}
 
           {/* MASTER ADMIN CMS LOGIN */}
@@ -725,10 +659,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   </div>
                 </div>
 
+                {/* "I'm not a robot" Verification on Admin */}
+                <div className="pt-1">
+                  <RobotVerification
+                    id="admin-robot-check"
+                    isVerified={isRobotVerified}
+                    onVerify={setIsRobotVerified}
+                  />
+                </div>
+
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="w-full py-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+                  disabled={loading || !isRobotVerified}
+                  className="w-full py-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-50"
                 >
                   <span>{language === 'bn' ? 'অ্যাডমিন প্যানেলে লগইন করুন' : 'Sign In as Admin'}</span>
                   <ArrowRight className="w-4 h-4" />

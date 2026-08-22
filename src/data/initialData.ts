@@ -11,7 +11,9 @@ import {
   NavigationMenu,
   CMSPage,
   InventoryItem,
-  POSSale
+  POSSale,
+  HeroSlide,
+  SectionSEO
 } from '../types';
 
 export const initialSettings: WebsiteSettings = {
@@ -29,6 +31,8 @@ export const initialSettings: WebsiteSettings = {
   addressBn: "২০/১, সাগর-সৈকত মার্কেট, দোকান নং ০২, ইন্দিরা রোড, তেজগাঁও কলেজের পাশে, ফার্মগেট, ঢাকা-১২১৫",
   openingHours: "Saturday - Thursday: 8:30 AM - 10:30 PM, Friday: 2:30 PM - 10:00 PM",
   openingHoursBn: "শনিবার - বৃহস্পতিবার: সকাল ৮:৩০ - রাত ১০:৩০, শুক্রবার: দুপুর ২:৩০ - রাত ১০:০০",
+  isShopOpen: true,
+  heroIntervalSeconds: 35,
   noticeBanner: "🔥 বিশেষ সেবা: তেজগাঁও কলেজ ভর্তি ও সেমিস্টার ফি জমা, বিএমইটি (BMET) ও পুলিশ ক্লিয়ারেন্স আবেদন চলছে।",
   noticeBannerBn: "🔥 বিশেষ সেবা: তেজগাঁও কলেজ ভর্তি ও সেমিস্টার ফি জমা, বিএমইটি (BMET) ও পুলিশ ক্লিয়ারেন্স আবেদন চলছে।",
   showNoticeBanner: true,
@@ -1067,22 +1071,179 @@ export const initialExpenses: Expense[] = [
 
 export const initialPOSSales: POSSale[] = [
   {
-    id: "pos_1",
+    id: "sale_pos_01",
     invoiceNumber: "INV-2026-0001",
-    cashierId: "usr_manager",
-    cashierName: "Md. Rafiqul Hassan",
-    customerName: "Md. Tareq",
-    customerPhone: "01755123456",
+    cashierId: "usr_operator",
+    cashierName: "Tanvir Ahmed",
+    customerName: "Walk-in Student",
+    customerPhone: "01700000000",
     items: [
-      { id: "i1", type: "service", name: "Urgent Passport Photo (4 Copies)", nameBn: "জরুরি পাসপোর্ট ছবি (৪ কপি)", price: 50, quantity: 1 },
-      { id: "i2", type: "custom", name: "Color Document Print (3 Pages)", nameBn: "কালার প্রিন্ট (৩ পাতা)", price: 10, quantity: 3 }
+      {
+        id: "item_p1",
+        type: "product",
+        itemId: "prod_a4_80",
+        name: "Double A Premium Printing Paper A4 80 GSM",
+        price: 510,
+        quantity: 1,
+        gsm: 80
+      }
     ],
-    subtotal: 80,
-    discount: 0,
-    total: 80,
-    paidAmount: 100,
-    changeAmount: 20,
+    subtotal: 510,
+    discount: 10,
+    total: 500,
+    paidAmount: 500,
+    changeAmount: 0,
     paymentMethod: "cash_counter",
-    createdAt: "2026-08-15T01:45:00Z"
+    createdAt: "2026-08-15T03:00:00Z"
   }
 ];
+
+export const initialHeroSlides: HeroSlide[] = [
+  {
+    id: "slide_1",
+    type: "photo",
+    src: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1920&auto=format&fit=crop",
+    tagEn: "Live Digital Counter",
+    tagBn: "লাইভ ডিজিটাল কাউন্টার",
+    titleEn: "Computer & Online Services Hub",
+    titleBn: "কম্পিউটার ও অনলাইন সার্ভিসেস হাব",
+    descriptionEn: "High-speed typing, admission forms, defense & government recruitment center in Farmgate.",
+    descriptionBn: "দ্রুত টাইপিং, ভর্তি ফরম, প্রতিরক্ষা বাহিনী ও সরকারি চাকরির আবেদন কেন্দ্র।",
+    accentColor: "emerald",
+    order: 1
+  },
+  {
+    id: "slide_2",
+    type: "photo",
+    src: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1920&auto=format&fit=crop",
+    tagEn: "Commercial Printing",
+    tagBn: "কমার্শিয়াল প্রিন্টিং",
+    titleEn: "Heavy Duty Digital Color & B/W Printing",
+    titleBn: "হেভি ডিউটি ডিজিটাল কালার ও সাদা-কালো প্রিন্ট",
+    descriptionEn: "Sharp laser printing, high-speed photocopying, thesis & spiral binding.",
+    descriptionBn: "হাই-স্পিড ফটোকপি, নির্ভুল লেজার প্রিন্ট, প্রজেক্ট ও থিসিস বুক বাইন্ডিং।",
+    accentColor: "sky",
+    order: 2
+  },
+  {
+    id: "slide_3",
+    type: "photo",
+    src: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1920&auto=format&fit=crop",
+    tagEn: "Tejgaon College Portal",
+    tagBn: "তেজগাঁও কলেজ পোর্টাল",
+    titleEn: "Academic Forms, NU Marksheet & Fee Deposit",
+    titleBn: "কলেজ ভর্তি, জাতীয় বিশ্ববিদ্যালয় মার্কশীট ও ফি জমা",
+    descriptionEn: "Instant online form submission, admit card download, and verified payment printout.",
+    descriptionBn: "ভর্তি ফরম পূরণ, প্রবেশপত্র ডাউনলোড এবং নিশ্চায়ন ফি পেমেন্ট স্লিপ প্রিন্ট।",
+    accentColor: "amber",
+    order: 3
+  },
+  {
+    id: "slide_4",
+    type: "photo",
+    src: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?q=80&w=1920&auto=format&fit=crop",
+    tagEn: "Paper & Supply Depot",
+    tagBn: "পেপার ও স্টেশনারি ডিপো",
+    titleEn: "A4, Legal, Double A & Glossy Photo Paper",
+    titleBn: "A4, লিগ্যাল, ডাবল এ ও গ্লসি ফটো পেপার পাইকারি ও খুচরা",
+    descriptionEn: "Premium 70-300 GSM paper reams, sticker paper, ID card lamination sheets.",
+    descriptionBn: "৭০ থেকে ৩০০ জিএসএম পেপার রিম, স্টিকার পেপার, ল্যামিনেশন রোল।",
+    accentColor: "purple",
+    order: 4
+  },
+  {
+    id: "slide_5",
+    type: "photo",
+    src: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1920&auto=format&fit=crop",
+    tagEn: "Instant Studio",
+    tagBn: "জরুরি স্টুডিও ফটো",
+    titleEn: "5-Minute Biometric Passport & Visa Photo",
+    titleBn: "৫ মিনিটে বায়োমেট্রিক পাসপোর্ট ও ভিসা সাইজ ছবি",
+    descriptionEn: "White/blue background change, digital retouching, and premium lab photo print.",
+    descriptionBn: "ব্যাকগ্রাউন্ড পরিবর্তন, ফেস রিটাচ এবং প্রিমিয়াম ল্যাব কোয়ালিটি ছবি ডেলিভারি।",
+    accentColor: "teal",
+    order: 5
+  }
+];
+
+export const initialSEOSettings: Record<string, SectionSEO> = {
+  home: {
+    sectionId: 'home',
+    title: 'Saiful Enterprise | Digital Service, Computer & Online Application Center',
+    titleBn: 'সাইফুল এন্টারপ্রাইজ | ডিজিটাল সার্ভিস, কম্পিউটার ও অনলাইন আবেদন সেন্টার',
+    description: 'Saiful Enterprise - Computer, Photocopy, Printing, Online Application & Digital Service Center in Indira Road, Farmgate, Dhaka.',
+    descriptionBn: 'সাইফুল এন্টারপ্রাইজ - কম্পিউটার টাইপিং, কালার ও লেজার প্রিন্ট, ফটোকপি, তেজগাঁও কলেজ ভর্তি ও অনলাইন আবেদন কেন্দ্র। ইন্দিরা রোড, ফার্মগেট, ঢাকা।',
+    keywords: 'Saiful Enterprise, Indira Road computer shop, Farmgate photocopy, Tejgaon college admission, BMET registration, police clearance, online application',
+    ogTitle: 'Saiful Enterprise - Your Trusted Digital & Print Solutions Hub',
+    ogDescription: 'Fast, secure computer printing, college admissions, online job application & passport photo services in Farmgate, Dhaka.',
+    ogImage: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1200&auto=format&fit=crop',
+    ogType: 'website',
+    canonicalUrl: 'https://saifulenterprise.com/'
+  },
+  services: {
+    sectionId: 'services',
+    title: 'Digital & Online Services Catalog | Saiful Enterprise',
+    titleBn: 'সকল অনলাইন ও কম্পিউটার সেবাসমূহ | সাইফুল এন্টারপ্রাইজ',
+    description: 'Explore full catalog of services: Tejgaon College admission, BMET registration, police clearance, defense application, typing & photo lab.',
+    descriptionBn: 'তেজগাঁও কলেজ ভর্তি সহায়তা, বিএমইটি রেজিস্ট্রেশন, পুলিশ ক্লিয়ারেন্স, সেনা/নৌ/বিমানবাহিনী আবেদন ও প্রিন্টিং সেবা।',
+    keywords: 'Tejgaon college admission help, BMET biometric registration, Bangladesh police clearance online, laser print Farmgate',
+    ogTitle: 'Services Catalog - Saiful Enterprise Farmgate',
+    ogDescription: 'Instant online applications, government portal submissions, laser printing & urgent photo services.',
+    ogImage: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1200&auto=format&fit=crop',
+    ogType: 'website',
+    canonicalUrl: 'https://saifulenterprise.com/services'
+  },
+  shop: {
+    sectionId: 'shop',
+    title: 'Paper & Printing Supplies Shop | Saiful Enterprise',
+    titleBn: 'পেপার ও স্টেশনারি অনলাইন শপ | সাইফুল এন্টারপ্রাইজ',
+    description: 'Order wholesale & retail Double A, PaperOne, 70/80 GSM A4, Legal, Glossy Photo Paper & Binding supplies.',
+    descriptionBn: 'ডাবল এ, পেপার ওয়ান, ৭০ ও ৮০ জিএসএম এ৪ পেপার, লিগ্যাল ও প্রিমিয়াম ফটো পেপার অনলাইনে অর্ডার করুন।',
+    keywords: 'Double A paper Dhaka, A4 paper price Farmgate, glossy photo paper, lamination sheets, stationery wholesale',
+    ogTitle: 'Premium Paper & Stationery Depot - Saiful Enterprise',
+    ogDescription: 'Best prices on Double A, 80 GSM paper, photo paper and printing accessories with fast delivery in Dhaka.',
+    ogImage: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?q=80&w=1200&auto=format&fit=crop',
+    ogType: 'website',
+    canonicalUrl: 'https://saifulenterprise.com/shop'
+  },
+  tracker: {
+    sectionId: 'tracker',
+    title: 'Track Application Status Online | Saiful Enterprise',
+    titleBn: 'আবেদনের অগ্রগতি লাইভ ট্র্যাক করুন | সাইফুল এন্টারপ্রাইজ',
+    description: 'Track your online application status, progress milestones and download receipts using your tracking number.',
+    descriptionBn: 'আপনার আবেদন নম্বর বা মোবাইল নম্বর দিয়ে সরকারি আবেদন, ভর্তি ও অন্যান্য সার্ভিসের বর্তমান অগ্রগতি জানুন।',
+    keywords: 'application tracking Saiful Enterprise, check application status, online slip download',
+    ogTitle: 'Application Tracker - Saiful Enterprise',
+    ogDescription: 'Real-time application verification, status check and digital money receipt download.',
+    ogImage: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1200&auto=format&fit=crop',
+    ogType: 'website',
+    canonicalUrl: 'https://saifulenterprise.com/tracker'
+  },
+  about: {
+    sectionId: 'about',
+    title: 'About Us & Expert Team | Saiful Enterprise Farmgate',
+    titleBn: 'আমাদের সম্পর্কে ও টিম পরিচিতি | সাইফুল এন্টারপ্রাইজ',
+    description: 'Serving Farmgate & Tejgaon for over 15 years with dedication, digital technology and trusted customer support.',
+    descriptionBn: 'ফার্মগেট ও ইন্দিরা রোডে ১৫ বছরেরও বেশি সময় ধরে কম্পিউটার সেবা, ডিজিটাল প্রিন্ট ও ছাত্র-ছাত্রীদের সহায়তা।',
+    keywords: 'Saiful Enterprise about us, Saiful Islam proprietor, Farmgate computer shop history',
+    ogTitle: 'About Saiful Enterprise - 15+ Years of Trust',
+    ogDescription: 'Meet the dedicated team behind the most trusted digital center in Farmgate.',
+    ogImage: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1200&auto=format&fit=crop',
+    ogType: 'website',
+    canonicalUrl: 'https://saifulenterprise.com/about'
+  },
+  contact: {
+    sectionId: 'contact',
+    title: 'Contact Us & Location | Saiful Enterprise Indira Road',
+    titleBn: 'যোগাযোগ ও দোকানের লোকেশন | সাইফুল এন্টারপ্রাইজ',
+    description: 'Visit us beside Tejgaon College, Indira Road, Farmgate or call/WhatsApp 01517992585.',
+    descriptionBn: 'আমাদের দোকান: ২০/১, সাগর-সৈকত মার্কেট, দোকান নং ০২, ইন্দিরা রোড, তেজগাঁও কলেজের পাশে, ফার্মগেট, ঢাকা।',
+    keywords: 'Saiful Enterprise contact, Indira Road shop number, WhatsApp 01517992585, Tejgaon college map',
+    ogTitle: 'Contact Saiful Enterprise Farmgate',
+    ogDescription: 'Call, WhatsApp or visit our computer & digital solutions center in Indira Road, Dhaka.',
+    ogImage: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1200&auto=format&fit=crop',
+    ogType: 'website',
+    canonicalUrl: 'https://saifulenterprise.com/contact'
+  }
+};
+

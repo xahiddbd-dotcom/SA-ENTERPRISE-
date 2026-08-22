@@ -21,6 +21,8 @@ import { StaffPortal } from './components/staff/StaffPortal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { AdminDirectLogin } from './components/admin/AdminDirectLogin';
 import { POSCounter } from './components/pos/POSCounter';
+import { DynamicSEO } from './components/common/DynamicSEO';
+import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { Shield, Lock } from 'lucide-react';
 
 const MainLayout: React.FC = () => {
@@ -71,6 +73,12 @@ const MainLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-neutral-950">
+      {/* Dynamic SEO Meta Tag Manager */}
+      <DynamicSEO currentTab={activeTab} />
+
+      {/* PWA Install Prompt and Offline Banner */}
+      <PWAInstallPrompt />
+
       {/* Top Notice */}
       <NoticeBar />
 

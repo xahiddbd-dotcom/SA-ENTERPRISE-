@@ -16,7 +16,9 @@ import {
   OrderStatus,
   PaymentStatus,
   ApplicationStatus,
-  Invoice
+  Invoice,
+  HeroSlide,
+  SectionSEO
 } from '../types';
 import {
   initialCategories,
@@ -29,13 +31,26 @@ import {
   initialApplications,
   initialExpenses,
   initialPOSSales,
-  initialSettings
+  initialSettings,
+  initialHeroSlides,
+  initialSEOSettings
 } from '../data/initialData';
 
 interface DataContextType {
   // Website Settings
   settings: WebsiteSettings;
   updateSettings: (newSettings: Partial<WebsiteSettings>) => void;
+
+  // Hero Background Slides
+  heroSlides: HeroSlide[];
+  addHeroSlide: (slide: Omit<HeroSlide, 'id'>) => HeroSlide;
+  updateHeroSlide: (id: string, updates: Partial<HeroSlide>) => void;
+  deleteHeroSlide: (id: string) => void;
+
+  // SEO & Meta Tags Manager
+  seoSettings: Record<string, SectionSEO>;
+  updateSectionSEO: (sectionKey: string, updates: Partial<SectionSEO>) => void;
+  resetSectionSEO: (sectionKey?: string) => void;
 
   // Services
   services: Service[];
@@ -46,6 +61,7 @@ interface DataContextType {
   addCategory: (cat: Omit<ServiceCategory, 'id'>) => void;
   updateCategory: (id: string, updates: Partial<ServiceCategory>) => void;
   deleteCategory: (id: string) => void;
+
 
   // Products & GSM
   products: Product[];
@@ -227,6 +243,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ];
   });
 
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(() => {
+    const saved = localStorage.getItem('se_hero_slides');
+    return saved ? JSON.parse(saved) : initialHeroSlides;
+  });
+
+  const [seoSettings, setSeoSettings] = useState<Record<string, SectionSEO>>(() => {
+    const saved = localStorage.getItem('se_seo_settings');
+    return saved ? JSON.parse(saved) : initialSEOSettings;
+  });
+
   // Sync to local storage
   useEffect(() => { localStorage.setItem('se_settings', JSON.stringify(settings)); }, [settings]);
   useEffect(() => { localStorage.setItem('se_categories', JSON.stringify(categories)); }, [categories]);
@@ -242,10 +268,57 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => { localStorage.setItem('se_cart', JSON.stringify(cart)); }, [cart]);
   useEffect(() => { localStorage.setItem('se_notifications', JSON.stringify(notifications)); }, [notifications]);
   useEffect(() => { localStorage.setItem('se_activity_logs', JSON.stringify(activityLogs)); }, [activityLogs]);
+  useEffect(() => { localStorage.setItem('se_hero_slides', JSON.stringify(heroSlides)); }, [heroSlides]);
+  useEffect(() => { localStorage.setItem('se_seo_settings', JSON.stringify(seoSettings)); }, [seoSettings]);
 
   const updateSettings = (newSettings: Partial<WebsiteSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
   };
+
+  // Hero Slides Management
+  const addHeroSlide = (slideData: Omit<HeroSlide, 'id'>) => {
+    const newSlide: HeroSlide = {
+      ...slideData,
+      id: `slide_${Date.now()}`
+    };
+    setHeroSlides(prev => [...prev, newSlide]);
+    logActivity('Hero Slide Added', `Added background slide "${newSlide.titleBn || newSlide.titleEn}"`);
+    return newSlide;
+  };
+
+  const updateHeroSlide = (id: string, updates: Partial<HeroSlide>) => {
+    setHeroSlides(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+    logActivity('Hero Slide Updated', `Updated slide ID ${id}`);
+  };
+
+  const deleteHeroSlide = (id: string) => {
+    setHeroSlides(prev => prev.filter(s => s.id !== id));
+    logActivity('Hero Slide Deleted', `Deleted slide ID ${id}`);
+  };
+
+  // SEO Management
+  const updateSectionSEO = (sectionKey: string, updates: Partial<SectionSEO>) => {
+    setSeoSettings(prev => ({
+      ...prev,
+      [sectionKey]: {
+        ...(prev[sectionKey] || { sectionId: sectionKey, title: '', description: '', keywords: '', ogTitle: '', ogDescription: '', ogImage: '' }),
+        ...updates
+      }
+    }));
+    logActivity('SEO Updated', `Updated meta tags & OG preview for section "${sectionKey}"`);
+  };
+
+  const resetSectionSEO = (sectionKey?: string) => {
+    if (sectionKey && initialSEOSettings[sectionKey]) {
+      setSeoSettings(prev => ({
+        ...prev,
+        [sectionKey]: initialSEOSettings[sectionKey]
+      }));
+    } else {
+      setSeoSettings(initialSEOSettings);
+    }
+  };
+
 
   // Service CRUD
   const addService = (serviceData: Omit<Service, 'id'>) => {
@@ -935,6 +1008,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setActivityLogs(data.activityLogs);
         localStorage.setItem('se_activity_logs', JSON.stringify(data.activityLogs));
       }
+      if (data.heroSlides && Array.isArray(data.heroSlides)) {
+        setHeroSlides(data.heroSlides);
+        localStorage.setItem('se_hero_slides', JSON.stringify(data.heroSlides));
+      }
+      if (data.seoSettings) {
+        setSeoSettings(data.seoSettings);
+        localStorage.setItem('se_seo_settings', JSON.stringify(data.seoSettings));
+      }
       return true;
     } catch (e) {
       console.error('Invalid JSON import', e);
@@ -947,6 +1028,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         settings,
         updateSettings,
+        heroSlides,
+        addHeroSlide,
+        updateHeroSlide,
+        deleteHeroSlide,
+        seoSettings,
+        updateSectionSEO,
+        resetSectionSEO,
         services,
         categories,
         addService,

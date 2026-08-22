@@ -1,0 +1,37 @@
+{
+  "name": "Saiful Enterprise - Digital Service & Computer Solutions",
+  "short_name": "Saiful Enterprise",
+  "description": "কম্পিউটার টাইপিং, কালার ও লেজার প্রিন্ট, ফটোকপি ও অনলাইন আবেদন কেন্দ্র। ইন্দিরা রোড, ফার্মগেট, ঢাকা।",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#059669",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "utilities", "education", "shopping"],
+  "shortcuts": [
+    {
+      "name": "সকল সেবাসমূহ (Services)",
+      "url": "/?tab=services",
+      "description": "View all online admission and government application services"
+    },
+    {
+      "name": "আবেদন ট্র্যাকিং (Track Status)",
+      "url": "/?tab=tracker",
+      "description": "Check live application tracking status"
+    },
+    {
+      "name": "পেপার ও স্টেশনারি শপ (Shop)",
+      "url": "/?tab=shop",
+      "description": "Buy paper reams and printing supplies"
+    }
+  ]
+}

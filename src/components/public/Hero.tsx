@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
-import { HeroBackgroundSlider, SLIDES_DATA } from './HeroBackgroundSlider';
+import { HeroBackgroundSlider } from './HeroBackgroundSlider';
 import {
   Printer,
   Sparkles,
@@ -13,7 +13,8 @@ import {
   FileCheck,
   Zap,
   MapPin,
-  Flame,
+  Clock,
+  Store,
   Award
 } from 'lucide-react';
 
@@ -24,10 +25,16 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
   const { language, t } = useLanguage();
-  const { settings } = useData();
+  const { settings, heroSlides } = useData();
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
-  const currentSlide = SLIDES_DATA[activeSlideIndex] || SLIDES_DATA[0];
+  const slides = (heroSlides && heroSlides.length > 0) ? heroSlides : [];
+  const currentSlide = slides[activeSlideIndex] || slides[0] || {
+    descriptionBn: 'দ্রুত টাইপিং, ভর্তি ফরম, প্রতিরক্ষা বাহিনী ও সরকারি চাকরির আবেদন কেন্দ্র।',
+    descriptionEn: 'High-speed typing, admission forms, defense & government recruitment center in Farmgate.'
+  };
+
+  const isShopOpen = settings.isShopOpen !== false;
 
   return (
     <section id="hero-section" className="relative overflow-hidden pt-8 pb-20 lg:py-28 min-h-[580px] lg:min-h-[660px] flex items-center">
@@ -51,7 +58,7 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
             </span>
           </div>
 
-          <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-900/80 border border-neutral-700 text-neutral-300 text-xs font-semibold backdrop-blur-md">
+          <div className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-neutral-900/80 border border-neutral-700 text-neutral-300 text-xs font-semibold backdrop-blur-md">
             <Award className="w-3.5 h-3.5 text-teal-400" />
             <span>
               {language === 'bn' ? '১৫+ বছরের নির্ভরযোগ্য সেবা' : '15+ Years of Service'}
@@ -88,7 +95,7 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
             {t('hero_desc')}
           </p>
 
-          {/* Direct CTA Buttons */}
+          {/* Direct CTA Buttons: আমাদের সেবা / কেনাকাটা / কল করুন / হোয়াটসঅ্যাপ */}
           <div className="pt-4 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <button
               id="hero-services-cta"
@@ -96,7 +103,7 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
               className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 text-white font-bold text-sm sm:text-base flex items-center gap-2 shadow-xl shadow-emerald-950/80 hover:brightness-110 active:scale-95 transition-all"
             >
               <Zap className="w-4 h-4" />
-              <span>{t('our_services', 'আমাদের সেবাসমূহ')}</span>
+              <span>{t('our_services', 'আমাদের সেবা')}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
@@ -105,7 +112,7 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
               onClick={() => setActiveTab('shop')}
               className="px-6 py-3.5 rounded-xl bg-neutral-900/90 backdrop-blur-md border border-neutral-700/90 text-neutral-100 font-bold text-sm sm:text-base hover:border-emerald-500/70 hover:bg-neutral-800 active:scale-95 transition-all shadow-lg shadow-black/50"
             >
-              <span>{t('shop_now', 'পেপার ও প্রিন্টিং শপ')}</span>
+              <span>{language === 'bn' ? 'কেনাকাটা / শপ' : 'Shop / Products'}</span>
             </button>
 
             <a
@@ -114,7 +121,7 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
               className="px-5 py-3.5 rounded-xl bg-neutral-900/90 backdrop-blur-md border border-neutral-700/90 text-emerald-400 font-bold text-sm sm:text-base flex items-center gap-2 hover:border-emerald-500 hover:text-emerald-300 transition-all shadow-lg shadow-black/50"
             >
               <Phone className="w-4 h-4" />
-              <span>{t('call_now')}</span>
+              <span>{language === 'bn' ? 'কল করুন' : 'Call Now'}</span>
             </a>
 
             <a
@@ -125,8 +132,40 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
               className="px-5 py-3.5 rounded-xl bg-emerald-950/80 backdrop-blur-md border border-emerald-500/40 text-emerald-300 font-bold text-sm sm:text-base flex items-center gap-2 hover:bg-emerald-900/80 transition-all shadow-lg shadow-emerald-950/50"
             >
               <MessageSquare className="w-4 h-4 text-emerald-400" />
-              <span>{t('whatsapp')}</span>
+              <span>{language === 'bn' ? 'হোয়াটসঅ্যাপ' : 'WhatsApp'}</span>
             </a>
+          </div>
+
+          {/* দোকান খোলা আছে / Shop Status prominently displayed below CTA buttons */}
+          <div className="pt-3 flex items-center justify-center animate-in fade-in duration-300">
+            <div className={`inline-flex flex-wrap items-center justify-center gap-2.5 px-4 py-2 rounded-2xl backdrop-blur-md border shadow-xl ${
+              isShopOpen
+                ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-200'
+                : 'bg-rose-950/80 border-rose-500/50 text-rose-200'
+            }`}>
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-3 w-3">
+                  {isShopOpen && (
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  )}
+                  <span className={`relative inline-flex rounded-full h-3 w-3 ${isShopOpen ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                </span>
+                <span className="font-bold text-xs sm:text-sm">
+                  {isShopOpen 
+                    ? (language === 'bn' ? '🟢 দোকান খোলা আছে (Shop Open Now)' : '🟢 Shop Open Now')
+                    : (language === 'bn' ? '🔴 দোকান এখন বন্ধ (Shop Closed)' : '🔴 Shop Closed')}
+                </span>
+              </div>
+              <span className="text-neutral-500 hidden sm:inline">•</span>
+              <div className="flex items-center gap-1 text-[11px] sm:text-xs text-neutral-300">
+                <Clock className="w-3.5 h-3.5 text-amber-400" />
+                <span>
+                  {language === 'bn' 
+                    ? (settings.openingHoursBn || 'সকাল ৮:৩০ - রাত ১০:৩০') 
+                    : (settings.openingHours || '8:30 AM - 10:30 PM')}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 

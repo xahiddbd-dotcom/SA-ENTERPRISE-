@@ -1,0 +1,84 @@
+import React, { useEffect } from 'react';
+import { useData } from '../../context/DataContext';
+import { useLanguage } from '../../context/LanguageContext';
+
+interface DynamicSEOProps {
+  currentTab: string;
+}
+
+export const DynamicSEO: React.FC<DynamicSEOProps> = ({ currentTab }) => {
+  const { seoSettings, settings } = useData();
+  const { language } = useLanguage();
+
+  useEffect(() => {
+    // Map currentTab to SEO section key
+    let sectionKey = 'home';
+    if (currentTab === 'services') sectionKey = 'services';
+    else if (currentTab === 'shop') sectionKey = 'shop';
+    else if (currentTab === 'tracker') sectionKey = 'tracker';
+    else if (currentTab === 'about') sectionKey = 'about';
+    else if (currentTab === 'contact') sectionKey = 'contact';
+
+    const currentSEO = seoSettings[sectionKey] || seoSettings['home'] || {
+      title: 'Saiful Enterprise | Digital Service & Computer Solutions',
+      titleBn: 'সাইফুল এন্টারপ্রাইজ | ডিজিটাল সার্ভিস ও কম্পিউটার সলিউশন',
+      description: 'Saiful Enterprise - Computer, Photocopy, Printing & Online Application Center in Farmgate, Dhaka.',
+      descriptionBn: 'সাইফুল এন্টারপ্রাইজ - কম্পিউটার টাইপিং, কালার ও লেজার প্রিন্ট, ফটোকপি ও অনলাইন আবেদন কেন্দ্র।',
+      keywords: 'Saiful Enterprise, Indira Road, Farmgate, Tejgaon College, photocopy, online application',
+      ogTitle: 'Saiful Enterprise - Farmgate, Dhaka',
+      ogDescription: 'Computer, printing, admission and digital solutions center.',
+      ogImage: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1200&auto=format&fit=crop'
+    };
+
+    // Update document title
+    const pageTitle = language === 'bn' 
+      ? (currentSEO.titleBn || currentSEO.title || settings.businessNameBn || 'সাইফুল এন্টারপ্রাইজ')
+      : (currentSEO.title || settings.businessName || 'Saiful Enterprise');
+    document.title = pageTitle;
+
+    // Helper to set or create meta tag
+    const setMetaTag = (attrName: 'name' | 'property', attrValue: string, content: string) => {
+      let element = document.querySelector(`meta[${attrName}="${attrValue}"]`) as HTMLMetaElement | null;
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(attrName, attrValue);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
+
+    const description = language === 'bn' 
+      ? (currentSEO.descriptionBn || currentSEO.description || settings.taglineBn || '')
+      : (currentSEO.description || settings.tagline || '');
+
+    setMetaTag('name', 'description', description);
+    setMetaTag('name', 'keywords', currentSEO.keywords || '');
+    setMetaTag('name', 'author', settings.businessName || 'Saiful Enterprise');
+
+    // Open Graph meta tags
+    setMetaTag('property', 'og:title', currentSEO.ogTitle || pageTitle);
+    setMetaTag('property', 'og:description', currentSEO.ogDescription || description);
+    setMetaTag('property', 'og:image', currentSEO.ogImage || 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1200&auto=format&fit=crop');
+    setMetaTag('property', 'og:type', currentSEO.ogType || 'website');
+    setMetaTag('property', 'og:site_name', language === 'bn' ? (settings.businessNameBn || 'সাইফুল এন্টারপ্রাইজ') : (settings.businessName || 'Saiful Enterprise'));
+
+    // Twitter Card
+    setMetaTag('name', 'twitter:card', 'summary_large_image');
+    setMetaTag('name', 'twitter:title', currentSEO.ogTitle || pageTitle);
+    setMetaTag('name', 'twitter:description', currentSEO.ogDescription || description);
+    setMetaTag('name', 'twitter:image', currentSEO.ogImage || 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1200&auto=format&fit=crop');
+
+    // Canonical link
+    if (currentSEO.canonicalUrl) {
+      let linkElement = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+      if (!linkElement) {
+        linkElement = document.createElement('link');
+        linkElement.setAttribute('rel', 'canonical');
+        document.head.appendChild(linkElement);
+      }
+      linkElement.setAttribute('href', currentSEO.canonicalUrl);
+    }
+  }, [currentTab, seoSettings, settings, language]);
+
+  return null;
+};

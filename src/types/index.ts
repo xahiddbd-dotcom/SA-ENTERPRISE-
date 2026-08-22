@@ -383,6 +383,35 @@ export interface AppNotification {
   createdAt: string;
 }
 
+export interface HeroSlide {
+  id: string;
+  type: 'photo' | 'video';
+  src: string;
+  poster?: string;
+  tagEn: string;
+  tagBn: string;
+  titleEn: string;
+  titleBn: string;
+  descriptionEn: string;
+  descriptionBn: string;
+  accentColor?: string;
+  order?: number;
+}
+
+export interface SectionSEO {
+  sectionId: 'home' | 'services' | 'shop' | 'tracker' | 'about' | 'contact';
+  title: string;
+  titleBn?: string;
+  description: string;
+  descriptionBn?: string;
+  keywords: string;
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: string;
+  ogType?: string;
+  canonicalUrl?: string;
+}
+
 export interface WebsiteSettings {
   businessName: string;
   businessNameBn: string;
@@ -398,6 +427,8 @@ export interface WebsiteSettings {
   addressBn: string;
   openingHours: string;
   openingHoursBn: string;
+  isShopOpen?: boolean;
+  heroIntervalSeconds?: number;
   noticeBanner: string;
   noticeBannerBn: string;
   showNoticeBanner: boolean;
@@ -413,3 +444,4 @@ export interface WebsiteSettings {
   minOrderAmount: number;
   maintenanceMode: boolean;
 }
+
