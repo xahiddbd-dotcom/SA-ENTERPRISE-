@@ -180,76 +180,102 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* User Account / Staff / Admin buttons */}
           {isAuthenticated ? (
-            <div className="relative">
-              <button
-                id="user-menu-trigger"
-                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-sm text-neutral-200 hover:border-emerald-500 transition-all"
-              >
-                <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold">
-                  {currentUser?.name?.charAt(0) || 'U'}
-                </div>
-                <span className="hidden sm:inline font-medium max-w-[100px] truncate">
-                  {currentUser?.name}
-                </span>
-                <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
-              </button>
-
-              {userDropdownOpen && (
-                <div
-                  className="absolute right-0 mt-2 w-56 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2"
-                  onClick={() => setUserDropdownOpen(false)}
+            <div className="flex items-center gap-2">
+              {isAdmin && (
+                <button
+                  id="header-admin-cms-shortcut"
+                  onClick={() => handleNavClick('admin')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 text-xs font-bold text-white shadow-md shadow-emerald-950 hover:brightness-110 transition-all border border-emerald-400/30 animate-pulse"
+                  title="Open Admin CMS Control Panel"
                 >
-                  <div className="px-4 py-2 border-b border-neutral-800">
-                    <p className="text-xs text-neutral-400">{currentUser?.email || currentUser?.phone}</p>
-                    <p className="text-xs font-semibold text-emerald-400 capitalize">
-                      {currentUser?.role.replace('_', ' ')}
-                    </p>
-                  </div>
-
-                  {isAdmin && (
-                    <button
-                      id="dropdown-admin-link"
-                      onClick={() => handleNavClick('admin')}
-                      className="w-full text-left px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-emerald-400 flex items-center gap-2"
-                    >
-                      <Shield className="w-4 h-4 text-emerald-400" />
-                      <span>{t('admin_login')}</span>
-                    </button>
-                  )}
-
-                  {isStaff && (
-                    <button
-                      id="dropdown-staff-link"
-                      onClick={() => handleNavClick('staff')}
-                      className="w-full text-left px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-emerald-400 flex items-center gap-2"
-                    >
-                      <FileCheck className="w-4 h-4 text-teal-400" />
-                      <span>{t('staff_login')}</span>
-                    </button>
-                  )}
-
-                  <button
-                    id="dropdown-applications-link"
-                    onClick={() => handleNavClick('applications')}
-                    className="w-full text-left px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-emerald-400 flex items-center gap-2"
-                  >
-                    <FileCheck className="w-4 h-4 text-neutral-400" />
-                    <span>{t('applications')}</span>
-                  </button>
-
-                  <div className="border-t border-neutral-800 my-1"></div>
-
-                  <button
-                    id="dropdown-logout-btn"
-                    onClick={logout}
-                    className="w-full text-left px-4 py-2 text-sm text-rose-400 hover:bg-rose-950/30 flex items-center gap-2"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Log Out</span>
-                  </button>
-                </div>
+                  <Shield className="w-3.5 h-3.5 text-white" />
+                  <span>Admin CMS</span>
+                </button>
               )}
+
+              {isStaff && !isAdmin && (
+                <button
+                  id="header-staff-pos-shortcut"
+                  onClick={() => handleNavClick('pos')}
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold hover:bg-emerald-900/60 transition-all"
+                  title="Open POS Cashier Counter"
+                >
+                  <FileCheck className="w-3.5 h-3.5" />
+                  <span>POS Counter</span>
+                </button>
+              )}
+
+              <div className="relative">
+                <button
+                  id="user-menu-trigger"
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-sm text-neutral-200 hover:border-emerald-500 transition-all"
+                >
+                  <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold">
+                    {currentUser?.name?.charAt(0) || 'U'}
+                  </div>
+                  <span className="hidden sm:inline font-medium max-w-[100px] truncate">
+                    {currentUser?.name}
+                  </span>
+                  <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
+                </button>
+
+                {userDropdownOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-56 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2"
+                    onClick={() => setUserDropdownOpen(false)}
+                  >
+                    <div className="px-4 py-2 border-b border-neutral-800">
+                      <p className="text-xs text-neutral-400">{currentUser?.email || currentUser?.phone}</p>
+                      <p className="text-xs font-semibold text-emerald-400 capitalize">
+                        {currentUser?.role.replace('_', ' ')}
+                      </p>
+                    </div>
+
+                    {isAdmin && (
+                      <button
+                        id="dropdown-admin-link"
+                        onClick={() => handleNavClick('admin')}
+                        className="w-full text-left px-4 py-2.5 text-sm text-emerald-400 font-semibold hover:bg-emerald-950/40 flex items-center gap-2"
+                      >
+                        <Shield className="w-4 h-4 text-emerald-400" />
+                        <span>অ্যাডমিন ফুল প্যানেল (Full CMS)</span>
+                      </button>
+                    )}
+
+                    {isStaff && (
+                      <button
+                        id="dropdown-staff-link"
+                        onClick={() => handleNavClick('staff')}
+                        className="w-full text-left px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-emerald-400 flex items-center gap-2"
+                      >
+                        <FileCheck className="w-4 h-4 text-teal-400" />
+                        <span>{t('staff_login')} / POS</span>
+                      </button>
+                    )}
+
+                    <button
+                      id="dropdown-applications-link"
+                      onClick={() => handleNavClick('applications')}
+                      className="w-full text-left px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-emerald-400 flex items-center gap-2"
+                    >
+                      <FileCheck className="w-4 h-4 text-neutral-400" />
+                      <span>{t('applications')}</span>
+                    </button>
+
+                    <div className="border-t border-neutral-800 my-1"></div>
+
+                    <button
+                      id="dropdown-logout-btn"
+                      onClick={logout}
+                      className="w-full text-left px-4 py-2 text-sm text-rose-400 hover:bg-rose-950/30 flex items-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Log Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <div className="flex items-center gap-1.5">
