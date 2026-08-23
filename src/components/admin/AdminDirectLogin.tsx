@@ -10,7 +10,7 @@ interface AdminDirectLoginProps {
 export const AdminDirectLogin: React.FC<AdminDirectLoginProps> = ({ onSuccess }) => {
   const { loginAdmin } = useAuth();
   const { language } = useLanguage();
-  const [identifier, setIdentifier] = useState('Admin');
+  const [identifier, setIdentifier] = useState('sent9696@gmail.com');
   const [password, setPassword] = useState('J@hid2045');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);

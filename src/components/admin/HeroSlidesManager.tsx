@@ -239,6 +239,70 @@ export const HeroSlidesManager: React.FC = () => {
         </div>
       </div>
 
+      {/* Hero Background Photo Banner Opacity Control (Default 50%) */}
+      <div className="p-5 rounded-3xl bg-neutral-900 border border-neutral-800 shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-teal-950/80 border border-teal-500/30 text-teal-400">
+              <Sliders className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-bold text-white">
+                {language === 'bn' ? 'ব্যাকগ্রাউন্ড ছবির অপাসিটি / দৃশ্যমানতা (Background Opacity)' : 'Hero Photo Banner Background Opacity'}
+              </h4>
+              <span className="text-[11px] text-neutral-400">
+                {language === 'bn' ? 'ছবির স্বচ্ছতা ও ব্রাইটনেস নিয়ন্ত্রণ করুন (ডিফল্ট ৫০%)' : 'Control photo transparency & background visibility (Default 50%)'}
+              </span>
+            </div>
+          </div>
+
+          {/* Quick preset buttons */}
+          <div className="flex items-center gap-2">
+            {[30, 40, 50, 60, 75].map(op => {
+              const currentOp = typeof settings.heroBackgroundOpacity === 'number' ? settings.heroBackgroundOpacity : 50;
+              return (
+                <button
+                  key={op}
+                  type="button"
+                  onClick={() => {
+                    updateSettings({ heroBackgroundOpacity: op });
+                    showNotification(language === 'bn' ? `ব্যাকগ্রাউন্ড অপাসিটি ${op}% সেট করা হয়েছে` : `Background opacity set to ${op}%`);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition-all ${
+                    currentOp === op
+                      ? 'bg-teal-600 text-white shadow-md'
+                      : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                  }`}
+                >
+                  {op}%
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Range Slider for Opacity */}
+        <div className="flex items-center gap-4">
+          <span className="text-xs font-mono text-neutral-500">10%</span>
+          <input
+            type="range"
+            min="10"
+            max="100"
+            step="5"
+            value={typeof settings.heroBackgroundOpacity === 'number' ? settings.heroBackgroundOpacity : 50}
+            onChange={e => {
+              const val = parseInt(e.target.value, 10);
+              updateSettings({ heroBackgroundOpacity: val });
+            }}
+            className="flex-1 accent-teal-500 cursor-pointer h-2 bg-neutral-800 rounded-lg"
+          />
+          <span className="text-xs font-mono text-neutral-500">100%</span>
+          <span className="px-3 py-1 bg-teal-950 border border-teal-500/40 rounded-xl text-xs font-mono font-bold text-teal-300 min-w-[55px] text-center">
+            {typeof settings.heroBackgroundOpacity === 'number' ? settings.heroBackgroundOpacity : 50}%
+          </span>
+        </div>
+      </div>
+
       {/* List of Active Slides */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-xs text-neutral-400 px-1">

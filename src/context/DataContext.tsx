@@ -152,7 +152,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [services, setServices] = useState<Service[]>(() => {
     const saved = localStorage.getItem('se_services');
-    return saved ? JSON.parse(saved) : initialServices;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.map((s: Service) => {
+            if (!s.image) {
+              const initMatch = initialServices.find(initS => initS.id === s.id);
+              if (initMatch?.image) {
+                return { ...s, image: initMatch.image };
+              }
+            }
+            return s;
+          });
+        }
+      } catch (e) {
+        console.error('Failed to parse saved services', e);
+      }
+    }
+    return initialServices;
   });
 
   const [gsmOptions, setGsmOptions] = useState<GsmOption[]>(() => {

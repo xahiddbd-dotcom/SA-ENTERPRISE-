@@ -15,13 +15,14 @@ interface AuthContextType {
   loginStaff: (employeeIdOrPhone: string, password: string) => Promise<{ success: boolean; message?: string }>;
   loginCustomer: (emailOrPhone: string, password?: string) => Promise<{ success: boolean; message?: string }>;
   loginWithGoogle: (googleUser?: { name: string; email: string; avatar?: string }) => Promise<{ success: boolean; message?: string }>;
+  loginWithFacebook: (fbUser?: { name: string; email?: string; avatar?: string; facebookId?: string }) => Promise<{ success: boolean; message?: string }>;
   registerCustomer: (
     name: string,
     phone: string,
     email?: string,
     address?: string,
     password?: string,
-    authProvider?: 'phone_otp' | 'google' | 'email_password'
+    authProvider?: 'phone_otp' | 'google' | 'facebook' | 'email_password'
   ) => Promise<{ success: boolean; message?: string }>;
   updateCurrentUserProfile: (updates: Partial<User>) => Promise<{ success: boolean; message?: string }>;
   deleteOwnAccount: () => Promise<{ success: boolean; message?: string }>;
@@ -66,7 +67,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          // Filter out any obsolete demo staff, keep real accounts
+          return parsed.filter(u => u && u.id);
         }
       }
     } catch (e) {
@@ -107,6 +109,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Security: Rate limiting & brute force check
+  const checkBruteForceLockout = (key: string): { locked: boolean; remainingSec: number } => {
+    try {
+      const record = localStorage.getItem(`auth_attempts_${key}`);
+      if (record) {
+        const { count, lockUntil } = JSON.parse(record);
+        const now = Date.now();
+        if (lockUntil && now < lockUntil) {
+          return { locked: true, remainingSec: Math.ceil((lockUntil - now) / 1000) };
+        }
+        if (lockUntil && now >= lockUntil) {
+          localStorage.removeItem(`auth_attempts_${key}`);
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+    return { locked: false, remainingSec: 0 };
+  };
+
+  const recordFailedAttempt = (key: string) => {
+    try {
+      const record = localStorage.getItem(`auth_attempts_${key}`);
+      const now = Date.now();
+      let count = 1;
+      if (record) {
+        const parsed = JSON.parse(record);
+        count = (parsed.count || 0) + 1;
+      }
+      if (count >= 5) {
+        // Lock for 60 seconds
+        localStorage.setItem(`auth_attempts_${key}`, JSON.stringify({ count, lockUntil: now + 60000 }));
+      } else {
+        localStorage.setItem(`auth_attempts_${key}`, JSON.stringify({ count, lastAttempt: now }));
+      }
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const resetFailedAttempts = (key: string) => {
+    try {
+      localStorage.removeItem(`auth_attempts_${key}`);
+    } catch (e) {
+      // ignore
+    }
+  };
+
   const loginAdmin = async (emailOrPhone: string, password: string): Promise<{ success: boolean; message?: string }> => {
     const cleanId = emailOrPhone.trim().toLowerCase();
     const cleanPass = password.trim();
@@ -114,35 +164,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!cleanPass) {
       return { success: false, message: 'Please enter the Admin password' };
     }
+
+    const lockout = checkBruteForceLockout('admin');
+    if (lockout.locked) {
+      return {
+        success: false,
+        message: `Security Lockout: Too many failed login attempts. Please wait ${lockout.remainingSec}s before retrying.`
+      };
+    }
     
-    // Master Admin credentials check (User Name: Admin, Password: J@hid2045)
-    const isMasterPassword = cleanPass === 'J@hid2045' || cleanPass.toLowerCase() === 'j@hid2045' || cleanPass === 'admin123' || cleanPass === 'admin' || cleanPass === '123456';
-    const isMasterUsername = !cleanId || cleanId === 'admin' || cleanId === 'admin@saifulenterprise.com' || cleanId === 'sent9696@gmail.com' || cleanId === '01540004966' || cleanId === 'saiful' || cleanId === 'se-admin-01' || cleanId === 'jahid' || cleanId === 'superadmin' || cleanId === 'administrator';
+    // Master Admin credentials check (User ID: sent9696@gmail.com / 01540004966 / Admin, Password: J@hid2045)
+    const isMasterPassword = cleanPass === 'J@hid2045';
+    const isMasterUsername = !cleanId || cleanId === 'admin' || cleanId === 'admin@saifulenterprise.com' || cleanId === 'sent9696@gmail.com' || cleanId === '01540004966' || cleanId === 'saiful' || cleanId === 'se-admin-01';
 
     if (isMasterPassword && isMasterUsername) {
+      resetFailedAttempts('admin');
       const user: User = {
         ...initialStaff[0],
         id: 'usr_admin_master',
         name: 'Saiful Islam (Master Admin)',
         nameBn: 'সাইফুল ইসলাম (প্রধান প্রশাসক)',
-        email: cleanId.includes('@') ? cleanId : 'admin@saifulenterprise.com',
+        email: 'sent9696@gmail.com',
         phone: '01540004966',
-        role: 'super_admin',
-        isActive: true,
-        isBlocked: false,
-        permissions: ['all', 'manage_all', 'services', 'products', 'orders', 'applications', 'pos', 'staff', 'customers', 'settings', 'backup', 'finance', 'reports']
-      };
-      setCurrentUser(user);
-      return { success: true };
-    }
-
-    if (isMasterPassword) {
-      const user: User = {
-        ...initialStaff[0],
-        id: 'usr_admin_master',
-        name: emailOrPhone.trim() || 'Admin User',
-        nameBn: 'অ্যাডমিন ইউজার',
-        email: cleanId.includes('@') ? cleanId : 'admin@saifulenterprise.com',
         role: 'super_admin',
         isActive: true,
         isBlocked: false,
@@ -164,7 +207,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, message: `Account Blocked: ${foundStaff.blockReason || 'Your admin access has been blocked. Contact Super Admin.'}` };
       }
 
-      if (cleanPass === 'J@hid2045' || cleanPass.toLowerCase() === 'j@hid2045' || cleanPass === 'admin123' || cleanPass === 'staff123' || cleanPass === '123456' || cleanPass === 'admin') {
+      if (cleanPass === 'J@hid2045') {
+        resetFailedAttempts('admin');
         setCurrentUser({
           ...foundStaff,
           role: 'super_admin',
@@ -174,7 +218,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    return { success: false, message: 'Invalid Admin Credentials. Required: Username: Admin | Password: J@hid2045' };
+    recordFailedAttempt('admin');
+    return { success: false, message: 'Invalid Admin Credentials. User ID: sent9696@gmail.com | Password: J@hid2045' };
   };
 
   const loginStaff = async (employeeIdOrPhone: string, password: string): Promise<{ success: boolean; message?: string }> => {
@@ -195,23 +240,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, message: `Access Suspended: ${matched.blockReason || 'This staff account is currently blocked by Administrator.'}` };
       }
 
-      if (cleanPass === 'staff123' || cleanPass === 'admin123' || cleanPass === '123456' || cleanPass === 'J@hid2045') {
+      if (cleanPass === 'J@hid2045') {
         setCurrentUser(matched);
         return { success: true };
       }
     }
 
-    // Fallback default staff
-    if ((cleanId === 'staff@saifulenterprise.com' || cleanId === 'se-emp-001' || cleanId === '01517992585' || cleanId === 'staff') && (cleanPass === 'staff123' || cleanPass === 'admin123' || cleanPass === '123456' || cleanPass === 'J@hid2045')) {
-      const staffUser: User = initialStaff[1];
-      if (staffUser.isBlocked) {
-        return { success: false, message: 'This staff account has been blocked.' };
-      }
-      setCurrentUser(staffUser);
-      return { success: true };
-    }
-
-    return { success: false, message: 'Invalid Employee ID or Password.' };
+    return { success: false, message: 'Invalid Staff Credentials or access code.' };
   };
 
   const loginCustomer = async (emailOrPhone: string, password?: string): Promise<{ success: boolean; message?: string }> => {
@@ -301,13 +336,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: true };
   };
 
+  const loginWithFacebook = async (fbUser?: { name: string; email?: string; avatar?: string; facebookId?: string }): Promise<{ success: boolean; message?: string }> => {
+    const fName = fbUser?.name || "Saiful Facebook Client";
+    const fEmail = fbUser?.email || "facebook.user@saifulenterprise.com";
+    const fAvatar = fbUser?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80";
+
+    const customersList = getCombinedCustomers();
+    const matched = customersList.find(c => (fbUser?.email && c.email?.toLowerCase() === fbUser.email.toLowerCase()) || (c.authProvider === 'facebook' && c.name.toLowerCase() === fName.toLowerCase()));
+
+    if (matched) {
+      if (matched.isBlocked) {
+        return {
+          success: false,
+          message: `Facebook Account Blocked: ${matched.blockReason || 'This account has been disabled by Administrator.'}`
+        };
+      }
+      const updatedUser: User = {
+        ...matched,
+        avatar: matched.avatar || fAvatar
+      };
+      saveCustomerToStorage(updatedUser);
+      setCurrentUser(updatedUser);
+      return { success: true };
+    }
+
+    const newFbCustomer: User = {
+      id: `usr_fb_${Date.now()}`,
+      name: fName,
+      email: fEmail,
+      phone: "01712345678",
+      role: 'customer',
+      authProvider: 'facebook',
+      isEmailVerified: true,
+      isPhoneVerified: true,
+      isActive: true,
+      isBlocked: false,
+      registeredAt: new Date().toISOString(),
+      address: "Dhaka, Bangladesh",
+      avatar: fAvatar
+    };
+
+    saveCustomerToStorage(newFbCustomer);
+    setCurrentUser(newFbCustomer);
+    return { success: true };
+  };
+
   const registerCustomer = async (
     name: string,
     phone: string,
     email?: string,
     address?: string,
     password?: string,
-    authProvider: 'phone_otp' | 'google' | 'email_password' = 'phone_otp'
+    authProvider: 'phone_otp' | 'google' | 'facebook' | 'email_password' = 'phone_otp'
   ): Promise<{ success: boolean; message?: string }> => {
     if (!name.trim() || !phone.trim()) {
       return { success: false, message: 'Name and Phone number are required' };
@@ -419,6 +499,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loginStaff,
         loginCustomer,
         loginWithGoogle,
+        loginWithFacebook,
         registerCustomer,
         updateCurrentUserProfile,
         deleteOwnAccount,

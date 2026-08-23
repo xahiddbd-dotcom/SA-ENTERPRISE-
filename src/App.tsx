@@ -188,7 +188,11 @@ const MainLayout: React.FC = () => {
       <Footer setActiveTab={setActiveTab} openAuthModal={handleOpenAuth} />
 
       {/* Global Modals */}
-      <CartModal isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <CartModal
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        onOpenAuthModal={handleOpenAuth}
+      />
 
       <AuthModal
         isOpen={isAuthModalOpen}

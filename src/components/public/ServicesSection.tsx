@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { Service, ServiceCategory } from '../../types';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   Printer,
   GraduationCap,
@@ -18,7 +19,8 @@ import {
   Sparkles,
   Search,
   Phone,
-  AlertCircle
+  AlertCircle,
+  ImageIcon
 } from 'lucide-react';
 
 interface ServicesSectionProps {
@@ -194,113 +196,173 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenTrackerW
           </div>
         </div>
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredServices.map(service => {
-            const category = categories.find(c => c.id === service.categoryId);
-            const IconComponent = getCategoryIcon(category?.iconName || 'Layers');
+        {/* Services Grid with Visual Photography Cards */}
+        <motion.div
+          layout
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          <AnimatePresence mode="popLayout">
+            {filteredServices.map((service, index) => {
+              const category = categories.find(c => c.id === service.categoryId);
+              const IconComponent = getCategoryIcon(category?.iconName || 'Layers');
 
-            return (
-              <div
-                key={service.id}
-                id={`service-card-${service.id}`}
-                className="bg-neutral-900/80 border border-neutral-800 hover:border-emerald-500/40 rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-950/20 group"
-              >
-                <div>
-                  {/* Category & Badge */}
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
-                      <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                        <IconComponent className="w-4 h-4 text-emerald-400" />
-                      </div>
-                      <span>{language === 'bn' ? category?.nameBn : category?.name}</span>
-                    </div>
-
-                    {service.isPopular && (
-                      <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[10px] font-bold">
-                        🔥 {language === 'bn' ? 'জনপ্রিয়' : 'Popular'}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-base sm:text-lg font-bold text-white mb-2 leading-snug group-hover:text-emerald-300 transition-colors">
-                    {language === 'bn' ? service.nameBn : service.name}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-3">
-                    {language === 'bn' ? service.descriptionBn : service.description}
-                  </p>
-
-                  {/* Required Documents Tags */}
-                  {service.requiredDocuments && service.requiredDocuments.length > 0 && (
-                    <div className="mb-4 space-y-1.5 bg-neutral-950/60 p-2.5 rounded-xl border border-neutral-850">
-                      <span className="text-[11px] font-medium text-neutral-400 flex items-center gap-1">
-                        <FileCheck className="w-3 h-3 text-emerald-400" />
-                        {language === 'bn' ? 'প্রয়োজনীয় কাগজপত্র:' : 'Required Docs:'}
-                      </span>
-                      <div className="flex flex-wrap gap-1">
-                        {(language === 'bn' ? service.requiredDocumentsBn : service.requiredDocuments).slice(0, 3).map((doc, idx) => (
-                          <span
-                            key={idx}
-                            className="text-[10px] px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 truncate max-w-[200px]"
-                          >
-                            {doc}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Bottom Bar: Price & Action */}
-                <div className="pt-3 border-t border-neutral-800 flex items-center justify-between gap-3">
+              return (
+                <motion.div
+                  key={service.id}
+                  layout
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.3), ease: [0.25, 1, 0.5, 1] }}
+                  whileHover={{ y: -5 }}
+                  id={`service-card-${service.id}`}
+                  className="bg-neutral-900/90 border border-neutral-800 hover:border-emerald-500/50 rounded-2xl overflow-hidden flex flex-col justify-between transition-colors duration-300 hover:shadow-2xl hover:shadow-emerald-950/40 group"
+                >
                   <div>
-                    <span className="text-[10px] text-neutral-400 block uppercase font-medium">
-                      {service.startingPrice ? (language === 'bn' ? 'শুরু মাত্র' : 'Starting From') : (language === 'bn' ? 'মূল্য' : 'Price')}
-                    </span>
-                    <span className="text-lg font-extrabold text-emerald-400 font-mono">
-                      ৳{service.price}
-                    </span>
+                    {/* Service Photo Display Banner */}
+                    <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-neutral-950">
+                      {service.image ? (
+                        <img
+                          src={service.image}
+                          alt={service.name}
+                          referrerPolicy="no-referrer"
+                          loading="lazy"
+                          className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
+                          onError={(e) => {
+                            // If image fails to load, replace with clean gradient placeholder
+                            (e.target as HTMLElement).style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-emerald-950/50 via-neutral-900 to-teal-950/50 flex items-center justify-center">
+                          <IconComponent className="w-12 h-12 text-emerald-400/40" />
+                        </div>
+                      )}
+
+                      {/* Dark gradient overlay for badge readability */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/30 to-black/40 pointer-events-none" />
+
+                      {/* Floating Top Bar on Photo: Category & Popular Tag */}
+                      <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-950/80 backdrop-blur-md border border-neutral-700/60 text-emerald-300 text-[11px] font-semibold shadow-sm">
+                          <IconComponent className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>{language === 'bn' ? category?.nameBn : category?.name}</span>
+                        </div>
+
+                        {service.isPopular && (
+                          <span className="px-2.5 py-1 rounded-full bg-amber-500/90 text-neutral-950 text-[10px] font-extrabold shadow-md flex items-center gap-1">
+                            <span>🔥</span>
+                            <span>{language === 'bn' ? 'জনপ্রিয়' : 'Popular'}</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Bottom-right on Photo: Estimated Time Badge */}
+                      <div className="absolute bottom-2.5 right-3 z-10">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-950/80 backdrop-blur-md border border-neutral-800 text-[10px] font-medium text-neutral-300">
+                          <Clock className="w-3 h-3 text-emerald-400" />
+                          <span>{language === 'bn' ? service.estimatedTimeBn : service.estimatedTime}</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="p-5 pt-4 space-y-3">
+                      {/* Title */}
+                      <h3 className="text-base sm:text-lg font-bold text-white leading-snug group-hover:text-emerald-300 transition-colors">
+                        {language === 'bn' ? service.nameBn : service.name}
+                      </h3>
+
+                      {/* Description */}
+                      <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed line-clamp-2">
+                        {language === 'bn' ? service.descriptionBn : service.description}
+                      </p>
+
+                      {/* Required Documents Tags */}
+                      {service.requiredDocuments && service.requiredDocuments.length > 0 && (
+                        <div className="space-y-1.5 bg-neutral-950/70 p-2.5 rounded-xl border border-neutral-800/80">
+                          <span className="text-[11px] font-semibold text-neutral-400 flex items-center gap-1">
+                            <FileCheck className="w-3.5 h-3.5 text-emerald-400" />
+                            {language === 'bn' ? 'প্রয়োজনীয় কাগজপত্র:' : 'Required Docs:'}
+                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {(language === 'bn' ? service.requiredDocumentsBn : service.requiredDocuments).slice(0, 3).map((doc, idx) => (
+                              <span
+                                key={idx}
+                                className="text-[10px] px-2 py-0.5 rounded bg-neutral-850 text-neutral-300 truncate max-w-[190px] border border-neutral-800"
+                              >
+                                {doc}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <button
-                    id={`apply-service-btn-${service.id}`}
-                    onClick={() => handleOpenModal(service)}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-950/40 transition-all active:scale-95"
-                  >
-                    <span>{t('apply_online')}</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  {/* Bottom Bar: Price & Action */}
+                  <div className="p-5 pt-3 border-t border-neutral-800/80 bg-neutral-900/40 flex items-center justify-between gap-3">
+                    <div>
+                      <span className="text-[10px] text-neutral-400 block uppercase font-semibold">
+                        {service.startingPrice ? (language === 'bn' ? 'শুরু মাত্র' : 'Starting From') : (language === 'bn' ? 'মূল্য' : 'Price')}
+                      </span>
+                      <span className="text-lg sm:text-xl font-extrabold text-emerald-400 font-mono">
+                        ৳{service.price}
+                      </span>
+                    </div>
+
+                    <button
+                      id={`apply-service-btn-${service.id}`}
+                      onClick={() => handleOpenModal(service)}
+                      className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-950/40 transition-all active:scale-95 hover:shadow-lg hover:shadow-emerald-900/40"
+                    >
+                      <span>{t('apply_online')}</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </motion.div>
       </div>
 
       {/* Service Application Modal */}
       {activeServiceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-neutral-900 border border-neutral-800 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-            {/* Modal Header */}
-            <div className="px-6 py-4 bg-neutral-950 border-b border-neutral-800 flex items-center justify-between">
-              <div>
-                <span className="text-xs font-semibold text-emerald-400 uppercase">
-                  {language === 'bn' ? 'অনলাইন আবেদন ও সেবা ফরম' : 'Online Service Request'}
-                </span>
-                <h3 className="text-lg font-bold text-white">
-                  {language === 'bn' ? activeServiceModal.nameBn : activeServiceModal.name}
-                </h3>
-              </div>
+            {/* Modal Header with Visual Banner */}
+            <div className="relative h-32 sm:h-40 w-full overflow-hidden bg-neutral-950 shrink-0">
+              {activeServiceModal.image ? (
+                <img
+                  src={activeServiceModal.image}
+                  alt={activeServiceModal.name}
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover object-center"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-r from-emerald-950 via-neutral-900 to-teal-950" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/60 to-black/50" />
+
+              {/* Close Button */}
               <button
                 id="close-service-modal-btn"
                 onClick={() => setActiveServiceModal(null)}
-                className="p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800"
+                className="absolute top-3 right-3 z-20 p-2 rounded-full bg-neutral-950/80 backdrop-blur-md text-neutral-300 hover:text-white border border-neutral-700/60 transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
+
+              {/* Header Details on Photo */}
+              <div className="absolute bottom-3 left-4 right-4 z-10">
+                <span className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wide">
+                  {language === 'bn' ? 'অনলাইন সেবা ও আবেদন' : 'Online Service Request'}
+                </span>
+                <h3 className="text-lg sm:text-xl font-extrabold text-white leading-tight">
+                  {language === 'bn' ? activeServiceModal.nameBn : activeServiceModal.name}
+                </h3>
+              </div>
             </div>
 
             {/* Modal Body */}
@@ -346,7 +408,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenTrackerW
                         }
                         setActiveServiceModal(null);
                       }}
-                      className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-bold text-xs flex items-center gap-2"
+                      className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950"
                     >
                       <span>{t('track_status')}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -355,7 +417,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenTrackerW
                     <button
                       id="close-success-modal-btn"
                       onClick={() => setActiveServiceModal(null)}
-                      className="px-5 py-2.5 rounded-xl bg-neutral-800 text-neutral-200 text-xs font-semibold"
+                      className="px-5 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold"
                     >
                       {language === 'bn' ? 'বন্ধ করুন' : 'Close'}
                     </button>
@@ -436,141 +498,155 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenTrackerW
                       id="applicant-email-input"
                       value={applicantEmail}
                       onChange={e => setApplicantEmail(e.target.value)}
-                      placeholder="name@gmail.com"
+                      placeholder="name@example.com"
                       className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs sm:text-sm text-neutral-100 focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
 
+                  {/* Customer Notes / Extra info */}
                   <div>
                     <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                      {language === 'bn' ? 'প্রয়োজনীয় বিবরণ / রোল / রেজিস্ট্রেশন / তথ্য' : 'Application Details / Roll / Reg / Special Instructions'}
+                      {language === 'bn' ? 'কাস্টমার নোট / বিশেষ নির্দেশনা' : 'Customer Notes / Instructions'}
                     </label>
                     <textarea
                       rows={2}
                       id="applicant-notes-input"
                       value={customerNotes}
                       onChange={e => setCustomerNotes(e.target.value)}
-                      placeholder={language === 'bn' ? 'যেমন: তেজগাঁও কলেজ BBA ৪র্থ সেমিস্টার, রোল: ১২৩৪৫...' : 'e.g., Tejgaon College Roll, SSC Reg number, Army Batch details...'}
+                      placeholder={language === 'bn' ? 'রোল নং, রেজিস্ট্রেশন নং বা জরুরি কোনো তথ্য লিখুন...' : 'Enter roll no, reg no, or any specific details...'}
                       className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs sm:text-sm text-neutral-100 focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
 
-                  {/* Document upload attachment */}
+                  {/* Document upload / attachment */}
                   <div>
                     <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                      {language === 'bn' ? 'ডকুমেন্ট বা ছবি ফাইল সংযুক্ত করুন (ঐচ্ছিক)' : 'Attach Documents / Photos (Optional)'}
+                      {language === 'bn' ? 'প্রয়োজনীয় ফাইল / ছবি আপলোড (ঐচ্ছিক)' : 'Upload Files / Photos (Optional)'}
                     </label>
-                    <div className="border-2 border-dashed border-neutral-700 hover:border-emerald-500/50 rounded-xl p-4 text-center cursor-pointer bg-neutral-950 relative">
+                    <div className="border border-dashed border-neutral-700 rounded-xl p-4 bg-neutral-950/60 text-center relative hover:border-emerald-500/50 transition-colors">
                       <input
                         type="file"
                         multiple
-                        id="document-upload-input"
+                        id="applicant-file-input"
                         onChange={handleFileUpload}
                         className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                       />
                       <Upload className="w-5 h-5 text-neutral-400 mx-auto mb-1" />
-                      <p className="text-xs text-neutral-300">
-                        {language === 'bn' ? 'ফাইল সিলেক্ট করতে এখানে ক্লিক করুন (PDF, JPG, PNG)' : 'Click to browse files (PDF, JPG, PNG)'}
-                      </p>
+                      <span className="text-xs text-neutral-300 block">
+                        {language === 'bn' ? 'ছবি বা পিডিএফ ফাইল ড্র্যাগ করুন অথবা ক্লিক করুন' : 'Click or Drag files to attach'}
+                      </span>
+                      <span className="text-[10px] text-neutral-500">JPG, PNG, PDF (Max 10MB)</span>
                     </div>
 
                     {uploadedFiles.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1.5">
+                      <div className="mt-2 space-y-1">
                         {uploadedFiles.map((file, i) => (
-                          <span key={i} className="text-[11px] px-2 py-1 rounded bg-neutral-800 text-emerald-400 border border-neutral-700">
-                            📎 {file.name}
-                          </span>
+                          <div key={i} className="flex items-center justify-between bg-neutral-950 px-3 py-1.5 rounded-lg border border-neutral-800 text-xs">
+                            <span className="text-neutral-200 truncate max-w-[200px]">{file.name}</span>
+                            <span className="text-[10px] text-emerald-400">Attached</span>
+                          </div>
                         ))}
                       </div>
                     )}
                   </div>
 
-                  {/* Payment selection */}
-                  <div className="p-3.5 rounded-xl bg-neutral-950 border border-neutral-800 space-y-3">
-                    <label className="block text-xs font-semibold text-white">
-                      {language === 'bn' ? 'পেমেন্ট মেথড নির্বাচন করুন' : 'Payment Preference'}
+                  {/* Payment Method */}
+                  <div>
+                    <label className="block text-xs font-semibold text-neutral-300 mb-2">
+                      {language === 'bn' ? 'পেমেন্ট পদ্ধতি নির্বাচন করুন' : 'Select Payment Method'}
                     </label>
-
                     <div className="grid grid-cols-3 gap-2">
                       <button
                         type="button"
                         id="pay-cash-btn"
                         onClick={() => setPaymentMethod('cash_counter')}
-                        className={`p-2.5 rounded-lg border text-xs font-semibold text-center transition-all ${
+                        className={`p-2.5 rounded-xl border text-xs font-semibold text-center transition-all ${
                           paymentMethod === 'cash_counter'
-                            ? 'bg-emerald-950 border-emerald-500 text-emerald-400'
-                            : 'bg-neutral-900 border-neutral-800 text-neutral-300'
+                            ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300'
+                            : 'bg-neutral-950 border-neutral-800 text-neutral-400'
                         }`}
                       >
-                        {language === 'bn' ? 'দোকানে নগদ' : 'Cash at Shop'}
+                        🏪 {language === 'bn' ? 'দোকানে ক্যাশ' : 'Cash at Counter'}
                       </button>
 
                       <button
                         type="button"
                         id="pay-bkash-btn"
                         onClick={() => setPaymentMethod('bkash')}
-                        className={`p-2.5 rounded-lg border text-xs font-semibold text-center transition-all ${
+                        className={`p-2.5 rounded-xl border text-xs font-semibold text-center transition-all ${
                           paymentMethod === 'bkash'
-                            ? 'bg-pink-950/40 border-pink-500 text-pink-400'
-                            : 'bg-neutral-900 border-neutral-800 text-neutral-300'
+                            ? 'bg-pink-600/20 border-pink-500 text-pink-300'
+                            : 'bg-neutral-950 border-neutral-800 text-neutral-400'
                         }`}
                       >
-                        bKash
+                        📱 বিকাশ (bKash)
                       </button>
 
                       <button
                         type="button"
                         id="pay-nagad-btn"
                         onClick={() => setPaymentMethod('nagad')}
-                        className={`p-2.5 rounded-lg border text-xs font-semibold text-center transition-all ${
+                        className={`p-2.5 rounded-xl border text-xs font-semibold text-center transition-all ${
                           paymentMethod === 'nagad'
-                            ? 'bg-amber-950/40 border-amber-500 text-amber-400'
-                            : 'bg-neutral-900 border-neutral-800 text-neutral-300'
+                            ? 'bg-orange-600/20 border-orange-500 text-orange-300'
+                            : 'bg-neutral-950 border-neutral-800 text-neutral-400'
                         }`}
                       >
-                        Nagad
+                        💳 নগদ (Nagad)
                       </button>
                     </div>
-
-                    {(paymentMethod === 'bkash' || paymentMethod === 'nagad') && (
-                      <div className="text-xs space-y-2 bg-neutral-900 p-3 rounded-lg border border-neutral-800">
-                        <p className="text-neutral-300 text-[11px]">
-                          {paymentMethod === 'bkash' ? 'bKash' : 'Nagad'} Personal: <strong className="text-emerald-400 font-mono">{settings.bkashNumber}</strong>
-                        </p>
-                        <input
-                          type="text"
-                          id="payment-trx-id-input"
-                          value={trxId}
-                          onChange={e => setTrxId(e.target.value)}
-                          placeholder="Enter Transaction TrxID (e.g. BK99X8821Z)"
-                          className="w-full px-3 py-1.5 bg-neutral-950 border border-neutral-700 rounded-lg text-xs text-neutral-100 font-mono focus:border-emerald-500 focus:outline-none"
-                        />
-                      </div>
-                    )}
                   </div>
 
-                  {/* Submit buttons */}
-                  <div className="pt-3 flex items-center justify-end gap-3">
+                  {/* TrxID input for bKash/Nagad */}
+                  {(paymentMethod === 'bkash' || paymentMethod === 'nagad') && (
+                    <div className="p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-2 text-xs">
+                      <p className="text-neutral-300">
+                        {language === 'bn'
+                          ? `আমাদের ${paymentMethod === 'bkash' ? 'বিকাশ' : 'নগদ'} পার্সোনাল/মার্চেন্ট নম্বরে ৳${activeServiceModal.price} সেন্ড মানি করুন:`
+                          : `Send ৳${activeServiceModal.price} to our ${paymentMethod === 'bkash' ? 'bKash' : 'Nagad'} Number:`}
+                        <strong className="block text-emerald-400 font-mono text-sm mt-0.5">
+                          {settings.phone || '01712-345678'}
+                        </strong>
+                      </p>
+                      <div>
+                        <label className="block text-neutral-400 mb-1">
+                          {language === 'bn' ? 'ট্রানজেকশন আইডি (TrxID) দিন' : 'Enter Transaction ID (TrxID)'}
+                        </label>
+                        <input
+                          type="text"
+                          id="trxid-input"
+                          value={trxId}
+                          onChange={e => setTrxId(e.target.value)}
+                          placeholder="e.g. 9J8A7K6L"
+                          className="w-full px-3 py-1.5 bg-neutral-900 border border-neutral-700 rounded-lg text-xs font-mono text-white focus:border-emerald-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="pt-3 flex items-center justify-end gap-3 border-t border-neutral-800">
                     <button
                       type="button"
+                      id="cancel-service-app-btn"
                       onClick={() => setActiveServiceModal(null)}
-                      className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white"
+                      className="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-semibold"
                     >
                       {language === 'bn' ? 'বাতিল' : 'Cancel'}
                     </button>
 
                     <button
                       type="submit"
-                      id="confirm-application-btn"
+                      id="submit-service-app-btn"
                       disabled={isSubmitting}
-                      className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs shadow-lg shadow-emerald-950 flex items-center gap-2 hover:brightness-110 active:scale-95 disabled:opacity-50"
+                      className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-950 flex items-center gap-2 disabled:opacity-50"
                     >
                       {isSubmitting ? (
-                        <span>{language === 'bn' ? 'দাখিল হচ্ছে...' : 'Submitting...'}</span>
+                        <span>{language === 'bn' ? 'সাবমিট হচ্ছে...' : 'Submitting...'}</span>
                       ) : (
                         <>
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>{language === 'bn' ? 'আবেদন দাখিল করুন' : 'Submit Application'}</span>
+                          <span>{language === 'bn' ? 'আবেদন নিশ্চিত করুন' : 'Confirm Application'}</span>
+                          <ArrowRight className="w-4 h-4" />
                         </>
                       )}
                     </button>

@@ -29,6 +29,7 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({ onSl
   // Interval in seconds configured by admin or defaulted to 35 seconds (30-45s)
   const intervalSeconds = Math.max(15, Math.min(90, settings.heroIntervalSeconds || 35));
   const totalDurationMs = intervalSeconds * 1000;
+  const backgroundOpacity = typeof settings.heroBackgroundOpacity === 'number' ? settings.heroBackgroundOpacity : 50;
 
   const slides = (heroSlides && heroSlides.length > 0) ? heroSlides : [
     {
@@ -97,7 +98,7 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({ onSl
 
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none -z-10">
-      {/* Slides image container */}
+      {/* Slides image container with 50% opacity */}
       <div className="relative w-full h-full">
         {slides.map((slide, index) => {
           const isActive = index === currentIndex;
@@ -106,8 +107,11 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({ onSl
             <div
               key={slide.id || index}
               className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
-                isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+                isActive ? 'z-10' : 'z-0 pointer-events-none'
               }`}
+              style={{
+                opacity: isActive ? backgroundOpacity / 100 : 0
+              }}
             >
               <img
                 src={slide.src}
@@ -123,10 +127,10 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({ onSl
         })}
       </div>
 
-      {/* Multi-layered Dark Vignettes & Gradients for Crisp Text Readability (WCAG AA Compliant) */}
-      <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/90 via-neutral-950/80 to-neutral-950 z-20" />
-      <div className="absolute inset-0 bg-radial from-transparent via-neutral-950/70 to-neutral-950/95 z-20" />
-      <div className="absolute inset-0 bg-neutral-950/40 backdrop-blur-[2px] z-20" />
+      {/* Multi-layered Dark Vignettes & Soft Gradients for High-Contrast Text Readability (WCAG AA Compliant) */}
+      <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/70 via-neutral-950/50 to-neutral-950 z-20" />
+      <div className="absolute inset-0 bg-radial from-transparent via-neutral-950/50 to-neutral-950/90 z-20" />
+      <div className="absolute inset-0 bg-neutral-950/20 backdrop-blur-[1px] z-20" />
 
       {/* Ambient glowing orbs */}
       <div className="absolute top-10 left-1/4 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl z-20 pointer-events-none animate-pulse" />

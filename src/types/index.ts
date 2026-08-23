@@ -44,7 +44,7 @@ export interface User {
   isActive: boolean;
   isBlocked?: boolean;
   blockReason?: string;
-  authProvider?: 'phone_otp' | 'google' | 'email_password' | 'admin_created';
+  authProvider?: 'phone_otp' | 'google' | 'facebook' | 'email_password' | 'admin_created';
   isPhoneVerified?: boolean;
   isEmailVerified?: boolean;
   registeredAt?: string;
@@ -429,6 +429,7 @@ export interface WebsiteSettings {
   openingHoursBn: string;
   isShopOpen?: boolean;
   heroIntervalSeconds?: number;
+  heroBackgroundOpacity?: number;
   noticeBanner: string;
   noticeBannerBn: string;
   showNoticeBanner: boolean;
@@ -443,5 +444,72 @@ export interface WebsiteSettings {
   deliveryChargeOutsideDhaka: number;
   minOrderAmount: number;
   maintenanceMode: boolean;
+}
+
+export type StoreExpenseCategory =
+  | 'tea_refreshment'  // চা-নাস্তা ও আপ্যায়ন
+  | 'paper_supplies'   // পেপার রিম ও স্টেশনারি ক্রয়
+  | 'toner_ink'        // টোনার ও প্রিন্টার কালি
+  | 'electricity_gen'  // বিদ্যুৎ বিল ও জেনারেটর
+  | 'shop_rent'        // দোকান ভাড়া ও সার্ভিস চার্জ
+  | 'internet_wifi'    // ইন্টারনেট ও রাউটার বিল
+  | 'transport'        // যাতায়াত ও মালামাল পরিবহন
+  | 'equipment_repair' // মেশিন সার্ভিসিং ও যন্ত্রাংশ
+  | 'salary_advance'   // কর্মচারী অগ্রিম বেতন
+  | 'miscellaneous';   // বিবিধ খুচরা খরচ
+
+export interface DailyCounterSale {
+  id: string;
+  date: string; // YYYY-MM-DD
+  time?: string;
+  category: 'photocopy_print' | 'online_admission' | 'studio_photo' | 'stationery_retail' | 'computer_service' | 'lamination_binding' | 'other_counter';
+  title: string;
+  customerName?: string;
+  paymentMethod: 'cash' | 'bkash' | 'nagad' | 'card';
+  amount: number;
+  operatorId?: string;
+  operatorName?: string;
+  counterNo?: string;
+  notes?: string;
+}
+
+export interface StoreExpenseRecord {
+  id: string;
+  date: string; // YYYY-MM-DD
+  time?: string;
+  category: StoreExpenseCategory;
+  title: string;
+  amount: number;
+  voucherNo?: string;
+  paidBy?: string;
+  note?: string;
+}
+
+export interface OperatorDailyLedger {
+  id: string;
+  date: string; // YYYY-MM-DD
+  operatorId: string;
+  operatorName: string;
+  operatorPhone?: string;
+  counterNo: string;
+  shift: 'morning' | 'evening' | 'full_day';
+  grossServiceSales: number; // সারাদিনের মোট সেবা ইনকাম
+  counterCashInHand: number; // ক্যাশ ড্রয়ারে ক্যাশ
+  digitalCollection: number; // বিকাশ/নগদে আদায়
+  deductionPercentage: number; // default 60% (সেটিংস অনুযায়ী অ্যাডজাস্টেবল)
+  deductionAmount: number; // 60% বাদ দিলে কত হয়
+  netAfterDeduction: number; // মোট থেকে 60% বাদ দিলে অবশিষ্ট বা শেয়ার
+  pagesPrintedCount?: number;
+  paperReamsUsed?: number;
+  status: 'settled' | 'pending' | 'verified';
+  verifiedBy?: string;
+  notes?: string;
+}
+
+export interface StoreLedgerSettings {
+  defaultDeductionPercentage: number; // 60
+  shopShareLabel: string;
+  operatorShareLabel: string;
+  enableVoucherNumbering: boolean;
 }
 

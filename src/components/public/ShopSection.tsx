@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { Product } from '../../types';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   ShoppingBag,
   Check,
@@ -159,106 +160,117 @@ export const ShopSection: React.FC<ShopSectionProps> = ({ openCart }) => {
         </div>
 
         {/* Product Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map(product => {
-            const hasDiscount = product.discountPrice && product.discountPrice < product.price;
-            const isOutOfStock = product.stock <= 0;
+        <motion.div
+          layout
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        >
+          <AnimatePresence mode="popLayout">
+            {filteredProducts.map((product, index) => {
+              const hasDiscount = product.discountPrice && product.discountPrice < product.price;
+              const isOutOfStock = product.stock <= 0;
 
-            return (
-              <div
-                key={product.id}
-                id={`product-card-${product.id}`}
-                onClick={() => setSelectedProductModal(product)}
-                className="bg-neutral-900 border border-neutral-800 hover:border-emerald-500/50 rounded-2xl overflow-hidden flex flex-col justify-between cursor-pointer group transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-950/20"
-              >
-                {/* Product Image & Badges */}
-                <div className="relative h-48 bg-neutral-950 overflow-hidden flex items-center justify-center p-4">
-                  {product.images && product.images[0] ? (
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      referrerPolicy="no-referrer"
-                      className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <Package className="w-12 h-12 text-neutral-700" />
-                  )}
-
-                  {/* Top Badges */}
-                  <div className="absolute top-3 left-3 flex flex-col gap-1">
-                    {product.gsm && (
-                      <span className="px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 text-[10px] font-mono font-bold">
-                        {product.gsm} GSM
-                      </span>
+              return (
+                <motion.div
+                  key={product.id}
+                  layout
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.3), ease: [0.25, 1, 0.5, 1] }}
+                  whileHover={{ y: -4 }}
+                  id={`product-card-${product.id}`}
+                  onClick={() => setSelectedProductModal(product)}
+                  className="bg-neutral-900 border border-neutral-800 hover:border-emerald-500/50 rounded-2xl overflow-hidden flex flex-col justify-between cursor-pointer group transition-colors duration-300 hover:shadow-xl hover:shadow-emerald-950/30"
+                >
+                  {/* Product Image & Badges */}
+                  <div className="relative h-48 bg-neutral-950 overflow-hidden flex items-center justify-center p-4">
+                    {product.images && product.images[0] ? (
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        referrerPolicy="no-referrer"
+                        className="max-h-full max-w-full object-contain group-hover:scale-108 transition-transform duration-500 ease-out"
+                      />
+                    ) : (
+                      <Package className="w-12 h-12 text-neutral-700" />
                     )}
-                    {product.brand && (
-                      <span className="px-2 py-0.5 rounded bg-neutral-900/90 text-neutral-300 text-[10px] font-semibold border border-neutral-750">
-                        {product.brand}
-                      </span>
-                    )}
-                  </div>
 
-                  {hasDiscount && (
-                    <span className="absolute top-3 right-3 px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold">
-                      SAVE ৳{product.price - (product.discountPrice || product.price)}
-                    </span>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="p-4 flex-1 flex flex-col justify-between">
-                  <div>
-                    <span className="text-[10px] text-neutral-400 uppercase font-mono block mb-1">
-                      SKU: {product.sku}
-                    </span>
-
-                    <h3 className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors leading-snug line-clamp-2 mb-2">
-                      {language === 'bn' ? product.nameBn : product.name}
-                    </h3>
-
-                    <div className="text-xs text-neutral-400 mb-3 flex items-center justify-between">
-                      <span>{language === 'bn' ? product.packSizeBn : product.packSize}</span>
-                      {isOutOfStock ? (
-                        <span className="text-rose-400 font-semibold">{t('out_of_stock')}</span>
-                      ) : (
-                        <span className="text-emerald-400 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" />
-                          {t('stock_in')} ({product.stock})
+                    {/* Top Badges */}
+                    <div className="absolute top-3 left-3 flex flex-col gap-1">
+                      {product.gsm && (
+                        <span className="px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 text-[10px] font-mono font-bold">
+                          {product.gsm} GSM
+                        </span>
+                      )}
+                      {product.brand && (
+                        <span className="px-2 py-0.5 rounded bg-neutral-900/90 text-neutral-300 text-[10px] font-semibold border border-neutral-750">
+                          {product.brand}
                         </span>
                       )}
                     </div>
+
+                    {hasDiscount && (
+                      <span className="absolute top-3 right-3 px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold">
+                        SAVE ৳{product.price - (product.discountPrice || product.price)}
+                      </span>
+                    )}
                   </div>
 
-                  {/* Pricing and Cart button */}
-                  <div className="pt-3 border-t border-neutral-800 flex items-center justify-between gap-2">
+                  {/* Info */}
+                  <div className="p-4 flex-1 flex flex-col justify-between">
                     <div>
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-base font-extrabold text-white font-mono">
-                          ৳{product.discountPrice || product.price}
-                        </span>
-                        {hasDiscount && (
-                          <span className="text-xs text-neutral-400 line-through font-mono">
-                            ৳{product.price}
+                      <span className="text-[10px] text-neutral-400 uppercase font-mono block mb-1">
+                        SKU: {product.sku}
+                      </span>
+
+                      <h3 className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors leading-snug line-clamp-2 mb-2">
+                        {language === 'bn' ? product.nameBn : product.name}
+                      </h3>
+
+                      <div className="text-xs text-neutral-400 mb-3 flex items-center justify-between">
+                        <span>{language === 'bn' ? product.packSizeBn : product.packSize}</span>
+                        {isOutOfStock ? (
+                          <span className="text-rose-400 font-semibold">{t('out_of_stock')}</span>
+                        ) : (
+                          <span className="text-emerald-400 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" />
+                            {t('stock_in')} ({product.stock})
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <button
-                      id={`add-to-cart-btn-${product.id}`}
-                      disabled={isOutOfStock}
-                      onClick={e => handleAddToCart(product, e)}
-                      className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-950 transition-all active:scale-95"
-                    >
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                      <span>{t('add_to_cart')}</span>
-                    </button>
+                    {/* Pricing and Cart button */}
+                    <div className="pt-3 border-t border-neutral-800 flex items-center justify-between gap-2">
+                      <div>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-base font-extrabold text-white font-mono">
+                            ৳{product.discountPrice || product.price}
+                          </span>
+                          {hasDiscount && (
+                            <span className="text-xs text-neutral-400 line-through font-mono">
+                              ৳{product.price}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <button
+                        id={`add-to-cart-btn-${product.id}`}
+                        disabled={isOutOfStock}
+                        onClick={e => handleAddToCart(product, e)}
+                        className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-950 transition-all active:scale-95"
+                      >
+                        <ShoppingBag className="w-3.5 h-3.5" />
+                        <span>{t('add_to_cart')}</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </motion.div>
       </div>
 
       {/* Floating Add Notification */}

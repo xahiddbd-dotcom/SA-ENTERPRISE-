@@ -8,6 +8,8 @@ import { DatabaseBackup } from './DatabaseBackup';
 import { CustomerManagement } from './CustomerManagement';
 import { HeroSlidesManager } from './HeroSlidesManager';
 import { SEOMetaManager } from './SEOMetaManager';
+import { CashMemo } from './CashMemo';
+import { AdminAnalyticsDashboard } from './AdminAnalyticsDashboard';
 import { ADMIN_THEMES, AdminThemeKey } from './AdminTheme';
 import { AdminThemeSwitcher } from './AdminThemeSwitcher';
 import {
@@ -55,6 +57,7 @@ import {
   History,
   Palette,
   Sparkles,
+  Camera,
   Image as ImageIcon
 } from 'lucide-react';
 
@@ -108,7 +111,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
   const [timelineNewDescBn, setTimelineNewDescBn] = useState('');
 
   const [activeMenu, setActiveMenu] = useState<
-    'overview' | 'services' | 'products' | 'applications' | 'orders' | 'pos' | 'finance' | 'customers' | 'staff' | 'hero_slides' | 'seo_meta' | 'settings' | 'backup'
+    'overview' | 'analytics' | 'cashmemo' | 'services' | 'products' | 'applications' | 'orders' | 'pos' | 'finance' | 'customers' | 'staff' | 'hero_slides' | 'seo_meta' | 'settings' | 'backup'
   >('overview');
 
   // Modals & form states
@@ -223,6 +226,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
         estimatedTimeBn: editingService.estimatedTimeBn || '১৫-৩০ মিনিট',
         description: editingService.description || '',
         descriptionBn: editingService.descriptionBn || '',
+        image: editingService.image || 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop&q=80',
         requiredDocuments: editingService.requiredDocuments || ['NID / Birth Certificate', 'Passport Photo'],
         requiredDocumentsBn: editingService.requiredDocumentsBn || ['জাতীয় পরিচয়পত্র / জন্ম নিবন্ধন', 'পাসপোর্ট ছবি'],
         isActive: true,
@@ -492,6 +496,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
             <nav className="space-y-1 text-xs font-semibold">
               {[
                 { id: 'overview', label: language === 'bn' ? 'ড্যাশবোর্ড ওভারভিউ' : 'Dashboard Overview', icon: LayoutDashboard },
+                { id: 'analytics', label: language === 'bn' ? 'আয়-ব্যয় ও পারফরম্যান্স' : 'Revenue & Analytics', icon: PieChart, badge: 'Live', badgeColor: 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' },
+                { id: 'cashmemo', label: language === 'bn' ? 'ডিজিটাল ক্যাশ মেমো' : 'Digital Cash Memo', icon: Receipt, badge: '3.5x5', badgeColor: 'bg-teal-950 text-teal-300 border border-teal-500/40' },
                 { id: 'services', label: language === 'bn' ? 'অনলাইন সেবা CMS' : 'Services Manager', icon: Layers, badge: services.length },
                 { id: 'products', label: language === 'bn' ? 'কাগজ ও স্টক' : 'Paper & Stock', icon: Package, badge: lowStockCount > 0 ? `${lowStockCount} Low` : `${products.length}`, badgeColor: lowStockCount > 0 ? 'bg-rose-950 text-rose-300 border border-rose-500/40' : undefined },
                 { id: 'applications', label: language === 'bn' ? 'গ্রাহক আবেদনসমূহ' : 'Online Applications', icon: FileCheck, badge: pendingAppsCount > 0 ? `${pendingAppsCount} New` : `${applications.length}`, badgeColor: pendingAppsCount > 0 ? 'bg-amber-950 text-amber-300 border border-amber-500/40' : undefined },
@@ -562,6 +568,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => setActiveMenu('cashmemo')}
+                    className="px-3.5 py-2 rounded-xl bg-teal-950 hover:bg-teal-900 border border-teal-500/40 text-teal-300 font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-teal-950"
+                  >
+                    <Receipt className="w-4 h-4 text-teal-400" />
+                    <span>{language === 'bn' ? 'ক্যাশ মেমো' : 'Cash Memo'}</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveMenu('analytics')}
+                    className="px-3.5 py-2 rounded-xl bg-emerald-950 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-emerald-950"
+                  >
+                    <PieChart className="w-4 h-4 text-emerald-400" />
+                    <span>{language === 'bn' ? 'আয়-ব্যয় অ্যানালিটিক্স' : 'Analytics & Trends'}</span>
+                  </button>
                   <button
                     onClick={() => setActiveMenu('backup')}
                     className="px-3.5 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 font-bold text-xs flex items-center gap-2 transition-all"
@@ -796,7 +816,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                   <table className="w-full text-left text-xs text-neutral-300">
                     <thead className="bg-neutral-950 text-neutral-400 uppercase text-[10px] border-b border-neutral-800">
                       <tr>
-                        <th className="p-4">Service Name</th>
+                        <th className="p-4">Service & Photo</th>
                         <th className="p-4">Category</th>
                         <th className="p-4">Service Fee</th>
                         <th className="p-4">Delivery Time</th>
@@ -808,13 +828,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                       {filteredServices.map(s => (
                         <tr key={s.id} className="hover:bg-neutral-850/60">
                           <td className="p-4">
-                            <strong className="text-white block text-sm">{s.name}</strong>
-                            <span className="text-neutral-400 text-xs">{s.nameBn}</span>
-                            {s.isPopular && (
-                              <span className="inline-block mt-1 text-[9px] px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-500/40 font-bold uppercase">
-                                Popular
-                              </span>
-                            )}
+                            <div className="flex items-center gap-3">
+                              <div className="w-14 h-11 rounded-lg overflow-hidden bg-neutral-950 border border-neutral-700/60 shrink-0">
+                                {s.image ? (
+                                  <img
+                                    src={s.image}
+                                    alt={s.name}
+                                    referrerPolicy="no-referrer"
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-neutral-600">
+                                    <Sparkles className="w-4 h-4" />
+                                  </div>
+                                )}
+                              </div>
+                              <div>
+                                <strong className="text-white block text-sm">{s.name}</strong>
+                                <span className="text-neutral-400 text-xs">{s.nameBn}</span>
+                                {s.isPopular && (
+                                  <span className="inline-block mt-0.5 text-[9px] px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-500/40 font-bold uppercase">
+                                    Popular
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </td>
                           <td className="p-4">
                             <span className="px-2 py-1 rounded bg-neutral-800 text-neutral-300 font-mono text-[11px]">
@@ -1699,6 +1737,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
             </div>
           )}
 
+          {/* VIEW: RECHARTS DAILY INCOME, EXPENSES & OPERATOR ANALYTICS */}
+          {activeMenu === 'analytics' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              <AdminAnalyticsDashboard />
+            </div>
+          )}
+
+          {/* VIEW: DIGITAL INTERACTIVE CASH MEMO (3.5x5) */}
+          {activeMenu === 'cashmemo' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              <CashMemo />
+            </div>
+          )}
+
           {/* VIEW 10: DATABASE BACKUP & RESTORE */}
           {activeMenu === 'backup' && (
             <div className="space-y-4 animate-in fade-in duration-200">
@@ -1764,6 +1816,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
               </div>
 
               <div>
+                <label className="text-xs text-neutral-400 block mb-1">Service Photo / Image URL</label>
+                <input
+                  type="url"
+                  placeholder="https://images.unsplash.com/..."
+                  value={editingService.image || ''}
+                  onChange={e => setEditingService({ ...editingService, image: e.target.value })}
+                  className="w-full px-3 py-1.5 bg-neutral-950 border border-neutral-700 rounded-lg text-xs text-white font-mono"
+                />
+                {editingService.image && (
+                  <div className="mt-2 relative h-24 w-full rounded-lg overflow-hidden border border-neutral-700 bg-neutral-950">
+                    <img
+                      src={editingService.image}
+                      alt="Preview"
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
                 <label className="text-xs text-neutral-400 block mb-1">Description</label>
                 <textarea
                   rows={2}
@@ -1771,6 +1847,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                   onChange={e => setEditingService({ ...editingService, description: e.target.value })}
                   className="w-full px-3 py-1.5 bg-neutral-950 border border-neutral-700 rounded-lg text-xs text-white"
                 />
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="is-popular-checkbox"
+                  checked={!!editingService.isPopular}
+                  onChange={e => setEditingService({ ...editingService, isPopular: e.target.checked })}
+                  className="rounded border-neutral-700 bg-neutral-950 text-emerald-600 focus:ring-emerald-500"
+                />
+                <label htmlFor="is-popular-checkbox" className="text-xs text-neutral-300">
+                  Mark as Popular / Featured (জনপ্রিয় সেবা)
+                </label>
               </div>
 
               <div className="pt-2 flex justify-end gap-2">

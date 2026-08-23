@@ -185,7 +185,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   id="header-admin-cms-shortcut"
                   onClick={() => handleNavClick('admin')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 text-xs font-bold text-white shadow-md shadow-emerald-950 hover:brightness-110 transition-all border border-emerald-400/30 animate-pulse"
+                  className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 text-xs font-bold text-white shadow-md shadow-emerald-950 hover:brightness-110 transition-all border border-emerald-400/30"
                   title="Open Admin CMS Control Panel"
                 >
                   <Shield className="w-3.5 h-3.5 text-white" />
@@ -197,7 +197,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   id="header-staff-pos-shortcut"
                   onClick={() => handleNavClick('pos')}
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold hover:bg-emerald-900/60 transition-all"
+                  className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold hover:bg-emerald-900/60 transition-all"
                   title="Open POS Cashier Counter"
                 >
                   <FileCheck className="w-3.5 h-3.5" />
@@ -209,12 +209,12 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   id="user-menu-trigger"
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-sm text-neutral-200 hover:border-emerald-500 transition-all"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-700 text-xs sm:text-sm text-neutral-200 hover:border-emerald-500 transition-all"
                 >
-                  <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold">
+                  <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
                     {currentUser?.name?.charAt(0) || 'U'}
                   </div>
-                  <span className="hidden sm:inline font-medium max-w-[100px] truncate">
+                  <span className="hidden sm:inline font-medium max-w-[110px] truncate">
                     {currentUser?.name}
                   </span>
                   <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
@@ -222,56 +222,66 @@ export const Header: React.FC<HeaderProps> = ({
 
                 {userDropdownOpen && (
                   <div
-                    className="absolute right-0 mt-2 w-56 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2"
+                    className="absolute right-0 mt-2 w-60 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2"
                     onClick={() => setUserDropdownOpen(false)}
                   >
-                    <div className="px-4 py-2 border-b border-neutral-800">
-                      <p className="text-xs text-neutral-400">{currentUser?.email || currentUser?.phone}</p>
-                      <p className="text-xs font-semibold text-emerald-400 capitalize">
-                        {currentUser?.role.replace('_', ' ')}
-                      </p>
+                    <div className="px-4 py-2.5 border-b border-neutral-800 bg-neutral-950/60">
+                      <p className="text-xs font-bold text-white truncate">{currentUser?.name}</p>
+                      <p className="text-[11px] text-neutral-400 truncate">{currentUser?.email || currentUser?.phone}</p>
+                      <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 capitalize font-medium">
+                        {currentUser?.role === 'customer' ? (language === 'bn' ? 'সম্মানিত গ্রাহক' : 'Customer Account') : currentUser?.role.replace('_', ' ')}
+                      </span>
                     </div>
+
+                    <button
+                      id="dropdown-applications-link"
+                      onClick={() => handleNavClick('applications')}
+                      className="w-full text-left px-4 py-2.5 text-xs sm:text-sm text-neutral-300 hover:bg-neutral-800 hover:text-emerald-400 flex items-center gap-2"
+                    >
+                      <FileCheck className="w-4 h-4 text-emerald-400" />
+                      <span>{language === 'bn' ? 'আমার আবেদন ট্র্যাকিং' : 'My Applications Tracker'}</span>
+                    </button>
+
+                    <button
+                      id="dropdown-cart-link"
+                      onClick={openCart}
+                      className="w-full text-left px-4 py-2 text-xs sm:text-sm text-neutral-300 hover:bg-neutral-800 hover:text-emerald-400 flex items-center gap-2"
+                    >
+                      <ShoppingBag className="w-4 h-4 text-neutral-400" />
+                      <span>{language === 'bn' ? 'শপিং কার্ট ও অর্ডার' : 'My Cart & Orders'}</span>
+                    </button>
 
                     {isAdmin && (
                       <button
                         id="dropdown-admin-link"
                         onClick={() => handleNavClick('admin')}
-                        className="w-full text-left px-4 py-2.5 text-sm text-emerald-400 font-semibold hover:bg-emerald-950/40 flex items-center gap-2"
+                        className="w-full text-left px-4 py-2.5 text-xs sm:text-sm text-emerald-400 font-semibold hover:bg-emerald-950/40 flex items-center gap-2 border-t border-neutral-800/80 mt-1 pt-2"
                       >
                         <Shield className="w-4 h-4 text-emerald-400" />
-                        <span>অ্যাডমিন ফুল প্যানেল (Full CMS)</span>
+                        <span>অ্যাডমিন ফুল প্যানেল (CMS)</span>
                       </button>
                     )}
 
                     {isStaff && (
                       <button
                         id="dropdown-staff-link"
-                        onClick={() => handleNavClick('staff')}
-                        className="w-full text-left px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-emerald-400 flex items-center gap-2"
+                        onClick={() => handleNavClick('pos')}
+                        className="w-full text-left px-4 py-2 text-xs sm:text-sm text-teal-400 hover:bg-neutral-800 flex items-center gap-2"
                       >
                         <FileCheck className="w-4 h-4 text-teal-400" />
-                        <span>{t('staff_login')} / POS</span>
+                        <span>স্টাফ পিওএস (POS Counter)</span>
                       </button>
                     )}
-
-                    <button
-                      id="dropdown-applications-link"
-                      onClick={() => handleNavClick('applications')}
-                      className="w-full text-left px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-emerald-400 flex items-center gap-2"
-                    >
-                      <FileCheck className="w-4 h-4 text-neutral-400" />
-                      <span>{t('applications')}</span>
-                    </button>
 
                     <div className="border-t border-neutral-800 my-1"></div>
 
                     <button
                       id="dropdown-logout-btn"
                       onClick={logout}
-                      className="w-full text-left px-4 py-2 text-sm text-rose-400 hover:bg-rose-950/30 flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-xs sm:text-sm text-rose-400 hover:bg-rose-950/30 flex items-center gap-2"
                     >
                       <LogOut className="w-4 h-4" />
-                      <span>Log Out</span>
+                      <span>{language === 'bn' ? 'লগ আউট (Log Out)' : 'Log Out'}</span>
                     </button>
                   </div>
                 )}
@@ -279,23 +289,16 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           ) : (
             <div className="flex items-center gap-1.5">
+              {/* Unified Customer / Buyer Account Button (Amazon / Daraz BD style) */}
               <button
-                id="portal-login-btn"
-                onClick={() => openAuthModal('staff')}
-                className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-xs font-semibold text-neutral-300 hover:text-white hover:border-emerald-500/40 transition-colors"
-                title="Staff / Operator Login"
-              >
-                <Shield className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{t('staff_login')}</span>
-              </button>
-
-              <button
-                id="header-login-btn"
-                onClick={() => openAuthModal('admin')}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 text-xs font-bold text-white shadow-md shadow-emerald-950 hover:brightness-110 transition-all"
+                id="customer-account-btn"
+                onClick={() => openAuthModal('login')}
+                className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-xs font-bold text-white shadow-md shadow-emerald-950/50 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                title="Customer Login / Sign Up"
               >
                 <User className="w-3.5 h-3.5" />
-                <span>{t('admin_login')}</span>
+                <span className="hidden sm:inline">{language === 'bn' ? 'লগইন / সাইন-আপ' : 'Login / Sign Up'}</span>
+                <span className="sm:hidden">{language === 'bn' ? 'লগইন' : 'Login'}</span>
               </button>
             </div>
           )}
@@ -313,8 +316,8 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-neutral-950 border-b border-neutral-800 px-4 py-4 space-y-2 animate-in slide-in-from-top duration-200">
-          <div className="grid grid-cols-2 gap-2 pb-3 border-b border-neutral-800">
+        <div className="lg:hidden bg-neutral-950 border-b border-neutral-800 px-4 py-4 space-y-3 animate-in slide-in-from-top duration-200">
+          <div className="grid grid-cols-2 gap-2 pb-2 border-b border-neutral-800">
             {navLinks.map(link => (
               <button
                 key={link.id}
@@ -330,27 +333,43 @@ export const Header: React.FC<HeaderProps> = ({
             ))}
           </div>
 
-          <div className="flex flex-col gap-2 pt-2">
-            <button
-              onClick={() => { setMobileMenuOpen(false); handleNavClick('admin'); }}
-              className="w-full text-left px-3 py-2.5 rounded-lg bg-emerald-950/40 border border-emerald-600/30 text-emerald-400 text-sm font-semibold flex items-center justify-between"
-            >
-              <span className="flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                {t('admin_login')}
-              </span>
-              <span className="text-xs bg-emerald-900 px-2 py-0.5 rounded text-white">Full CMS</span>
-            </button>
+          <div className="flex flex-col gap-2 pt-1">
+            {!isAuthenticated ? (
+              <button
+                onClick={() => { setMobileMenuOpen(false); openAuthModal('login'); }}
+                className="w-full text-left px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-bold flex items-center justify-between shadow-md shadow-emerald-950"
+              >
+                <span className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  {language === 'bn' ? 'গ্রাহক অ্যাকাউন্ট (লগইন / সাইন-আপ)' : 'Customer Login / Sign Up'}
+                </span>
+                <span className="text-xs bg-black/30 px-2 py-0.5 rounded text-emerald-200">OTP / Google</span>
+              </button>
+            ) : (
+              <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-between text-xs">
+                <div>
+                  <strong className="text-white block">{currentUser?.name}</strong>
+                  <span className="text-neutral-400">{currentUser?.email || currentUser?.phone}</span>
+                </div>
+                <button
+                  onClick={() => { setMobileMenuOpen(false); logout(); }}
+                  className="px-2.5 py-1 rounded bg-rose-950 text-rose-300 border border-rose-800 text-[11px]"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
 
+            {/* Subtle Staff / Admin Portal Access */}
             <button
-              onClick={() => { setMobileMenuOpen(false); handleNavClick('staff'); }}
-              className="w-full text-left px-3 py-2.5 rounded-lg bg-neutral-900 border border-neutral-800 text-teal-400 text-sm font-semibold flex items-center justify-between"
+              onClick={() => { setMobileMenuOpen(false); openAuthModal('admin'); }}
+              className="w-full text-left px-3 py-2 rounded-lg bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:text-neutral-200 text-xs flex items-center justify-between"
             >
               <span className="flex items-center gap-2">
-                <FileCheck className="w-4 h-4" />
-                {t('staff_login')} / POS Counter
+                <Shield className="w-3.5 h-3.5 text-neutral-500" />
+                <span>{language === 'bn' ? 'স্টাফ ও অ্যাডমিন পোর্টাল' : 'Staff & Admin Management Portal'}</span>
               </span>
-              <span className="text-xs bg-neutral-800 px-2 py-0.5 rounded text-neutral-300">Staff Portal</span>
+              <span className="text-[10px] text-neutral-500 font-mono">CMS Access</span>
             </button>
           </div>
 

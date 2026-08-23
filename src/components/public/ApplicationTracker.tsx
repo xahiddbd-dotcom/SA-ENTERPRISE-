@@ -22,7 +22,12 @@ import {
   FileText,
   BadgePercent,
   X,
-  History
+  History,
+  Share2,
+  Copy,
+  Check,
+  Globe2,
+  LockOpen
 } from 'lucide-react';
 
 interface ApplicationTrackerProps {
@@ -37,13 +42,21 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
   const [matchedApplication, setMatchedApplication] = useState<Application | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [showSlipModal, setShowSlipModal] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
+  // Check URL params on mount or prop update for instant direct no-login tracking link
   useEffect(() => {
-    if (initialSearchId) {
-      setQuery(initialSearchId);
+    let targetId = initialSearchId;
+    if (!targetId && typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      targetId = params.get('track') || params.get('tracking') || params.get('id') || params.get('app') || '';
+    }
+
+    if (targetId) {
+      setQuery(targetId);
       const found = applications.find(
-        a => a.applicationNumber.toLowerCase() === initialSearchId.toLowerCase() ||
-             a.applicantPhone.includes(initialSearchId)
+        a => a.applicationNumber.toLowerCase() === targetId!.toLowerCase() ||
+             a.applicantPhone.includes(targetId!)
       );
       if (found) {
         setMatchedApplication(found);
@@ -65,6 +78,16 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
            (a.applicantEmail && a.applicantEmail.toLowerCase().includes(clean))
     );
     setMatchedApplication(found || null);
+  };
+
+  const handleCopyShareLink = (appNumber: string) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const shareUrl = `${origin}/?track=${encodeURIComponent(appNumber)}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(shareUrl);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2500);
+    }
   };
 
   const steps: { key: ApplicationStatus; labelBn: string; labelEn: string; descBn: string; descEn: string }[] = [
@@ -167,9 +190,15 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="text-center space-y-3 mb-8 sm:mb-12">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-            <FileCheck className="w-4 h-4 text-emerald-400" />
-            <span>{language === 'bn' ? 'স্মার্ট অনলাইন আবেদন ট্র্যাকিং' : 'Smart Application Live Tracker'}</span>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+              <FileCheck className="w-4 h-4 text-emerald-400" />
+              <span>{language === 'bn' ? 'স্মার্ট অনলাইন আবেদন ট্র্যাকিং' : 'Smart Application Live Tracker'}</span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-500/30 text-teal-300 text-xs font-semibold">
+              <LockOpen className="w-3.5 h-3.5 text-teal-400" />
+              <span>{language === 'bn' ? 'উন্মুক্ত ট্র্যাকিং • নো-লগইন' : 'Public Access • No Login Required'}</span>
+            </div>
           </div>
 
           <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
@@ -178,8 +207,8 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
 
           <p className="text-neutral-400 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
             {language === 'bn'
-              ? 'আপনার আবেদন নম্বর (যেমন: APP-2026-0001) বা ফোন নম্বর দিয়ে তাৎক্ষণিক প্রতিটি ধাপের লাইভ অগ্রগতি ও অপারেটর নোট দেখুন।'
-              : 'Enter your Tracking ID or mobile phone to view detailed timeline progression, operator logs, and confirmation slips.'}
+              ? 'আপনার আবেদন ট্র্যাকিং আইডি (যেমন: APP-2026-0001) দিয়ে লগইন ছাড়াই যেকোনো সময় তাৎক্ষণিক প্রতিটি ধাপের লাইভ অগ্রগতি, ভেরিফিকেশন ও ডেলিভারি স্লিপ দেখুন।'
+              : 'Public, no-login access: Enter your Tracking ID to view real-time timeline logs, specialist updates, and confirmation slips.'}
           </p>
         </div>
 
@@ -267,6 +296,17 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
                   }`}>
                     {matchedApplication.paymentStatus === 'paid' ? 'Fee Paid (৳' + matchedApplication.paidAmount + ')' : 'Payment Pending'}
                   </span>
+
+                  {/* Copy Shareable Link Button */}
+                  <button
+                    type="button"
+                    onClick={() => handleCopyShareLink(matchedApplication.applicationNumber)}
+                    className="px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-teal-300 text-xs font-semibold flex items-center gap-1.5 transition-colors border border-teal-500/30"
+                    title="Copy Direct Tracking Link"
+                  >
+                    {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-teal-400" />}
+                    <span>{copiedLink ? (language === 'bn' ? 'লিঙ্ক কপি হয়েছে!' : 'Link Copied!') : (language === 'bn' ? 'ট্র্যাকিং লিঙ্ক' : 'Copy Link')}</span>
+                  </button>
 
                   {/* Print Slip Button */}
                   <button
