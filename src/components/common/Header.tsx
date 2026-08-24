@@ -43,7 +43,6 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'home', label: t('home') },
     { id: 'services', label: t('services') },
     { id: 'shop', label: t('shop') },
-    { id: 'applications', label: t('applications') },
     { id: 'about', label: t('about') },
     { id: 'contact', label: t('contact') }
   ];
@@ -110,9 +109,6 @@ export const Header: React.FC<HeaderProps> = ({
           <div>
             <div className="font-bold text-lg leading-tight tracking-tight text-white flex items-center gap-1.5">
               <span>{language === 'bn' ? settings.businessNameBn : settings.businessName}</span>
-              <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                PRO
-              </span>
             </div>
             <div className="text-[11px] text-neutral-400 truncate max-w-[200px] sm:max-w-xs">
               {language === 'bn' ? 'কম্পিউটার • প্রিন্ট • অনলাইন আবেদন' : 'Digital Services & Online Applications'}
@@ -234,11 +230,20 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
 
                     <button
-                      id="dropdown-applications-link"
-                      onClick={() => handleNavClick('applications')}
-                      className="w-full text-left px-4 py-2.5 text-xs sm:text-sm text-neutral-300 hover:bg-neutral-800 hover:text-emerald-400 flex items-center gap-2"
+                      id="dropdown-profile-orders-link"
+                      onClick={() => handleNavClick('profile')}
+                      className="w-full text-left px-4 py-2.5 text-xs sm:text-sm text-emerald-400 font-semibold hover:bg-neutral-800 flex items-center gap-2"
                     >
-                      <FileCheck className="w-4 h-4 text-emerald-400" />
+                      <User className="w-4 h-4 text-emerald-400" />
+                      <span>{language === 'bn' ? 'আমার প্রোফাইল ও অর্ডার হিস্টোরি' : 'My Profile & Order History'}</span>
+                    </button>
+
+                    <button
+                      id="dropdown-applications-link"
+                      onClick={() => handleNavClick('tracker')}
+                      className="w-full text-left px-4 py-2 text-xs sm:text-sm text-neutral-300 hover:bg-neutral-800 hover:text-emerald-400 flex items-center gap-2"
+                    >
+                      <FileCheck className="w-4 h-4 text-neutral-400" />
                       <span>{language === 'bn' ? 'আমার আবেদন ট্র্যাকিং' : 'My Applications Tracker'}</span>
                     </button>
 
@@ -346,17 +351,37 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="text-xs bg-black/30 px-2 py-0.5 rounded text-emerald-200">OTP / Google</span>
               </button>
             ) : (
-              <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-between text-xs">
-                <div>
-                  <strong className="text-white block">{currentUser?.name}</strong>
-                  <span className="text-neutral-400">{currentUser?.email || currentUser?.phone}</span>
-                </div>
-                <button
-                  onClick={() => { setMobileMenuOpen(false); logout(); }}
-                  className="px-2.5 py-1 rounded bg-rose-950 text-rose-300 border border-rose-800 text-[11px]"
+              <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 space-y-2">
+                <div
+                  onClick={() => { setMobileMenuOpen(false); handleNavClick('profile'); }}
+                  className="flex items-center justify-between text-xs cursor-pointer hover:opacity-80"
                 >
-                  Logout
-                </button>
+                  <div>
+                    <strong className="text-white block flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>{currentUser?.name}</span>
+                    </strong>
+                    <span className="text-neutral-400">{currentUser?.email || currentUser?.phone}</span>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold">
+                    {language === 'bn' ? 'প্রোফাইল' : 'Profile'}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 border-t border-neutral-800">
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); handleNavClick('profile'); }}
+                    className="flex-1 py-1.5 rounded-lg bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold text-center"
+                  >
+                    {language === 'bn' ? 'অর্ডার হিস্টোরি' : 'Order History'}
+                  </button>
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); logout(); }}
+                    className="px-3 py-1.5 rounded-lg bg-rose-950 text-rose-300 border border-rose-800 text-[11px]"
+                  >
+                    Logout
+                  </button>
+                </div>
               </div>
             )}
 

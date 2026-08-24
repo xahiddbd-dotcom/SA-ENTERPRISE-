@@ -51,7 +51,18 @@ export const initialSettings: WebsiteSettings = {
   deliveryChargeInsideDhaka: 60,
   deliveryChargeOutsideDhaka: 120,
   minOrderAmount: 100,
-  maintenanceMode: false
+  maintenanceMode: false,
+
+  // Background Texture & Wallpaper Defaults
+  backgroundType: 'combo',
+  texturePattern: 'grid',
+  textureOpacity: 15,
+  wallpaperPreset: 'dark_modern_geometric',
+  customWallpaperUrl: '',
+  wallpaperOpacity: 25,
+  wallpaperBlur: 3,
+  wallpaperFixed: true,
+  backgroundOverlayTint: 'dark'
 };
 
 export const initialCategories: ServiceCategory[] = [
@@ -573,6 +584,191 @@ export const initialOrders: Order[] = [
   {
     id: "ord_101",
     orderNumber: "SE-2026-00001",
+    userId: "usr_admin_saiful",
+    customerId: "usr_admin_saiful",
+    customerName: "Saiful Islam",
+    customerPhone: "01540004966",
+    customerEmail: "sent9696@gmail.com",
+    deliveryAddress: "Farmgate, Tejgaon, Dhaka",
+    deliveryType: "delivery",
+    items: [
+      {
+        id: "item_1",
+        productId: "prod_a4_70",
+        productName: "Double A Copier Paper A4 70 GSM",
+        productNameBn: "ডাবল এ ফটোকপি পেপার A4 ৭০ জিএসএম",
+        price: 450,
+        quantity: 5,
+        gsm: 70,
+        total: 2250,
+        image: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=300&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "item_2",
+        productId: "prod_photo_180",
+        productName: "Kodak High Glossy Photo Paper 180 GSM",
+        productNameBn: "কোডাক হাই গ্লসি ফটো পেপার ১৮০ জিএসএম",
+        price: 290,
+        quantity: 2,
+        gsm: 180,
+        total: 580,
+        image: "https://images.unsplash.com/photo-1517842645767-c639042777db?w=300&auto=format&fit=crop&q=80"
+      }
+    ],
+    subtotal: 2830,
+    deliveryFee: 60,
+    discount: 100,
+    total: 2790,
+    paymentMethod: "bkash",
+    paymentStatus: "paid",
+    paymentTrxId: "BK99X8821Z",
+    orderStatus: "processing",
+    notes: "Please pack with extra plastic wrap for office storage.",
+    createdAt: "2026-08-23T14:30:00Z",
+    updatedAt: "2026-08-23T15:00:00Z"
+  },
+  {
+    id: "ord_102",
+    orderNumber: "SE-2026-00002",
+    userId: "usr_admin_saiful",
+    customerId: "usr_admin_saiful",
+    customerName: "Saiful Islam",
+    customerPhone: "01540004966",
+    customerEmail: "sent9696@gmail.com",
+    deliveryAddress: "Shop Counter (16/A Indira Road, Farmgate)",
+    deliveryType: "pickup",
+    items: [
+      {
+        id: "item_3",
+        productId: "prod_a4_80",
+        productName: "Double A Premium Printing Paper A4 80 GSM",
+        productNameBn: "ডাবল এ প্রিমিয়াম প্রিন্টিং পেপার A4 ৮০ জিএসএম",
+        price: 510,
+        quantity: 10,
+        gsm: 80,
+        total: 5100,
+        image: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=300&auto=format&fit=crop&q=80"
+      }
+    ],
+    subtotal: 5100,
+    deliveryFee: 0,
+    discount: 200,
+    total: 4900,
+    paymentMethod: "cash_counter",
+    paymentStatus: "paid",
+    paymentTrxId: "POS-INV-8902",
+    orderStatus: "delivered",
+    notes: "Tejgaon student batch printing supply.",
+    createdAt: "2026-08-18T10:15:00Z",
+    updatedAt: "2026-08-18T12:30:00Z"
+  },
+  {
+    id: "ord_103",
+    orderNumber: "SE-2026-00003",
+    userId: "usr_admin_saiful",
+    customerId: "usr_admin_saiful",
+    customerName: "Saiful Islam",
+    customerPhone: "01540004966",
+    customerEmail: "sent9696@gmail.com",
+    deliveryAddress: "Farmgate, Tejgaon, Dhaka",
+    deliveryType: "delivery",
+    items: [
+      {
+        id: "item_4",
+        productId: "prod_matte_220",
+        productName: "Matte Heavy Cardstock Paper 220 GSM",
+        productNameBn: "ম্যাট হেভি কার্ডস্টক পেপার ২২০ জিএসএম",
+        price: 340,
+        quantity: 3,
+        gsm: 220,
+        total: 1020,
+        image: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=300&auto=format&fit=crop&q=80"
+      }
+    ],
+    subtotal: 1020,
+    deliveryFee: 60,
+    discount: 0,
+    total: 1080,
+    paymentMethod: "nagad",
+    paymentStatus: "paid",
+    paymentTrxId: "NG7741029",
+    orderStatus: "ready",
+    notes: "Certificate cardstock for training seminar.",
+    createdAt: "2026-08-22T09:00:00Z",
+    updatedAt: "2026-08-22T11:45:00Z"
+  },
+  {
+    id: "ord_104",
+    orderNumber: "SE-2026-00004",
+    userId: "usr_admin_saiful",
+    customerId: "usr_admin_saiful",
+    customerName: "Saiful Islam",
+    customerPhone: "01540004966",
+    customerEmail: "sent9696@gmail.com",
+    deliveryAddress: "Farmgate, Tejgaon, Dhaka",
+    deliveryType: "delivery",
+    items: [
+      {
+        id: "item_5",
+        productId: "prod_legal_75",
+        productName: "Legal Stamp Deed Paper 75 GSM",
+        productNameBn: "লিগ্যাল স্ট্যাম্প ও চুক্তিপত্র পেপার ৭৫ জিএসএম",
+        price: 490,
+        quantity: 2,
+        gsm: 75,
+        total: 980,
+        image: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=300&auto=format&fit=crop&q=80"
+      }
+    ],
+    subtotal: 980,
+    deliveryFee: 60,
+    discount: 0,
+    total: 1040,
+    paymentMethod: "cod",
+    paymentStatus: "pending",
+    orderStatus: "confirmed",
+    notes: "Affidavit and deed work preparation.",
+    createdAt: "2026-08-24T06:30:00Z",
+    updatedAt: "2026-08-24T07:15:00Z"
+  },
+  {
+    id: "ord_105",
+    orderNumber: "SE-2026-00005",
+    userId: "usr_admin_saiful",
+    customerId: "usr_admin_saiful",
+    customerName: "Saiful Islam",
+    customerPhone: "01540004966",
+    customerEmail: "sent9696@gmail.com",
+    deliveryAddress: "Farmgate, Tejgaon, Dhaka",
+    deliveryType: "delivery",
+    items: [
+      {
+        id: "item_6",
+        productId: "prod_glossy_250",
+        productName: "Cast Coated Ultra Glossy 250 GSM",
+        productNameBn: "কাস্ট কোটেড আল্ট্রা গ্লসি ২৫০ জিএসএম",
+        price: 420,
+        quantity: 1,
+        gsm: 250,
+        total: 420,
+        image: "https://images.unsplash.com/photo-1517842645767-c639042777db?w=300&auto=format&fit=crop&q=80"
+      }
+    ],
+    subtotal: 420,
+    deliveryFee: 60,
+    discount: 0,
+    total: 480,
+    paymentMethod: "bkash",
+    paymentStatus: "verified",
+    paymentTrxId: "BK339911X",
+    orderStatus: "pending",
+    notes: "Sample photo testing.",
+    createdAt: "2026-08-24T08:50:00Z",
+    updatedAt: "2026-08-24T08:50:00Z"
+  },
+  {
+    id: "ord_106",
+    orderNumber: "SE-2026-00006",
     customerName: "Kamrul Hasan",
     customerPhone: "01712345678",
     customerEmail: "kamrul@gmail.com",
@@ -580,7 +776,7 @@ export const initialOrders: Order[] = [
     deliveryType: "pickup",
     items: [
       {
-        id: "item_1",
+        id: "item_7",
         productId: "prod_a4_70",
         productName: "Double A Copier Paper A4 70 GSM",
         productNameBn: "ডাবল এ ফটোকপি পেপার A4 ৭০ জিএসএম",
@@ -597,49 +793,10 @@ export const initialOrders: Order[] = [
     paymentMethod: "bkash",
     paymentStatus: "paid",
     paymentTrxId: "BK99X8821Z",
-    orderStatus: "ready",
+    orderStatus: "delivered",
     notes: "Please pack properly for college library.",
     createdAt: "2026-08-14T10:30:00Z",
     updatedAt: "2026-08-14T11:00:00Z"
-  },
-  {
-    id: "ord_102",
-    orderNumber: "SE-2026-00002",
-    customerName: "Anisur Rahman",
-    customerPhone: "01811223344",
-    deliveryAddress: "House 14, Road 4, Dhanmondi, Dhaka",
-    deliveryType: "delivery",
-    items: [
-      {
-        id: "item_2",
-        productId: "prod_photo_180",
-        productName: "Kodak High Glossy Photo Paper 180 GSM",
-        productNameBn: "কোডাক হাই গ্লসি ফটো পেপার ১৮০ জিএসএম",
-        price: 290,
-        quantity: 1,
-        gsm: 180,
-        total: 290
-      },
-      {
-        id: "item_3",
-        productId: "prod_a4_80",
-        productName: "Double A Premium Printing Paper A4 80 GSM",
-        productNameBn: "ডাবল এ প্রিমিয়াম প্রিন্টিং পেপার A4 ৮০ জিএসএম",
-        price: 510,
-        quantity: 1,
-        gsm: 80,
-        total: 510
-      }
-    ],
-    subtotal: 800,
-    deliveryFee: 60,
-    discount: 20,
-    total: 840,
-    paymentMethod: "cod",
-    paymentStatus: "pending",
-    orderStatus: "processing",
-    createdAt: "2026-08-15T01:15:00Z",
-    updatedAt: "2026-08-15T01:30:00Z"
   }
 ];
 

@@ -85,6 +85,7 @@ interface DataContextType {
   orders: Order[];
   createOrder: (orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'updatedAt'>) => Order;
   updateOrderStatus: (orderId: string, status: OrderStatus, paymentStatus?: PaymentStatus) => void;
+  addOrderReview: (orderId: string, rating: number, feedback: string, userName?: string) => void;
   deleteOrder: (orderId: string) => void;
 
   // Applications
@@ -142,7 +143,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Load initial states or localStorage
   const [settings, setSettings] = useState<WebsiteSettings>(() => {
     const saved = localStorage.getItem('se_settings');
-    return saved ? JSON.parse(saved) : initialSettings;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return { ...initialSettings, ...parsed };
+      } catch (e) {
+        console.error('Error parsing settings:', e);
+      }
+    }
+    return initialSettings;
   });
 
   const [categories, setCategories] = useState<ServiceCategory[]>(() => {
@@ -487,6 +496,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return ord;
     }));
     logActivity('Order Status Updated', `Order ${orderId} marked as ${status}`);
+  };
+
+  const addOrderReview = (orderId: string, rating: number, feedback: string, userName?: string) => {
+    setOrders(prev => prev.map(ord => {
+      if (ord.id === orderId) {
+        return {
+          ...ord,
+          review: {
+            rating: Math.max(1, Math.min(5, rating)),
+            feedback: feedback.trim(),
+            createdAt: new Date().toISOString(),
+            userName: userName || ord.customerName || 'Verified Customer'
+          },
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return ord;
+    }));
+    logActivity('Order Reviewed', `Order ${orderId} received a ${rating}-star review with feedback`);
   };
 
   const deleteOrder = (orderId: string) => {
@@ -1078,6 +1106,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         orders,
         createOrder,
         updateOrderStatus,
+        addOrderReview,
         deleteOrder,
         applications,
         createApplication,

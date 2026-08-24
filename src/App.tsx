@@ -12,6 +12,7 @@ import { ShopSection } from './components/public/ShopSection';
 import { ProductSlider } from './components/public/ProductSlider';
 import { TeamSection } from './components/public/TeamSection';
 import { ApplicationTracker } from './components/public/ApplicationTracker';
+import { UserProfile } from './components/public/UserProfile';
 import { TrustSection } from './components/public/TrustSection';
 import { ContactSection } from './components/public/ContactSection';
 import { CartModal } from './components/public/CartModal';
@@ -136,6 +137,18 @@ const MainLayout: React.FC = () => {
         {activeTab === 'tracker' && (
           <div className="pt-6">
             <ApplicationTracker initialSearchId={trackerInitialId} />
+          </div>
+        )}
+
+        {/* CUSTOMER PROFILE & ORDER HISTORY (SECURE & PAGINATED) */}
+        {activeTab === 'profile' && (
+          <div className="pt-4">
+            <UserProfile
+              onNavigate={setActiveTab}
+              onOpenTrackerWithId={handleOpenTrackerWithId}
+              onOpenAuthModal={handleOpenAuth}
+              onOpenCart={() => setIsCartOpen(true)}
+            />
           </div>
         )}
 

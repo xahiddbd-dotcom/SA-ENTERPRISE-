@@ -135,38 +135,6 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
               <span>{language === 'bn' ? 'হোয়াটসঅ্যাপ' : 'WhatsApp'}</span>
             </a>
           </div>
-
-          {/* দোকান খোলা আছে / Shop Status prominently displayed below CTA buttons */}
-          <div className="pt-3 flex items-center justify-center animate-in fade-in duration-300">
-            <div className={`inline-flex flex-wrap items-center justify-center gap-2.5 px-4 py-2 rounded-2xl backdrop-blur-md border shadow-xl ${
-              isShopOpen
-                ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-200'
-                : 'bg-rose-950/80 border-rose-500/50 text-rose-200'
-            }`}>
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-3 w-3">
-                  {isShopOpen && (
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  )}
-                  <span className={`relative inline-flex rounded-full h-3 w-3 ${isShopOpen ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
-                </span>
-                <span className="font-bold text-xs sm:text-sm">
-                  {isShopOpen 
-                    ? (language === 'bn' ? '🟢 দোকান খোলা আছে (Shop Open Now)' : '🟢 Shop Open Now')
-                    : (language === 'bn' ? '🔴 দোকান এখন বন্ধ (Shop Closed)' : '🔴 Shop Closed')}
-                </span>
-              </div>
-              <span className="text-neutral-500 hidden sm:inline">•</span>
-              <div className="flex items-center gap-1 text-[11px] sm:text-xs text-neutral-300">
-                <Clock className="w-3.5 h-3.5 text-amber-400" />
-                <span>
-                  {language === 'bn' 
-                    ? (settings.openingHoursBn || 'সকাল ৮:৩০ - রাত ১০:৩০') 
-                    : (settings.openingHours || '8:30 AM - 10:30 PM')}
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Quick Highlights Grid with Frosted Glassmorphic Cards */}

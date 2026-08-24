@@ -182,9 +182,18 @@ export interface OrderItem {
   image?: string;
 }
 
+export interface OrderReview {
+  rating: number; // 1 to 5 stars
+  feedback: string;
+  createdAt: string;
+  userName?: string;
+}
+
 export interface Order {
   id: string;
   orderNumber: string;
+  userId?: string;
+  customerId?: string;
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
@@ -203,6 +212,7 @@ export interface Order {
   createdAt: string;
   updatedAt: string;
   assignedStaffId?: string;
+  review?: OrderReview;
 }
 
 export type ApplicationStatus = 'new' | 'processing' | 'submitted' | 'completed' | 'delivered' | 'cancelled';
@@ -412,6 +422,10 @@ export interface SectionSEO {
   canonicalUrl?: string;
 }
 
+export type BackgroundPatternType = 'none' | 'dots' | 'grid' | 'circuit' | 'diagonal_stripes' | 'hexagons' | 'paper_grain' | 'mesh_glow';
+export type BackgroundWallpaperPreset = 'none' | 'cyber_workspace' | 'printing_press' | 'digital_matrix' | 'dark_modern_geometric' | 'tech_glow' | 'custom';
+export type BackgroundOverlayTint = 'dark' | 'emerald' | 'navy' | 'slate' | 'pure_black';
+
 export interface WebsiteSettings {
   businessName: string;
   businessNameBn: string;
@@ -444,6 +458,17 @@ export interface WebsiteSettings {
   deliveryChargeOutsideDhaka: number;
   minOrderAmount: number;
   maintenanceMode: boolean;
+
+  // Background Texture & Wallpaper Settings
+  backgroundType?: 'default' | 'texture' | 'wallpaper' | 'combo';
+  texturePattern?: BackgroundPatternType;
+  textureOpacity?: number; // 0 to 100
+  wallpaperPreset?: BackgroundWallpaperPreset;
+  customWallpaperUrl?: string;
+  wallpaperOpacity?: number; // 0 to 100
+  wallpaperBlur?: number; // 0 to 20 px
+  wallpaperFixed?: boolean;
+  backgroundOverlayTint?: BackgroundOverlayTint;
 }
 
 export type StoreExpenseCategory =

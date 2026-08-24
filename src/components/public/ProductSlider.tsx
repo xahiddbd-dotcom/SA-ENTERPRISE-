@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { Product } from '../../types';
+import { Image } from '../common/Image';
 import {
   ChevronLeft,
   ChevronRight,
@@ -144,11 +145,12 @@ export const ProductSlider: React.FC<ProductSliderProps> = ({ openCart }) => {
 
           {/* Product Big Photo Slider */}
           <div className="lg:col-span-6 flex items-center justify-center relative min-h-[300px] sm:min-h-[380px] bg-neutral-950/70 rounded-2xl border border-neutral-800/80 p-4 sm:p-6 overflow-hidden group">
-            <img
+            <Image
               src={currentProduct.imageUrl || 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=800&auto=format&fit=crop&q=80'}
               alt={currentProduct.name}
-              referrerPolicy="no-referrer"
-              className="max-h-[320px] w-auto object-contain rounded-xl shadow-2xl transition-transform duration-700 ease-out group-hover:scale-105"
+              objectFit="contain"
+              className="max-h-[320px] w-auto rounded-xl shadow-2xl transition-transform duration-700 ease-out group-hover:scale-105"
+              priority={true}
             />
 
             {/* Badges on Image */}
@@ -295,11 +297,13 @@ export const ProductSlider: React.FC<ProductSliderProps> = ({ openCart }) => {
                   : 'bg-neutral-900/60 border-neutral-800 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800'
               }`}
             >
-              <img
+              <Image
                 src={item.imageUrl}
                 alt={item.name}
-                referrerPolicy="no-referrer"
-                className="w-5 h-5 object-contain rounded"
+                objectFit="contain"
+                className="w-5 h-5 rounded"
+                aspectRatio="1/1"
+                loading="lazy"
               />
               <span className="font-mono">{item.brand || item.name.split(' ')[0]}</span>
             </button>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
+import { Image } from '../common/Image';
 import {
   ShoppingBag,
   Trash2,
@@ -66,8 +67,11 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenAut
 
     setTimeout(() => {
       const newOrder = createOrder({
+        userId: currentUser?.id,
+        customerId: currentUser?.id,
         customerName,
         customerPhone,
+        customerEmail: currentUser?.email || undefined,
         deliveryAddress: deliveryType === 'pickup' ? 'Shop Pickup (Indira Road)' : customerAddress,
         deliveryType,
         items: cart.map(item => ({
@@ -239,12 +243,14 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenAut
                     className="flex items-center justify-between gap-3 p-3 rounded-xl bg-neutral-950 border border-neutral-800"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-lg bg-neutral-900 flex items-center justify-center p-1 border border-neutral-800 shrink-0">
-                        <img
+                      <div className="w-12 h-12 rounded-lg bg-neutral-900 flex items-center justify-center p-1 border border-neutral-800 shrink-0 overflow-hidden">
+                        <Image
                           src={item.product.images[0]}
                           alt={item.product.name}
-                          referrerPolicy="no-referrer"
-                          className="max-h-full max-w-full object-contain"
+                          objectFit="contain"
+                          className="max-h-10 max-w-full"
+                          aspectRatio="1/1"
+                          loading="lazy"
                         />
                       </div>
                       <div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { Product } from '../../types';
+import { Image } from '../common/Image';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ShoppingBag,
@@ -185,11 +186,12 @@ export const ShopSection: React.FC<ShopSectionProps> = ({ openCart }) => {
                   {/* Product Image & Badges */}
                   <div className="relative h-48 bg-neutral-950 overflow-hidden flex items-center justify-center p-4">
                     {product.images && product.images[0] ? (
-                      <img
+                      <Image
                         src={product.images[0]}
                         alt={product.name}
-                        referrerPolicy="no-referrer"
-                        className="max-h-full max-w-full object-contain group-hover:scale-108 transition-transform duration-500 ease-out"
+                        objectFit="contain"
+                        className="max-h-40 max-w-full group-hover:scale-108 transition-transform duration-500 ease-out"
+                        loading="lazy"
                       />
                     ) : (
                       <Package className="w-12 h-12 text-neutral-700" />
@@ -298,12 +300,13 @@ export const ShopSection: React.FC<ShopSectionProps> = ({ openCart }) => {
             </div>
 
             <div className="p-6 overflow-y-auto space-y-5">
-              <div className="h-52 bg-neutral-950 rounded-xl p-4 flex items-center justify-center">
-                <img
+              <div className="h-52 bg-neutral-950 rounded-xl p-4 flex items-center justify-center overflow-hidden">
+                <Image
                   src={selectedProductModal.images[0]}
                   alt={selectedProductModal.name}
-                  referrerPolicy="no-referrer"
-                  className="max-h-full max-w-full object-contain"
+                  objectFit="contain"
+                  className="max-h-48 max-w-full"
+                  priority={true}
                 />
               </div>
 
