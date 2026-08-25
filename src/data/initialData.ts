@@ -19,7 +19,10 @@ import {
   OperatorDailyLedger,
   StoreLedgerSettings,
   CustomLedgerCategory,
-  DailyCashReconciliation
+  DailyCashReconciliation,
+  StampItemConfig,
+  StampSaleRecord,
+  StampStockPurchase
 } from '../types';
 
 export const initialSettings: WebsiteSettings = {
@@ -1459,6 +1462,232 @@ export const initialDailyCashReconciliations: DailyCashReconciliation[] = [
     status: 'balanced',
     closedBy: 'Saiful Islam',
     notes: 'Cash drawer tally is 100% matched.'
+  }
+];
+
+// ----------------------------------------------------
+// JUDICIAL STAMP & CARTRIDGE INITIAL DATA
+// ----------------------------------------------------
+export const initialStampConfigs: StampItemConfig[] = [
+  {
+    id: 'stamp_50',
+    name: '50 Taka Non-Judicial Stamp',
+    nameBn: '৫০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
+    faceValue: 50,
+    defaultBuyPrice: 55, // ক্রয় মূল্য ৫৫ টাকা
+    defaultSalePrice: 70, // বিক্রয় মূল্য ৭০ টাকা (মুনাফা ১৫-২০ টাকা)
+    currentStock: 50,
+    lowStockThreshold: 10,
+    category: 'stamp',
+    descriptionBn: 'হলফনামা, সাধারণ অঙ্গীকারনামা ও প্রত্যয়নপত্রে ব্যবহৃত হয়'
+  },
+  {
+    id: 'stamp_100',
+    name: '100 Taka Non-Judicial Stamp',
+    nameBn: '১০০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
+    faceValue: 100,
+    defaultBuyPrice: 105, // ক্রয় মূল্য ১০৫ টাকা
+    defaultSalePrice: 120, // বিক্রয় মূল্য ১২০ টাকা (মুনাফা ১৫ টাকা)
+    currentStock: 65,
+    lowStockThreshold: 10,
+    category: 'stamp',
+    descriptionBn: 'চুক্তিপত্র, ভাড়ানামা, বায়না ও নোটারি পাবলিক কার্যাদিতে সর্বাধিক ব্যবহৃত'
+  },
+  {
+    id: 'cartridge_paper',
+    name: 'Cartridge Legal Paper',
+    nameBn: 'কার্টিজ পেপার (দলিল/চুক্তির কাগজ)',
+    faceValue: 0,
+    defaultBuyPrice: 5,
+    defaultSalePrice: 10,
+    currentStock: 300,
+    lowStockThreshold: 30,
+    category: 'cartridge',
+    descriptionBn: 'জুডিশিয়াল স্ট্যাম্পের সাথে সংযুক্ত দলিল ড্রাফটিং ও লিগ্যাল প্রিন্টিং পেপার'
+  },
+  {
+    id: 'stamp_200',
+    name: '200 Taka Non-Judicial Stamp',
+    nameBn: '২০০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
+    faceValue: 200,
+    defaultBuyPrice: 210,
+    defaultSalePrice: 240,
+    currentStock: 25,
+    lowStockThreshold: 5,
+    category: 'stamp',
+    descriptionBn: 'বাণিজ্যিক চুক্তি ও বিশেষ ক্ষমতাপত্র'
+  },
+  {
+    id: 'stamp_300',
+    name: '300 Taka Non-Judicial Stamp',
+    nameBn: '৩০০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
+    faceValue: 300,
+    defaultBuyPrice: 315,
+    defaultSalePrice: 350,
+    currentStock: 20,
+    lowStockThreshold: 5,
+    category: 'stamp',
+    descriptionBn: 'জমির বায়না দলিল, অংশীদারি চুক্তি ও প্রধান দলিলপত্র'
+  },
+  {
+    id: 'stamp_500',
+    name: '500 Taka Non-Judicial Stamp',
+    nameBn: '৫০০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
+    faceValue: 500,
+    defaultBuyPrice: 525,
+    defaultSalePrice: 580,
+    currentStock: 12,
+    lowStockThreshold: 3,
+    category: 'stamp',
+    descriptionBn: 'উচ্চমূল্যের সম্পত্তি হস্তান্তর ও স্পেশাল পাওয়ার অব অ্যাটর্নি'
+  },
+  {
+    id: 'stamp_writing',
+    name: 'Stamp Drafting & Typing Fee',
+    nameBn: 'স্ট্যাম্প ড্রাফটিং ও কম্পিউটার টাইপিং ফি',
+    faceValue: 0,
+    defaultBuyPrice: 0,
+    defaultSalePrice: 150,
+    currentStock: 999,
+    lowStockThreshold: 0,
+    category: 'service',
+    descriptionBn: 'চুক্তিপত্র, হলফনামা বা ভাড়ানামা কম্পিউটার কম্পোজ ও প্রিন্ট সার্ভিস'
+  }
+];
+
+export const initialStampSales: StampSaleRecord[] = [
+  {
+    id: 'st_sale_001',
+    date: '2026-08-25',
+    time: '10:15',
+    itemType: 'stamp_100',
+    itemName: '100 Taka Non-Judicial Stamp',
+    itemNameBn: '১০০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
+    quantity: 3,
+    buyPricePerUnit: 105,
+    salePricePerUnit: 120,
+    totalBuyCost: 315,
+    totalSaleAmount: 360,
+    totalProfit: 45,
+    serialNumbers: 'খ গ ৪১৮৯২০ - ৪১৮৯২২',
+    deedType: 'দোকান ভাড়ানামা চুক্তিপত্র',
+    customerName: 'Md. Rafiqul Islam',
+    customerPhone: '01712345678',
+    advocateOrVendor: 'Adv. M. Rahman',
+    paymentMethod: 'cash',
+    operatorName: 'Saiful Islam',
+    notes: '৩০০ টাকার ভাড়ানামা চুক্তির জন্য ৩টি ১০০ টাকার স্ট্যাম্প',
+    createdAt: '2026-08-25T10:15:00Z'
+  },
+  {
+    id: 'st_sale_002',
+    date: '2026-08-25',
+    time: '11:40',
+    itemType: 'cartridge_paper',
+    itemName: 'Cartridge Legal Paper',
+    itemNameBn: 'কার্টিজ পেপার (দলিল/চুক্তির কাগজ)',
+    quantity: 6,
+    buyPricePerUnit: 5,
+    salePricePerUnit: 10,
+    totalBuyCost: 30,
+    totalSaleAmount: 60,
+    totalProfit: 30,
+    serialNumbers: '-',
+    deedType: 'ভাড়ানামা সংযুক্তি পেপার',
+    customerName: 'Md. Rafiqul Islam',
+    customerPhone: '01712345678',
+    paymentMethod: 'cash',
+    operatorName: 'Saiful Islam',
+    notes: 'চুক্তিপত্রের অতিরিক্ত পাতা',
+    createdAt: '2026-08-25T11:40:00Z'
+  },
+  {
+    id: 'st_sale_003',
+    date: '2026-08-25',
+    time: '14:20',
+    itemType: 'stamp_50',
+    itemName: '50 Taka Non-Judicial Stamp',
+    itemNameBn: '৫০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
+    quantity: 2,
+    buyPricePerUnit: 55,
+    salePricePerUnit: 70,
+    totalBuyCost: 110,
+    totalSaleAmount: 140,
+    totalProfit: 30,
+    serialNumbers: 'ক ঘ ৫৯২৩১১ - ৫৯২৩১২',
+    deedType: 'অঙ্গীকারনামা / হলফনামা',
+    customerName: 'Kamal Hossain',
+    customerPhone: '01898765432',
+    paymentMethod: 'bkash',
+    operatorName: 'Tanvir Ahmed',
+    notes: 'ছাত্র হলফনামা ফরম',
+    createdAt: '2026-08-25T14:20:00Z'
+  },
+  {
+    id: 'st_sale_004',
+    date: '2026-08-24',
+    time: '16:00',
+    itemType: 'stamp_100',
+    itemName: '100 Taka Non-Judicial Stamp',
+    itemNameBn: '১০০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
+    quantity: 5,
+    buyPricePerUnit: 105,
+    salePricePerUnit: 120,
+    totalBuyCost: 525,
+    totalSaleAmount: 600,
+    totalProfit: 75,
+    serialNumbers: 'খ গ ৪১৮৯০৫ - ৪১৮৯০৯',
+    deedType: 'বায়না দলিল',
+    customerName: 'Habibur Rahman',
+    customerPhone: '01911223344',
+    advocateOrVendor: 'Adv. S. Chowdhury',
+    paymentMethod: 'cash',
+    operatorName: 'Saiful Islam',
+    createdAt: '2026-08-24T16:00:00Z'
+  }
+];
+
+export const initialStampPurchases: StampStockPurchase[] = [
+  {
+    id: 'st_pur_001',
+    date: '2026-08-20',
+    itemType: 'stamp_50',
+    itemNameBn: '৫০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
+    quantity: 60,
+    buyPricePerUnit: 55,
+    totalCost: 3300,
+    vendorSource: 'ডিস্ট্রিক্ট ট্রেজারি ভেন্ডার পয়েন্ট',
+    serialRange: 'ক ঘ ৫৯২৩০১ - ৫৯২৩৬০',
+    paidBy: 'Saiful Islam',
+    note: 'নতুন বান্ডেল ক্রয়',
+    createdAt: '2026-08-20T09:00:00Z'
+  },
+  {
+    id: 'st_pur_002',
+    date: '2026-08-20',
+    itemType: 'stamp_100',
+    itemNameBn: '১০০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
+    quantity: 80,
+    buyPricePerUnit: 105,
+    totalCost: 8400,
+    vendorSource: 'ডিস্ট্রিক্ট ট্রেজারি ভেন্ডার পয়েন্ট',
+    serialRange: 'খ গ ৪১৮৯০১ - ৪১৮৯৮০',
+    paidBy: 'Saiful Islam',
+    note: '১০০ টাকার স্ট্যাম্প নতুন স্টক',
+    createdAt: '2026-08-20T09:15:00Z'
+  },
+  {
+    id: 'st_pur_003',
+    date: '2026-08-21',
+    itemType: 'cartridge_paper',
+    itemNameBn: 'কার্টিজ পেপার (দলিল/চুক্তির কাগজ)',
+    quantity: 350,
+    buyPricePerUnit: 5,
+    totalCost: 1750,
+    vendorSource: 'বাংলাবাজার হোলসেল পেপার মার্কেট',
+    paidBy: 'Saiful Islam',
+    note: '১ রিম কার্টিজ পেপার ক্রয়',
+    createdAt: '2026-08-21T11:00:00Z'
   }
 ];
 

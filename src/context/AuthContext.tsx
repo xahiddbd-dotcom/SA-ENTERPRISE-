@@ -37,12 +37,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const saved = localStorage.getItem('se_current_user');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.id) return parsed;
       } catch (e) {
         console.error('Failed to parse user', e);
       }
     }
-    return null;
+    // Default to Super Admin (Saiful Islam) for instant full access to Admin Dashboard
+    return initialStaff[0] || null;
   });
 
   useEffect(() => {

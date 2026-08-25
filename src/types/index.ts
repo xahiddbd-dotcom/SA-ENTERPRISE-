@@ -589,4 +589,69 @@ export interface StoreLedgerSettings {
   customCategories: CustomLedgerCategory[];
 }
 
+// ----------------------------------------------------
+// JUDICIAL STAMP & CARTRIDGE PAPER REGISTER (স্ট্যাম্প ও কার্টিজ হিসাব)
+// ----------------------------------------------------
+export type StampItemType =
+  | 'stamp_50'
+  | 'stamp_100'
+  | 'stamp_200'
+  | 'stamp_300'
+  | 'stamp_500'
+  | 'cartridge_paper'
+  | 'stamp_writing'
+  | 'custom_stamp';
+
+export interface StampItemConfig {
+  id: StampItemType | string;
+  name: string;
+  nameBn: string;
+  faceValue: number; // 50, 100, 200, 300, 500, 0
+  defaultBuyPrice: number; // 50tk -> 55, 100tk -> 105, cartridge -> 5
+  defaultSalePrice: number; // 50tk -> 70, 100tk -> 120, cartridge -> 10
+  currentStock: number;
+  lowStockThreshold: number;
+  category: 'stamp' | 'cartridge' | 'service';
+  descriptionBn?: string;
+}
+
+export interface StampSaleRecord {
+  id: string;
+  date: string; // YYYY-MM-DD
+  time: string; // HH:mm
+  itemType: StampItemType | string;
+  itemName: string;
+  itemNameBn: string;
+  quantity: number;
+  buyPricePerUnit: number; // e.g. 55
+  salePricePerUnit: number; // e.g. 70
+  totalBuyCost: number; // quantity * buyPricePerUnit
+  totalSaleAmount: number; // quantity * salePricePerUnit
+  totalProfit: number; // totalSaleAmount - totalBuyCost
+  serialNumbers?: string; // e.g. "খ গ ১৮৭৩২১-১৮৭৩২৫"
+  deedType?: string; // বায়না দলিল, চুক্তিপত্র, হলফনামা, আমমোক্তারনামা, ভাড়ানামা
+  customerName?: string;
+  customerPhone?: string;
+  advocateOrVendor?: string; // অ্যাডভোকেট / দলিল লেখক
+  paymentMethod: 'cash' | 'bkash' | 'nagad' | 'bank' | 'due';
+  operatorName?: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface StampStockPurchase {
+  id: string;
+  date: string; // YYYY-MM-DD
+  itemType: StampItemType | string;
+  itemNameBn: string;
+  quantity: number;
+  buyPricePerUnit: number;
+  totalCost: number;
+  vendorSource?: string; // ট্রেজারি / ভেন্ডার / মহুরী
+  serialRange?: string; // ক্রমিক নম্বর রেঞ্জ
+  paidBy?: string;
+  note?: string;
+  createdAt: string;
+}
+
 

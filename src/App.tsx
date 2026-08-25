@@ -31,7 +31,7 @@ import { Shield, Lock } from 'lucide-react';
 const MainLayout: React.FC = () => {
   const { currentUser, isAuthenticated, isAdmin, isSuperAdmin, isStaffOrAdmin } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<string>('home');
+  const [activeTab, setActiveTab] = useState<string>('admin');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register' | 'staff' | 'admin'>('login');

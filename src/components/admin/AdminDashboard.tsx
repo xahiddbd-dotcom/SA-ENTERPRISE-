@@ -12,6 +12,7 @@ import { CashMemo } from './CashMemo';
 import { AdminAnalyticsDashboard } from './AdminAnalyticsDashboard';
 import { BackgroundSettingsManager } from './BackgroundSettingsManager';
 import { DailyShopLedger } from './DailyShopLedger';
+import { JudicialStampRegister } from './JudicialStampRegister';
 import { ADMIN_THEMES, AdminThemeKey } from './AdminTheme';
 import { AdminThemeSwitcher } from './AdminThemeSwitcher';
 import {
@@ -114,7 +115,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
   const [timelineNewDescBn, setTimelineNewDescBn] = useState('');
 
   const [activeMenu, setActiveMenu] = useState<
-    'overview' | 'analytics' | 'ledger' | 'cashmemo' | 'services' | 'products' | 'applications' | 'orders' | 'pos' | 'finance' | 'customers' | 'staff' | 'hero_slides' | 'seo_meta' | 'background_settings' | 'settings' | 'backup'
+    'overview' | 'analytics' | 'ledger' | 'stamps' | 'cashmemo' | 'services' | 'products' | 'applications' | 'orders' | 'pos' | 'finance' | 'customers' | 'staff' | 'hero_slides' | 'seo_meta' | 'background_settings' | 'settings' | 'backup'
   >('overview');
 
   // Modals & form states
@@ -500,6 +501,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
               {[
                 { id: 'overview', label: language === 'bn' ? 'ড্যাশবোর্ড ওভারভিউ' : 'Dashboard Overview', icon: LayoutDashboard },
                 { id: 'ledger', label: language === 'bn' ? 'দৈনিক হিসাব খাতা' : 'Daily Shop Ledger', icon: BookOpen, badge: 'Special', badgeColor: 'bg-amber-500 text-black font-bold' },
+                { id: 'stamps', label: language === 'bn' ? 'স্ট্যাম্প ও কার্টিজ রেজিস্টার' : 'Stamp & Cartridge Register', icon: FileText, badge: '৫০৳/১০০৳', badgeColor: 'bg-amber-400 text-black font-bold' },
                 { id: 'analytics', label: language === 'bn' ? 'আয়-ব্যয় ও পারফরম্যান্স' : 'Revenue & Analytics', icon: PieChart, badge: 'Live', badgeColor: 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' },
                 { id: 'cashmemo', label: language === 'bn' ? 'ডিজিটাল ক্যাশ মেমো' : 'Digital Cash Memo', icon: Receipt, badge: '3.5x5', badgeColor: 'bg-teal-950 text-teal-300 border border-teal-500/40' },
                 { id: 'services', label: language === 'bn' ? 'অনলাইন সেবা CMS' : 'Services Manager', icon: Layers, badge: services.length },
@@ -580,6 +582,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                   >
                     <BookOpen className="w-4 h-4 text-amber-400 animate-pulse" />
                     <span>{language === 'bn' ? 'দৈনিক হিসাব খাতা' : 'Daily Shop Ledger'}</span>
+                  </button>
+                  {/* Special Stamp & Cartridge Register Button */}
+                  <button
+                    onClick={() => setActiveMenu('stamps')}
+                    className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-950/70 to-neutral-900 hover:bg-neutral-800 border border-amber-500/40 text-amber-300 font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-amber-950"
+                  >
+                    <FileText className="w-4 h-4 text-amber-400" />
+                    <span>{language === 'bn' ? 'স্ট্যাম্প ও কার্টিজ রেজিস্টার' : 'Stamp Register'}</span>
                   </button>
                   <button
                     onClick={() => setActiveMenu('cashmemo')}
@@ -761,6 +771,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
           {/* VIEW: DAILY SHOP LEDGER (স্পেশাল দৈনিক হিসাব খাতা) */}
           {activeMenu === 'ledger' && (
             <DailyShopLedger isEmbedded={true} />
+          )}
+
+          {/* VIEW: JUDICIAL STAMPS & CARTRIDGE REGISTER (জুডিশিয়াল স্ট্যাম্প ও কার্টিজ পেপার রেজিস্টার) */}
+          {activeMenu === 'stamps' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              <JudicialStampRegister lang={language} />
+            </div>
           )}
 
           {/* VIEW 2: SERVICES MANAGER */}

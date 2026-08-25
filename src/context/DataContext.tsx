@@ -24,7 +24,10 @@ import {
   OperatorDailyLedger,
   StoreLedgerSettings,
   CustomLedgerCategory,
-  DailyCashReconciliation
+  DailyCashReconciliation,
+  StampItemConfig,
+  StampSaleRecord,
+  StampStockPurchase
 } from '../types';
 import {
   initialCategories,
@@ -45,7 +48,10 @@ import {
   initialDailyCounterSales,
   initialStoreExpenses,
   initialOperatorDailyLedgers,
-  initialDailyCashReconciliations
+  initialDailyCashReconciliations,
+  initialStampConfigs,
+  initialStampSales,
+  initialStampPurchases
 } from '../data/initialData';
 
 interface DataContextType {
@@ -167,6 +173,19 @@ interface DataContextType {
   updateLedgerSettings: (settings: Partial<StoreLedgerSettings>) => void;
   addCustomCategory: (category: Omit<CustomLedgerCategory, 'id'>) => CustomLedgerCategory;
   deleteCustomCategory: (id: string) => void;
+
+  // Judicial Stamp & Cartridge Paper Register (জুডিশিয়াল স্ট্যাম্প ও কার্টিজ পেপার হিসাব)
+  stampConfigs: StampItemConfig[];
+  stampSales: StampSaleRecord[];
+  stampPurchases: StampStockPurchase[];
+  recordStampSale: (saleData: Omit<StampSaleRecord, 'id' | 'createdAt'>, syncToLedger?: boolean) => StampSaleRecord;
+  updateStampSale: (id: string, updates: Partial<StampSaleRecord>) => void;
+  deleteStampSale: (id: string) => void;
+  recordStampPurchase: (purchaseData: Omit<StampStockPurchase, 'id' | 'createdAt'>) => StampStockPurchase;
+  deleteStampPurchase: (id: string) => void;
+  updateStampConfig: (id: string, updates: Partial<StampItemConfig>) => void;
+  addStampConfig: (config: Omit<StampItemConfig, 'id'>) => StampItemConfig;
+  deleteStampConfig: (id: string) => void;
 
   // Reset / Export Data
   resetAllData: () => void;
@@ -343,6 +362,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : initialStoreLedgerSettings;
   });
 
+  // Judicial Stamp & Cartridge States
+  const [stampConfigs, setStampConfigs] = useState<StampItemConfig[]>(() => {
+    const saved = localStorage.getItem('se_stamp_configs');
+    return saved ? JSON.parse(saved) : initialStampConfigs;
+  });
+
+  const [stampSales, setStampSales] = useState<StampSaleRecord[]>(() => {
+    const saved = localStorage.getItem('se_stamp_sales');
+    return saved ? JSON.parse(saved) : initialStampSales;
+  });
+
+  const [stampPurchases, setStampPurchases] = useState<StampStockPurchase[]>(() => {
+    const saved = localStorage.getItem('se_stamp_purchases');
+    return saved ? JSON.parse(saved) : initialStampPurchases;
+  });
+
   // Sync to local storage
   useEffect(() => { localStorage.setItem('se_settings', JSON.stringify(settings)); }, [settings]);
   useEffect(() => { localStorage.setItem('se_categories', JSON.stringify(categories)); }, [categories]);
@@ -365,6 +400,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => { localStorage.setItem('se_operator_ledgers', JSON.stringify(operatorLedgers)); }, [operatorLedgers]);
   useEffect(() => { localStorage.setItem('se_cash_reconciliations', JSON.stringify(cashReconciliations)); }, [cashReconciliations]);
   useEffect(() => { localStorage.setItem('se_ledger_settings', JSON.stringify(ledgerSettings)); }, [ledgerSettings]);
+  useEffect(() => { localStorage.setItem('se_stamp_configs', JSON.stringify(stampConfigs)); }, [stampConfigs]);
+  useEffect(() => { localStorage.setItem('se_stamp_sales', JSON.stringify(stampSales)); }, [stampSales]);
+  useEffect(() => { localStorage.setItem('se_stamp_purchases', JSON.stringify(stampPurchases)); }, [stampPurchases]);
 
   const updateSettings = (newSettings: Partial<WebsiteSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
@@ -1125,6 +1163,157 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logActivity('Custom Ledger Category Deleted', `Deleted category ${id}`);
   };
 
+  // Judicial Stamp & Cartridge Paper Actions (জুডিশিয়াল স্ট্যাম্প ও কার্টিজ পেপার অ্যাকশন)
+  const recordStampSale = (
+    saleData: Omit<StampSaleRecord, 'id' | 'createdAt'>,
+    syncToLedger = true
+  ) => {
+    const newSale: StampSaleRecord = {
+      ...saleData,
+      id: `st_sale_${Date.now()}`,
+      createdAt: new Date().toISOString()
+    };
+
+    setStampSales(prev => [newSale, ...prev]);
+
+    // Update remaining stock
+    setStampConfigs(prev =>
+      prev.map(item => {
+        if (item.id === newSale.itemType) {
+          const updatedStock = Math.max(0, (item.currentStock || 0) - newSale.quantity);
+          return { ...item, currentStock: updatedStock };
+        }
+        return item;
+      })
+    );
+
+    // If synced to main daily shop ledger
+    if (syncToLedger && newSale.paymentMethod !== 'due') {
+      const ledgerEntry: Omit<DailyCounterSale, 'id'> = {
+        date: newSale.date,
+        time: newSale.time,
+        category: 'stamp',
+        title: `${newSale.itemNameBn} (পিস: ${newSale.quantity})`,
+        customerName: newSale.customerName,
+        customerPhone: newSale.customerPhone,
+        paymentMethod: newSale.paymentMethod,
+        amount: newSale.totalSaleAmount,
+        operatorName: newSale.operatorName || 'Shop Operator',
+        notes: `স্ট্যাম্প বিক্রয় | লাভ: ৳${newSale.totalProfit}${newSale.serialNumbers ? ` | ক্রমিক: ${newSale.serialNumbers}` : ''}`
+      };
+      addDailyCounterSale(ledgerEntry);
+    }
+
+    logActivity(
+      'Stamp Sold',
+      `Sold ${newSale.quantity} pcs ${newSale.itemNameBn} for ৳${newSale.totalSaleAmount} (Profit: ৳${newSale.totalProfit})`
+    );
+
+    return newSale;
+  };
+
+  const updateStampSale = (id: string, updates: Partial<StampSaleRecord>) => {
+    setStampSales(prev =>
+      prev.map(sale => {
+        if (sale.id === id) {
+          const updated = { ...sale, ...updates };
+          // Recalculate totals
+          updated.totalBuyCost = updated.quantity * updated.buyPricePerUnit;
+          updated.totalSaleAmount = updated.quantity * updated.salePricePerUnit;
+          updated.totalProfit = updated.totalSaleAmount - updated.totalBuyCost;
+          return updated;
+        }
+        return sale;
+      })
+    );
+    logActivity('Stamp Sale Updated', `Updated stamp sale record ${id}`);
+  };
+
+  const deleteStampSale = (id: string) => {
+    const saleToDelete = stampSales.find(s => s.id === id);
+    if (saleToDelete) {
+      // Restore stock
+      setStampConfigs(prev =>
+        prev.map(item => {
+          if (item.id === saleToDelete.itemType) {
+            return { ...item, currentStock: (item.currentStock || 0) + saleToDelete.quantity };
+          }
+          return item;
+        })
+      );
+    }
+    setStampSales(prev => prev.filter(s => s.id !== id));
+    logActivity('Stamp Sale Deleted', `Deleted stamp sale record ${id}`);
+  };
+
+  const recordStampPurchase = (purchaseData: Omit<StampStockPurchase, 'id' | 'createdAt'>) => {
+    const newPurchase: StampStockPurchase = {
+      ...purchaseData,
+      id: `st_pur_${Date.now()}`,
+      createdAt: new Date().toISOString()
+    };
+
+    setStampPurchases(prev => [newPurchase, ...prev]);
+
+    // Increase stock
+    setStampConfigs(prev =>
+      prev.map(item => {
+        if (item.id === newPurchase.itemType) {
+          return { ...item, currentStock: (item.currentStock || 0) + newPurchase.quantity };
+        }
+        return item;
+      })
+    );
+
+    logActivity(
+      'Stamp Stock Purchased',
+      `Purchased ${newPurchase.quantity} pcs ${newPurchase.itemNameBn} (Cost: ৳${newPurchase.totalCost})`
+    );
+
+    return newPurchase;
+  };
+
+  const deleteStampPurchase = (id: string) => {
+    const purToDelete = stampPurchases.find(p => p.id === id);
+    if (purToDelete) {
+      setStampConfigs(prev =>
+        prev.map(item => {
+          if (item.id === purToDelete.itemType) {
+            return {
+              ...item,
+              currentStock: Math.max(0, (item.currentStock || 0) - purToDelete.quantity)
+            };
+          }
+          return item;
+        })
+      );
+    }
+    setStampPurchases(prev => prev.filter(p => p.id !== id));
+    logActivity('Stamp Purchase Deleted', `Deleted stamp stock purchase record ${id}`);
+  };
+
+  const updateStampConfig = (id: string, updates: Partial<StampItemConfig>) => {
+    setStampConfigs(prev =>
+      prev.map(item => (item.id === id ? { ...item, ...updates } : item))
+    );
+    logActivity('Stamp Config Updated', `Updated settings/pricing for stamp item ${id}`);
+  };
+
+  const addStampConfig = (configData: Omit<StampItemConfig, 'id'>) => {
+    const newConfig: StampItemConfig = {
+      ...configData,
+      id: `stamp_custom_${Date.now()}`
+    };
+    setStampConfigs(prev => [...prev, newConfig]);
+    logActivity('Stamp Item Added', `Added stamp/item config "${newConfig.nameBn}"`);
+    return newConfig;
+  };
+
+  const deleteStampConfig = (id: string) => {
+    setStampConfigs(prev => prev.filter(item => item.id !== id));
+    logActivity('Stamp Item Deleted', `Deleted stamp config ${id}`);
+  };
+
   // Reset & Backup
   const resetAllData = () => {
     localStorage.removeItem('se_settings');
@@ -1145,6 +1334,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('se_operator_ledgers');
     localStorage.removeItem('se_cash_reconciliations');
     localStorage.removeItem('se_ledger_settings');
+    localStorage.removeItem('se_stamp_configs');
+    localStorage.removeItem('se_stamp_sales');
+    localStorage.removeItem('se_stamp_purchases');
 
     setSettings(initialSettings);
     setCategories(initialCategories);
@@ -1162,12 +1354,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setOperatorLedgers(initialOperatorDailyLedgers);
     setCashReconciliations(initialDailyCashReconciliations);
     setLedgerSettings(initialStoreLedgerSettings);
+    setStampConfigs(initialStampConfigs);
+    setStampSales(initialStampSales);
+    setStampPurchases(initialStampPurchases);
   };
 
   const exportDatabaseJSON = () => {
     const payload = {
       system: 'Saiful Enterprise - Computer, Online & Paper Store',
-      version: '2.4.0',
+      version: '2.5.0',
       exportedAt: new Date().toISOString(),
       exportedBy: 'Admin',
       statistics: {
@@ -1180,7 +1375,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         posSalesCount: posSales.length,
         expensesCount: expenses.length,
         dailySalesCount: dailyCounterSales.length,
-        storeExpensesCount: storeExpenses.length
+        storeExpensesCount: storeExpenses.length,
+        stampSalesCount: stampSales.length
       },
       settings,
       categories,
@@ -1198,7 +1394,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       storeExpenses,
       operatorLedgers,
       cashReconciliations,
-      ledgerSettings
+      ledgerSettings,
+      stampConfigs,
+      stampSales,
+      stampPurchases
     };
     return JSON.stringify(payload, null, 2);
   };
@@ -1281,6 +1480,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.ledgerSettings) {
         setLedgerSettings(data.ledgerSettings);
         localStorage.setItem('se_ledger_settings', JSON.stringify(data.ledgerSettings));
+      }
+      if (data.stampConfigs && Array.isArray(data.stampConfigs)) {
+        setStampConfigs(data.stampConfigs);
+        localStorage.setItem('se_stamp_configs', JSON.stringify(data.stampConfigs));
+      }
+      if (data.stampSales && Array.isArray(data.stampSales)) {
+        setStampSales(data.stampSales);
+        localStorage.setItem('se_stamp_sales', JSON.stringify(data.stampSales));
+      }
+      if (data.stampPurchases && Array.isArray(data.stampPurchases)) {
+        setStampPurchases(data.stampPurchases);
+        localStorage.setItem('se_stamp_purchases', JSON.stringify(data.stampPurchases));
       }
       return true;
     } catch (e) {
@@ -1370,6 +1581,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateLedgerSettings,
         addCustomCategory,
         deleteCustomCategory,
+        stampConfigs,
+        stampSales,
+        stampPurchases,
+        recordStampSale,
+        updateStampSale,
+        deleteStampSale,
+        recordStampPurchase,
+        deleteStampPurchase,
+        updateStampConfig,
+        addStampConfig,
+        deleteStampConfig,
         notifications,
         markNotificationAsRead,
         markAllNotificationsAsRead,

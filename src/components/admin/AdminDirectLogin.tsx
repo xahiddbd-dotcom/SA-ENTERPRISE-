@@ -10,8 +10,8 @@ interface AdminDirectLoginProps {
 export const AdminDirectLogin: React.FC<AdminDirectLoginProps> = ({ onSuccess }) => {
   const { loginAdmin } = useAuth();
   const { language } = useLanguage();
-  const [identifier, setIdentifier] = useState('sent9696@gmail.com');
-  const [password, setPassword] = useState('J@hid2045');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -40,27 +40,6 @@ export const AdminDirectLogin: React.FC<AdminDirectLoginProps> = ({ onSuccess })
     }
   };
 
-  const handleInstantLogin = async () => {
-    setErrorMsg(null);
-    setSuccessMsg(null);
-    setLoading(true);
-    try {
-      const res = await loginAdmin('Admin', 'J@hid2045');
-      if (res.success) {
-        setSuccessMsg(language === 'bn' ? 'সরাসরি অ্যাডমিন প্যানেলে প্রবেশ করা হচ্ছে...' : 'Entering Admin Panel...');
-        setTimeout(() => {
-          if (onSuccess) onSuccess();
-        }, 300);
-      } else {
-        setErrorMsg(res.message || 'Direct login failed');
-      }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Login error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="max-w-md mx-auto py-12 px-4">
       <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
@@ -70,12 +49,12 @@ export const AdminDirectLogin: React.FC<AdminDirectLoginProps> = ({ onSuccess })
             <Shield className="w-8 h-8" />
           </div>
           <h2 className="text-xl sm:text-2xl font-extrabold text-white">
-            {language === 'bn' ? 'অ্যাডমিন CMS প্যানেল লগইন' : 'Admin CMS Control Panel'}
+            {language === 'bn' ? 'অ্যাডমিন প্যানেল লগইন' : 'Admin CMS Control Panel'}
           </h2>
           <p className="text-xs text-neutral-400">
             {language === 'bn' 
               ? 'সাইফুল এন্টারপ্রাইজ সেন্ট্রাল ম্যানেজমেন্ট, স্টক ইনভেন্টরি, ডাটাবেজ ব্যাকআপ ও অ্যাকাউন্টস।'
-              : 'Full access to services, paper inventory, live orders, POS terminal, and financial ledger.'}
+              : 'Secure access to services, paper inventory, live orders, POS terminal, and financial ledger.'}
           </p>
         </div>
 
@@ -94,29 +73,11 @@ export const AdminDirectLogin: React.FC<AdminDirectLoginProps> = ({ onSuccess })
           </div>
         )}
 
-        {/* 1-Click Instant Master Admin Login */}
-        <button
-          type="button"
-          id="admin-direct-instant-login-btn"
-          onClick={handleInstantLogin}
-          disabled={loading}
-          className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
-        >
-          <Shield className="w-4 h-4" />
-          <span>{language === 'bn' ? '⚡ ১-ক্লিকে সরাসরি অ্যাডমিন প্যানেলে প্রবেশ করুন' : '⚡ 1-Click Direct Admin Access'}</span>
-        </button>
-
-        <div className="flex items-center gap-3 text-xs text-neutral-500">
-          <div className="flex-1 h-px bg-neutral-800" />
-          <span>{language === 'bn' ? 'অথবা ইউজার ও পাসওয়ার্ড দিয়ে লগইন' : 'Or sign in with credentials'}</span>
-          <div className="flex-1 h-px bg-neutral-800" />
-        </div>
-
-        {/* Direct Form */}
+        {/* Direct Secure Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
-              {language === 'bn' ? 'ইউজার নেম (Username)' : 'Username / Admin ID'}
+              {language === 'bn' ? 'ইউজারনেম বা ইমেইল' : 'Username / Email'}
             </label>
             <div className="relative">
               <UserIcon className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -124,17 +85,18 @@ export const AdminDirectLogin: React.FC<AdminDirectLoginProps> = ({ onSuccess })
                 type="text"
                 required
                 id="admin-direct-username"
+                autoComplete="username"
                 value={identifier}
                 onChange={e => setIdentifier(e.target.value)}
-                placeholder="Admin"
-                className="w-full pl-10 pr-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs sm:text-sm text-neutral-100 font-mono focus:outline-none focus:border-emerald-500 transition-colors"
+                placeholder={language === 'bn' ? 'ইউজারনেম বা ইমেইল লিখুন' : 'Enter username or email'}
+                className="w-full pl-10 pr-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs sm:text-sm text-neutral-100 font-sans focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
-              {language === 'bn' ? 'পাসওয়ার্ড (Password)' : 'Password'}
+              {language === 'bn' ? 'পাসওয়ার্ড' : 'Password'}
             </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -142,10 +104,11 @@ export const AdminDirectLogin: React.FC<AdminDirectLoginProps> = ({ onSuccess })
                 type={showPassword ? 'text' : 'password'}
                 required
                 id="admin-direct-password"
+                autoComplete="current-password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="J@hid2045"
-                className="w-full pl-10 pr-10 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs sm:text-sm text-neutral-100 font-mono focus:outline-none focus:border-emerald-500 transition-colors"
+                placeholder="••••••••"
+                className="w-full pl-10 pr-10 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs sm:text-sm text-neutral-100 font-sans focus:outline-none focus:border-emerald-500 transition-colors"
               />
               <button
                 type="button"
@@ -162,38 +125,23 @@ export const AdminDirectLogin: React.FC<AdminDirectLoginProps> = ({ onSuccess })
             type="submit"
             id="admin-direct-submit-btn"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
           >
             {loading ? (
-              <span>Verifying credentials...</span>
+              <span>{language === 'bn' ? 'যাচাই করা হচ্ছে...' : 'Verifying credentials...'}</span>
             ) : (
               <>
-                <span>{language === 'bn' ? 'লগইন করুন' : 'Sign In'}</span>
+                <Shield className="w-4 h-4" />
+                <span>{language === 'bn' ? 'নিরাপদ লগইন করুন' : 'Secure Sign In'}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
 
-          {/* Quick Credential Hint Box */}
-          <div className="p-3 rounded-xl bg-neutral-950/80 border border-neutral-800 flex items-center justify-between text-xs font-mono text-neutral-400">
-            <div>
-              <span className="text-neutral-500">User: </span>
-              <strong className="text-emerald-400">Admin</strong>
-              <span className="mx-2 text-neutral-600">|</span>
-              <span className="text-neutral-500">Pass: </span>
-              <strong className="text-emerald-400">J@hid2045</strong>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setIdentifier('Admin');
-                setPassword('J@hid2045');
-              }}
-              className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 text-[11px] font-sans hover:underline"
-            >
-              <KeyRound className="w-3 h-3" />
-              <span>Fill</span>
-            </button>
+          {/* Security Assurance Footer */}
+          <div className="pt-2 flex items-center justify-center gap-2 text-[11px] text-neutral-500">
+            <Lock className="w-3.5 h-3.5 text-emerald-500/80" />
+            <span>{language === 'bn' ? '২৫৬-বিট এসএসএল এনক্রিপ্টেড নিরাপদ কানেকশন' : '256-bit SSL Encrypted & Secured Access'}</span>
           </div>
         </form>
       </div>

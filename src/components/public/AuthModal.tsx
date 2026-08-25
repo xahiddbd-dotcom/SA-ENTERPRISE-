@@ -698,19 +698,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
-                {/* Admin Quick Credentials hint */}
-                <div className="p-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-[11px] text-neutral-400 flex items-center justify-between">
-                  <span>Authorized Admin: <strong className="text-white">sent9696@gmail.com</strong> / <strong className="text-emerald-400">J@hid2045</strong></span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIdentifier('sent9696@gmail.com');
-                      setPassword('J@hid2045');
-                    }}
-                    className="text-emerald-400 hover:text-emerald-300 font-medium underline ml-2 shrink-0"
-                  >
-                    Quick Fill
-                  </button>
+                {/* Security footer */}
+                <div className="pt-1 flex items-center justify-center gap-1.5 text-[11px] text-neutral-500">
+                  <Lock className="w-3.5 h-3.5 text-emerald-500/80" />
+                  <span>{language === 'bn' ? 'সুরক্ষিত ও এনক্রিপ্টেড অ্যাডমিন অ্যাক্সেস' : 'Encrypted & Secured Admin Access'}</span>
                 </div>
               </form>
             </div>

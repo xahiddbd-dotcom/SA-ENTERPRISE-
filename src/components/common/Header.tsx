@@ -198,11 +198,11 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   id="header-admin-cms-shortcut"
                   onClick={() => handleNavClick('admin')}
-                  className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 text-xs font-bold text-white shadow-md shadow-emerald-950 hover:brightness-110 transition-all border border-emerald-400/30"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-xs font-bold text-white shadow-md shadow-emerald-950 hover:brightness-110 active:scale-95 transition-all border border-emerald-400/40"
                   title="Open Admin CMS Control Panel"
                 >
                   <Shield className="w-3.5 h-3.5 text-white" />
-                  <span>Admin CMS</span>
+                  <span>{language === 'bn' ? 'অ্যাডমিন প্যানেল' : 'Admin CMS'}</span>
                 </button>
               )}
 
