@@ -10,6 +10,7 @@ import { HeroSlidesManager } from './HeroSlidesManager';
 import { SEOMetaManager } from './SEOMetaManager';
 import { CashMemo } from './CashMemo';
 import { AdminAnalyticsDashboard } from './AdminAnalyticsDashboard';
+import { BackgroundSettingsManager } from './BackgroundSettingsManager';
 import { ADMIN_THEMES, AdminThemeKey } from './AdminTheme';
 import { AdminThemeSwitcher } from './AdminThemeSwitcher';
 import {
@@ -111,7 +112,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
   const [timelineNewDescBn, setTimelineNewDescBn] = useState('');
 
   const [activeMenu, setActiveMenu] = useState<
-    'overview' | 'analytics' | 'cashmemo' | 'services' | 'products' | 'applications' | 'orders' | 'pos' | 'finance' | 'customers' | 'staff' | 'hero_slides' | 'seo_meta' | 'settings' | 'backup'
+    'overview' | 'analytics' | 'cashmemo' | 'services' | 'products' | 'applications' | 'orders' | 'pos' | 'finance' | 'customers' | 'staff' | 'hero_slides' | 'seo_meta' | 'background_settings' | 'settings' | 'backup'
   >('overview');
 
   // Modals & form states
@@ -507,6 +508,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                 { id: 'customers', label: language === 'bn' ? 'কাস্টমার একাউন্টস' : 'Customer Database', icon: UserCheck, badge: customers.length },
                 { id: 'staff', label: language === 'bn' ? 'স্টাফ ও অপারেটর' : 'Staff & Roles', icon: Users, badge: staff.length },
                 { id: 'hero_slides', label: language === 'bn' ? 'হিরো ব্যাকগ্রাউন্ড ছবি' : 'Hero Photo Carousel', icon: ImageIcon, badge: heroSlides.length },
+                { id: 'background_settings', label: language === 'bn' ? 'ব্যাকগ্রাউন্ড ও ওয়ালপেপার' : 'Background & Wallpaper', icon: Palette },
                 { id: 'seo_meta', label: language === 'bn' ? 'এসইও ও মেটা ট্যাগ' : 'Dynamic SEO & Meta', icon: Globe },
                 { id: 'settings', label: language === 'bn' ? 'ব্যবসায়িক সেটিংস' : 'Business Settings', icon: Settings },
                 { id: 'backup', label: language === 'bn' ? 'ডাটাবেজ ব্যাকআপ' : 'Database Backup', icon: Database }
@@ -1734,6 +1736,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
           {activeMenu === 'seo_meta' && (
             <div className="space-y-4 animate-in fade-in duration-200">
               <SEOMetaManager />
+            </div>
+          )}
+
+          {/* VIEW: BACKGROUND & WALLPAPER SYSTEM CMS */}
+          {activeMenu === 'background_settings' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              <BackgroundSettingsManager />
             </div>
           )}
 
