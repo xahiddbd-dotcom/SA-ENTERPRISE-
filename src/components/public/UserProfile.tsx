@@ -6,6 +6,7 @@ import { Order, OrderStatus, Application, Product } from '../../types';
 import { Image } from '../common/Image';
 import { OrderItemCard } from './OrderItemCard';
 import { OrderQuickViewModal } from './OrderQuickViewModal';
+import { jsPDF } from 'jspdf';
 import {
   User,
   Package,
@@ -32,6 +33,8 @@ import {
   Printer,
   RefreshCw,
   FileText,
+  FileSpreadsheet,
+  Download,
   Lock,
   Edit3,
   Save,
@@ -563,6 +566,185 @@ export const UserProfile: React.FC<UserProfileProps> = ({
     return { totalCount, deliveredCount, inProgressCount, totalSpent };
   }, [userOrders]);
 
+  // Export User Order History to CSV
+  const handleExportOrdersCsv = useCallback(() => {
+    if (userOrders.length === 0) return;
+
+    try {
+      const headers = ['Order Number', 'Date', 'Status', 'Total (BDT)', 'Payment Status', 'Payment Method', 'Items Count', 'Items Detail', 'Delivery Type'];
+      const rows = userOrders.map(o => {
+        const itemsSummary = o.items.map(i => `${i.productName} (x${i.quantity})`).join('; ');
+        return [
+          `"${o.orderNumber}"`,
+          `"${new Date(o.createdAt).toLocaleDateString()}"`,
+          `"${o.orderStatus.toUpperCase()}"`,
+          `"${o.total}"`,
+          `"${o.paymentStatus || 'pending'}"`,
+          `"${o.paymentMethod || 'cash'}"`,
+          `"${o.items.reduce((s, i) => s + i.quantity, 0)}"`,
+          `"${itemsSummary.replace(/"/g, '""')}"`,
+          `"${o.deliveryType || 'standard'}"`
+        ];
+      });
+
+      const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `Saiful_Enterprise_Orders_${currentUser?.name ? currentUser.name.replace(/\s+/g, '_') : 'Customer'}_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('CSV Export Error:', err);
+    }
+  }, [userOrders, currentUser]);
+
+  // Export User Order History to PDF
+  const handleExportOrdersPdf = useCallback(() => {
+    if (userOrders.length === 0) return;
+
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 14;
+      const contentWidth = pageWidth - margin * 2;
+
+      let y = 14;
+
+      // Header Banner
+      pdf.setFillColor(15, 23, 42); // slate-900
+      pdf.roundedRect(margin, y, contentWidth, 24, 2, 2, 'F');
+
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(13);
+      pdf.setTextColor(255, 255, 255);
+      pdf.text('SAIFUL ENTERPRISE', margin + 6, y + 8);
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(7.5);
+      pdf.setTextColor(148, 163, 184);
+      pdf.text('Customer Purchase & Order History Statement', margin + 6, y + 14);
+      pdf.text('20/1 Sagar-Saikat Market, Indira Road, Farmgate, Dhaka | Cell: 01540004966', margin + 6, y + 19);
+
+      // Customer Info Box
+      y += 28;
+      pdf.setFillColor(248, 250, 252);
+      pdf.setDrawColor(226, 232, 240);
+      pdf.roundedRect(margin, y, contentWidth, 20, 2, 2, 'FD');
+
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(8.5);
+      pdf.setTextColor(30, 41, 59);
+      pdf.text(`Customer: ${currentUser?.name || 'Valued Customer'}`, margin + 4, y + 6);
+      pdf.text(`Total Orders: ${userOrders.length} | Total Spent: BDT ${stats.totalSpent.toLocaleString()}`, margin + contentWidth - 75, y + 6);
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(7.5);
+      pdf.setTextColor(100, 116, 139);
+      pdf.text(`Phone: ${currentUser?.phone || '-'} | Email: ${currentUser?.email || '-'}`, margin + 4, y + 12);
+      pdf.text(`Delivery Address: ${currentUser?.address || 'Indira Road / Farmgate'}`, margin + 4, y + 17);
+
+      y += 25;
+
+      // Orders Table Header
+      const colWidths = [28, 24, 28, 26, 52, 24]; // Total 182mm
+      const headers = ['Order #', 'Date', 'Status', 'Payment', 'Items Summary', 'Total (BDT)'];
+
+      pdf.setFillColor(30, 41, 59);
+      pdf.rect(margin, y, contentWidth, 7, 'F');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(7);
+      pdf.setTextColor(255, 255, 255);
+
+      let curX = margin;
+      headers.forEach((h, hIdx) => {
+        pdf.text(h, curX + 2, y + 4.8);
+        curX += colWidths[hIdx];
+      });
+      y += 7;
+
+      // Orders Table Rows
+      userOrders.forEach((ord, oIdx) => {
+        if (y + 8 > pageHeight - 20) {
+          pdf.addPage();
+          y = 15;
+          pdf.setFillColor(30, 41, 59);
+          pdf.rect(margin, y, contentWidth, 7, 'F');
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(7);
+          pdf.setTextColor(255, 255, 255);
+          let tx = margin;
+          headers.forEach((h, hIdx) => {
+            pdf.text(h, tx + 2, y + 4.8);
+            tx += colWidths[hIdx];
+          });
+          y += 7;
+        }
+
+        const isEven = oIdx % 2 === 0;
+        pdf.setFillColor(isEven ? 255 : 248, isEven ? 255 : 250, isEven ? 255 : 252);
+        pdf.rect(margin, y, contentWidth, 6.5, 'F');
+        pdf.setDrawColor(226, 232, 240);
+        pdf.setLineWidth(0.1);
+        pdf.line(margin, y + 6.5, margin + contentWidth, y + 6.5);
+
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(6.8);
+        pdf.setTextColor(51, 65, 85);
+
+        const itemsText = ord.items.map(i => `${i.productName} x${i.quantity}`).join(', ').slice(0, 32);
+        const rowVals = [
+          ord.orderNumber,
+          new Date(ord.createdAt).toLocaleDateString(),
+          ord.orderStatus.toUpperCase(),
+          ord.paymentMethod ? ord.paymentMethod.toUpperCase() : 'CASH',
+          itemsText,
+          `BDT ${ord.total}`
+        ];
+
+        let rx = margin;
+        rowVals.forEach((val, cIdx) => {
+          if (cIdx === 0) {
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(30, 41, 59);
+          } else if (cIdx === 2) {
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(ord.orderStatus === 'delivered' ? 16 : ord.orderStatus === 'cancelled' ? 239 : 245, ord.orderStatus === 'delivered' ? 185 : ord.orderStatus === 'cancelled' ? 68 : 158, ord.orderStatus === 'delivered' ? 129 : ord.orderStatus === 'cancelled' ? 68 : 11);
+          } else if (cIdx === 5) {
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(16, 185, 129);
+          } else {
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(51, 65, 85);
+          }
+          pdf.text(val, rx + 2, y + 4.5);
+          rx += colWidths[cIdx];
+        });
+
+        y += 6.5;
+      });
+
+      // Footer
+      const totalPages = (pdf as any).internal.getNumberOfPages();
+      for (let p = 1; p <= totalPages; p++) {
+        pdf.setPage(p);
+        pdf.setDrawColor(203, 213, 225);
+        pdf.line(margin, pageHeight - 12, margin + contentWidth, pageHeight - 12);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(6.5);
+        pdf.setTextColor(148, 163, 184);
+        pdf.text('Saiful Enterprise - Customer Service Desk: 01540004966', margin, pageHeight - 8);
+        pdf.text(`Page ${p} of ${totalPages}`, margin + contentWidth - 20, pageHeight - 8);
+      }
+
+      pdf.save(`Saiful_Enterprise_Orders_${currentUser?.name ? currentUser.name.replace(/\s+/g, '_') : 'Customer'}.pdf`);
+    } catch (err) {
+      console.error('PDF Export Error:', err);
+    }
+  }, [userOrders, currentUser, stats]);
+
   // If Not Logged In - Prompt Login
   if (!isAuthenticated || !currentUser) {
     return (
@@ -1057,6 +1239,33 @@ export const UserProfile: React.FC<UserProfileProps> = ({
                     </button>
                   ))}
                 </div>
+
+                {/* Export Buttons: PDF & CSV */}
+                {userOrders.length > 0 && (
+                  <div className="flex items-center gap-1.5 pl-1 sm:border-l sm:border-neutral-800">
+                    <button
+                      type="button"
+                      id="export-user-orders-csv-btn"
+                      onClick={handleExportOrdersCsv}
+                      className="px-2.5 py-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-neutral-300 text-xs font-semibold flex items-center gap-1 border border-neutral-800 transition-all hover:text-white"
+                      title={language === 'bn' ? 'এক্সেল / CSV ফরম্যাটে অর্ডার হিস্টোরি ডাউনলোড' : 'Export Orders to CSV'}
+                    >
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="hidden sm:inline">CSV</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      id="export-user-orders-pdf-btn"
+                      onClick={handleExportOrdersPdf}
+                      className="px-2.5 py-1.5 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 text-xs font-semibold flex items-center gap-1 border border-emerald-500/40 transition-all shadow-sm"
+                      title={language === 'bn' ? 'পিডিএফ স্টেটমেন্ট ডাউনলোড করুন' : 'Export Orders to PDF Statement'}
+                    >
+                      <FileText className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="hidden sm:inline">{language === 'bn' ? 'পিডিএফ' : 'PDF'}</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 

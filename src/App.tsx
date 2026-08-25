@@ -21,6 +21,7 @@ import { GlobalSearchModal } from './components/public/GlobalSearchModal';
 import { StaffPortal } from './components/staff/StaffPortal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { AdminDirectLogin } from './components/admin/AdminDirectLogin';
+import { DailyShopLedger } from './components/admin/DailyShopLedger';
 import { POSCounter } from './components/pos/POSCounter';
 import { DynamicSEO } from './components/common/DynamicSEO';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
@@ -160,6 +161,13 @@ const MainLayout: React.FC = () => {
         {activeTab === 'contact' && (
           <div className="pt-6">
             <ContactSection />
+          </div>
+        )}
+
+        {/* DAILY SHOP LEDGER (দৈনিক দোকানের হিসাব খাতা - Special Direct Access) */}
+        {activeTab === 'ledger' && (
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <DailyShopLedger onNavigate={setActiveTab} />
           </div>
         )}
 

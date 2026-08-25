@@ -143,6 +143,15 @@ export const POSCounter: React.FC = () => {
     }));
   };
 
+  const updateItemName = (id: string, newName: string) => {
+    setCartItems(prev => prev.map(i => {
+      if (i.id === id) {
+        return { ...i, name: newName, nameBn: newName };
+      }
+      return i;
+    }));
+  };
+
   const removeItem = (id: string) => {
     setCartItems(prev => prev.filter(i => i.id !== id));
   };
@@ -487,9 +496,19 @@ export const POSCounter: React.FC = () => {
                   key={item.id}
                   className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-xs hover:border-neutral-700 transition-colors"
                 >
-                  <div className="flex-1 truncate">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-white block truncate">{item.name}</span>
+                      {item.isCustom ? (
+                        <input
+                          type="text"
+                          value={item.name}
+                          onChange={e => updateItemName(item.id, e.target.value)}
+                          className="font-bold text-white bg-transparent border-b border-dashed border-neutral-700 hover:border-emerald-500 focus:border-emerald-500 focus:outline-none w-full text-xs"
+                          title="Click to rename item"
+                        />
+                      ) : (
+                        <span className="font-bold text-white block truncate">{item.name}</span>
+                      )}
                       {item.isCustom && (
                         <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono shrink-0">
                           Custom

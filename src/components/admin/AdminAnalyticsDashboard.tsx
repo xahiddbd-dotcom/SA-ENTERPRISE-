@@ -261,32 +261,371 @@ export const AdminAnalyticsDashboard: React.FC = () => {
     }
   };
 
-  // Export to PDF using html2canvas and jsPDF
-  const handleExportPdf = async () => {
-    if (!reportContainerRef.current) return;
+  // Export to PDF using reliable multi-page jsPDF document generation
+  const handleExportPdf = () => {
     setIsExportingPdf(true);
 
     try {
-      const canvas = await html2canvas(reportContainerRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#0a0a0a',
-        logging: false
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
+      const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
+      const margin = 14;
+      const contentWidth = pageWidth - margin * 2; // 182mm
+
+      let y = 14;
+
+      // Helper to add new page if needed
+      const checkPageBreak = (neededHeight: number) => {
+        if (y + neededHeight > pageHeight - 20) {
+          pdf.addPage();
+          y = 15;
+          // Re-add top mini banner on subsequent pages
+          pdf.setFillColor(15, 23, 42); // slate-900
+          pdf.rect(margin, y, contentWidth, 8, 'F');
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(8);
+          pdf.setTextColor(255, 255, 255);
+          pdf.text('SAIFUL ENTERPRISE — FINANCIAL AUDIT & PERFORMANCE REPORT', margin + 3, y + 5.5);
+          pdf.setFont('helvetica', 'normal');
+          pdf.setTextColor(148, 163, 184);
+          pdf.text(`Period: ${timeRange.toUpperCase()}`, margin + contentWidth - 35, y + 5.5);
+          y += 13;
+        }
+      };
+
+      // 1. TOP BRAND HEADER BANNER (Page 1)
+      pdf.setFillColor(15, 23, 42); // slate-900
+      pdf.roundedRect(margin, y, contentWidth, 26, 3, 3, 'F');
+
+      // Title & Address
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.setTextColor(255, 255, 255);
+      pdf.text('SAIFUL ENTERPRISE', margin + 6, y + 8);
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8);
+      pdf.setTextColor(148, 163, 184); // slate-400
+      pdf.text('20/1 Sagar-Saikat Market, Indira Road, Farmgate, Dhaka-1215 | Helpline: 01540004966', margin + 6, y + 14);
+      pdf.text('Complete IT Solutions, Laser Print Lab, Government Applications & Stationery', margin + 6, y + 19);
+
+      // Right Tag
+      pdf.setFillColor(16, 185, 129); // emerald-500
+      pdf.roundedRect(margin + contentWidth - 52, y + 5, 46, 16, 2, 2, 'F');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(7.5);
+      pdf.setTextColor(255, 255, 255);
+      pdf.text('FINANCIAL AUDIT REPORT', margin + contentWidth - 49, y + 10.5);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(6.5);
+      pdf.text(`Range: ${timeRange.toUpperCase()} | ${new Date().toLocaleDateString()}`, margin + contentWidth - 49, y + 16.5);
+
+      y += 31;
+
+      // 2. EXECUTIVE KPI CARDS (4 Boxes)
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(10);
+      pdf.setTextColor(30, 41, 59);
+      pdf.text('1. EXECUTIVE SUMMARY & FINANCIAL KPI', margin, y);
+      y += 4;
+
+      const cardWidth = (contentWidth - 9) / 4; // 4 cards with 3mm gap
+      const cardHeight = 18;
+
+      const kpis = [
+        { label: 'GROSS REVENUE', value: `BDT ${totalIncome.toLocaleString()}`, color: [16, 185, 129], bg: [236, 253, 245] },
+        { label: 'TOTAL EXPENSES', value: `BDT ${totalExpense.toLocaleString()}`, color: [239, 68, 68], bg: [254, 242, 242] },
+        { label: 'NET PROFIT', value: `BDT ${netProfit.toLocaleString()}`, color: [59, 130, 246], bg: [239, 246, 255] },
+        { label: 'PROFIT MARGIN', value: `${profitMargin}% ROI`, color: [147, 51, 234], bg: [250, 245, 255] }
+      ];
+
+      kpis.forEach((kpi, idx) => {
+        const x = margin + idx * (cardWidth + 3);
+        // Box Background & border
+        pdf.setFillColor(kpi.bg[0], kpi.bg[1], kpi.bg[2]);
+        pdf.setDrawColor(kpi.color[0], kpi.color[1], kpi.color[2]);
+        pdf.setLineWidth(0.3);
+        pdf.roundedRect(x, y, cardWidth, cardHeight, 2, 2, 'FD');
+
+        // Label
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(6.5);
+        pdf.setTextColor(100, 116, 139);
+        pdf.text(kpi.label, x + 3, y + 5.5);
+
+        // Value
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(9);
+        pdf.setTextColor(kpi.color[0], kpi.color[1], kpi.color[2]);
+        pdf.text(kpi.value, x + 3, y + 13);
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      y += cardHeight + 7;
 
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Saiful_Enterprise_Performance_Report_${timeRange}.pdf`);
+      // 3. REVENUE BREAKDOWN BY STREAM
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(10);
+      pdf.setTextColor(30, 41, 59);
+      pdf.text('2. REVENUE STREAMS BREAKDOWN', margin, y);
+      y += 4;
+
+      const streams = streamBreakdownData;
+      const streamColWidth = (contentWidth - 6) / 3;
+      streams.forEach((st, sIdx) => {
+        const sx = margin + sIdx * (streamColWidth + 3);
+        pdf.setFillColor(248, 250, 252);
+        pdf.setDrawColor(226, 232, 240);
+        pdf.setLineWidth(0.2);
+        pdf.roundedRect(sx, y, streamColWidth, 14, 2, 2, 'FD');
+
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(7.5);
+        pdf.setTextColor(51, 65, 85);
+        pdf.text(st.name.replace(/[^a-zA-Z0-9 ()&/]/g, '').trim() || 'Counter Sales', sx + 3, y + 5);
+
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(9);
+        pdf.setTextColor(16, 185, 129);
+        pdf.text(`BDT ${st.value.toLocaleString()}`, sx + 3, y + 10.5);
+
+        const share = totalIncome > 0 ? ((st.value / totalIncome) * 100).toFixed(1) : '0';
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(6.5);
+        pdf.setTextColor(100, 116, 139);
+        pdf.text(`(${share}% share)`, sx + streamColWidth - 20, y + 10.5);
+      });
+
+      y += 20;
+
+      // 4. DAILY FINANCIAL AUDIT LEDGER (Table)
+      checkPageBreak(50);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(10);
+      pdf.setTextColor(30, 41, 59);
+      pdf.text('3. DAILY FINANCIAL AUDIT & TRANSACTION LEDGER', margin, y);
+      y += 4;
+
+      // Table Header
+      const colWidths = [24, 22, 28, 28, 28, 26, 26]; // Total 182mm
+      const headers = ['Date', 'Day', 'Gross (BDT)', 'Expense (BDT)', 'Net Profit (BDT)', 'POS Sales', 'Applications'];
+      
+      pdf.setFillColor(30, 41, 59);
+      pdf.rect(margin, y, contentWidth, 7, 'F');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(7);
+      pdf.setTextColor(255, 255, 255);
+
+      let curX = margin;
+      headers.forEach((h, hIdx) => {
+        pdf.text(h, curX + 2, y + 4.8);
+        curX += colWidths[hIdx];
+      });
+      y += 7;
+
+      // Table Rows
+      dailyFinancialTrend.forEach((row, rIdx) => {
+        checkPageBreak(7);
+        const isEven = rIdx % 2 === 0;
+        pdf.setFillColor(isEven ? 255 : 248, isEven ? 255 : 250, isEven ? 255 : 252);
+        pdf.rect(margin, y, contentWidth, 6, 'F');
+
+        // Draw light bottom border
+        pdf.setDrawColor(226, 232, 240);
+        pdf.setLineWidth(0.1);
+        pdf.line(margin, y + 6, margin + contentWidth, y + 6);
+
+        let rx = margin;
+        const rowVals = [
+          row.date,
+          row.name.replace(/[^a-zA-Z0-9 ]/g, '').trim() || row.date.slice(-5),
+          `BDT ${row.income.toLocaleString()}`,
+          `BDT ${row.expense.toLocaleString()}`,
+          `BDT ${row.profit.toLocaleString()}`,
+          `BDT ${row.invoices.toLocaleString()}`,
+          `BDT ${row.applications.toLocaleString()}`
+        ];
+
+        rowVals.forEach((val, cIdx) => {
+          if (cIdx === 2) {
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(16, 185, 129);
+          } else if (cIdx === 3) {
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(239, 68, 68);
+          } else if (cIdx === 4) {
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(row.profit >= 0 ? 59 : 239, row.profit >= 0 ? 130 : 68, row.profit >= 0 ? 246 : 68);
+          } else {
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(51, 65, 85);
+          }
+          pdf.setFontSize(6.8);
+          pdf.text(val, rx + 2, y + 4.2);
+          rx += colWidths[cIdx];
+        });
+
+        y += 6;
+      });
+
+      y += 6;
+
+      // 5. OPERATOR EFFICIENCY & PRODUCTIVITY TABLE
+      checkPageBreak(45);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(10);
+      pdf.setTextColor(30, 41, 59);
+      pdf.text('4. OPERATOR PERFORMANCE & LAB PRODUCTIVITY MATRIX', margin, y);
+      y += 4;
+
+      const opColWidths = [45, 45, 30, 32, 30]; // Total 182mm
+      const opHeaders = ['Operator Name', 'Designation / Role', 'Tasks Resolved', 'Revenue Billed', 'Rating'];
+
+      pdf.setFillColor(30, 41, 59);
+      pdf.rect(margin, y, contentWidth, 7, 'F');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(7);
+      pdf.setTextColor(255, 255, 255);
+
+      let opCurX = margin;
+      opHeaders.forEach((h, hIdx) => {
+        pdf.text(h, opCurX + 2, y + 4.8);
+        opCurX += opColWidths[hIdx];
+      });
+      y += 7;
+
+      operatorPerformanceData.forEach((op, opIdx) => {
+        checkPageBreak(6);
+        const isEven = opIdx % 2 === 0;
+        pdf.setFillColor(isEven ? 255 : 248, isEven ? 255 : 250, isEven ? 255 : 252);
+        pdf.rect(margin, y, contentWidth, 6, 'F');
+        pdf.setDrawColor(226, 232, 240);
+        pdf.setLineWidth(0.1);
+        pdf.line(margin, y + 6, margin + contentWidth, y + 6);
+
+        let ox = margin;
+        const opVals = [
+          op.name,
+          op.role,
+          `${op.applicationsCount} Tasks (${op.speed})`,
+          `BDT ${op.revenue.toLocaleString()}`,
+          `${op.rating}% Score`
+        ];
+
+        opVals.forEach((val, cIdx) => {
+          if (cIdx === 3) {
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(16, 185, 129);
+          } else if (cIdx === 4) {
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(59, 130, 246);
+          } else {
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(51, 65, 85);
+          }
+          pdf.setFontSize(6.8);
+          pdf.text(val, ox + 2, y + 4.2);
+          ox += opColWidths[cIdx];
+        });
+
+        y += 6;
+      });
+
+      y += 6;
+
+      // 6. ITEMIZED EXPENSES TABLE
+      checkPageBreak(40);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(10);
+      pdf.setTextColor(30, 41, 59);
+      pdf.text('5. BUSINESS EXPENSE LEDGER', margin, y);
+      y += 4;
+
+      const expColWidths = [24, 34, 60, 28, 36]; // Total 182mm
+      const expHeaders = ['Date', 'Category', 'Expense Description', 'Amount', 'Audit Remarks'];
+
+      pdf.setFillColor(30, 41, 59);
+      pdf.rect(margin, y, contentWidth, 7, 'F');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(7);
+      pdf.setTextColor(255, 255, 255);
+
+      let expCurX = margin;
+      expHeaders.forEach((h, hIdx) => {
+        pdf.text(h, expCurX + 2, y + 4.8);
+        expCurX += expColWidths[hIdx];
+      });
+      y += 7;
+
+      expenses.slice(0, 10).forEach((exp: any, eIdx: number) => {
+        checkPageBreak(6);
+        const isEven = eIdx % 2 === 0;
+        pdf.setFillColor(isEven ? 255 : 248, isEven ? 255 : 250, isEven ? 255 : 252);
+        pdf.rect(margin, y, contentWidth, 6, 'F');
+        pdf.setDrawColor(226, 232, 240);
+        pdf.setLineWidth(0.1);
+        pdf.line(margin, y + 6, margin + contentWidth, y + 6);
+
+        let ex = margin;
+        const expVals = [
+          exp.date,
+          exp.category.toUpperCase().replace('_', ' '),
+          exp.title.slice(0, 36),
+          `BDT ${exp.amount.toLocaleString()}`,
+          (exp.note || '-').slice(0, 22)
+        ];
+
+        expVals.forEach((val, cIdx) => {
+          if (cIdx === 3) {
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(239, 68, 68);
+          } else {
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(51, 65, 85);
+          }
+          pdf.setFontSize(6.8);
+          pdf.text(val, ex + 2, y + 4.2);
+          ex += expColWidths[cIdx];
+        });
+
+        y += 6;
+      });
+
+      // 7. FOOTER ON ALL PAGES
+      const totalPages = typeof (pdf as any).getNumberOfPages === 'function'
+        ? (pdf as any).getNumberOfPages()
+        : (Array.isArray((pdf as any).internal?.pages) ? Math.max(1, (pdf as any).internal.pages.length - 1) : 1);
+
+      for (let p = 1; p <= totalPages; p++) {
+        pdf.setPage(p);
+        pdf.setDrawColor(203, 213, 225);
+        pdf.setLineWidth(0.3);
+        pdf.line(margin, pageHeight - 12, margin + contentWidth, pageHeight - 12);
+
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(6.5);
+        pdf.setTextColor(148, 163, 184);
+        pdf.text(
+          'Saiful Enterprise - Farmgate Hub, Indira Road, Beside Tejgaon College, Dhaka | Cell: 01540004966, 01517992585',
+          margin,
+          pageHeight - 8
+        );
+        pdf.text(
+          `Page ${p} of ${totalPages}  |  CONFIDENTIAL AUDIT`,
+          margin + contentWidth - 36,
+          pageHeight - 8
+        );
+      }
+
+      // Save PDF
+      const filename = `Saiful_Enterprise_Performance_Report_${timeRange}_${new Date().toISOString().slice(0, 10)}.pdf`;
+      pdf.save(filename);
 
       setExportSuccessMsg('পিডিএফ অডিট রিপোর্ট সফলভাবে ডাউনলোড হয়েছে!');
-      setTimeout(() => setExportSuccessMsg(null), 3000);
+      setTimeout(() => setExportSuccessMsg(null), 3500);
     } catch (err) {
       console.error('PDF Export Error:', err);
-      alert('Failed to generate PDF report.');
+      setExportSuccessMsg('PDF তৈরিতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
+      setTimeout(() => setExportSuccessMsg(null), 3500);
     } finally {
       setIsExportingPdf(false);
     }

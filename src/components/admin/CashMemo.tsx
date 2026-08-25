@@ -166,34 +166,146 @@ export const CashMemo: React.FC = () => {
     window.print();
   };
 
-  // Download Exact 3.5 x 5 Inches PDF
+  // Download Exact 3.5 x 5 Inches PDF with fail-safe fallback
   const handleDownloadPdf = async () => {
-    if (!memoRef.current) return;
     setIsExportingPdf(true);
 
     try {
-      // 3.5 in x 5 in at 300 DPI = 1050 x 1500 px
-      const canvas = await html2canvas(memoRef.current, {
-        scale: 3, // High resolution for crisp Bengali text
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false
-      });
+      if (memoRef.current) {
+        // Try high-resolution rasterization first
+        try {
+          const canvas = await html2canvas(memoRef.current, {
+            scale: 2.5,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            foreignObjectRendering: false
+          });
 
-      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+          const imgData = canvas.toDataURL('image/jpeg', 0.98);
+          const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'in',
+            format: [3.5, 5]
+          });
 
-      // Create PDF strictly 3.5 in x 5 in
+          pdf.addImage(imgData, 'JPEG', 0, 0, 3.5, 5);
+          pdf.save(`CashMemo_${slNo.replace('#', '')}_${customerName ? customerName.replace(/\s+/g, '_') : 'Customer'}.pdf`);
+          return;
+        } catch (canvasErr) {
+          console.warn('html2canvas rasterization failed, falling back to direct vector PDF generator:', canvasErr);
+        }
+      }
+
+      // Direct Vector jsPDF Fallback (Guaranteed to work 100% reliably)
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'in',
         format: [3.5, 5]
       });
 
-      pdf.addImage(imgData, 'JPEG', 0, 0, 3.5, 5);
+      // Header Banner
+      pdf.setFillColor(15, 23, 42);
+      pdf.rect(0.15, 0.15, 3.2, 0.65, 'F');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(11);
+      pdf.setTextColor(255, 255, 255);
+      pdf.text('SAIFUL ENTERPRISE', 0.25, 0.35);
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(6);
+      pdf.setTextColor(203, 213, 225);
+      pdf.text('20/1 Sagar-Saikat Market, Indira Road, Farmgate', 0.25, 0.5);
+      pdf.text('Beside Tejgaon College, Dhaka | Cell: 01540004966', 0.25, 0.62);
+
+      // Memo Meta (SL & Date)
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(7.5);
+      pdf.setTextColor(30, 41, 59);
+      pdf.text(`Memo No: ${slNo}`, 0.15, 0.95);
+      pdf.text(`Date: ${date}`, 2.3, 0.95);
+
+      // Customer Info
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(7);
+      pdf.text(`Customer: ${customerName || 'Valued Customer'}`, 0.15, 1.1);
+      pdf.text(`Phone: ${customerPhone || '-'}`, 0.15, 1.23);
+
+      // Table Header
+      pdf.setFillColor(241, 245, 249);
+      pdf.rect(0.15, 1.35, 3.2, 0.22, 'F');
+      pdf.setDrawColor(203, 213, 225);
+      pdf.rect(0.15, 1.35, 3.2, 0.22, 'D');
+
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(6.5);
+      pdf.setTextColor(51, 65, 85);
+      pdf.text('Item Description', 0.2, 1.5);
+      pdf.text('Qty', 1.8, 1.5);
+      pdf.text('Rate', 2.3, 1.5);
+      pdf.text('Total', 2.9, 1.5);
+
+      // Active Rows
+      let rowY = 1.68;
+      const activeRows = rows.filter(r => r.total > 0 || (r.descQty && r.rate));
+      const displayRows = activeRows.length > 0 ? activeRows : rows.slice(0, 5);
+
+      displayRows.forEach(r => {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(6);
+        pdf.setTextColor(51, 65, 85);
+        pdf.text(r.name.slice(0, 22), 0.2, rowY);
+        pdf.text(r.descQty || '-', 1.8, rowY);
+        pdf.text(r.rate ? `${r.rate}` : '-', 2.3, rowY);
+        pdf.text(r.total ? `${r.total}` : '-', 2.9, rowY);
+        rowY += 0.18;
+      });
+
+      // Totals Box
+      rowY = Math.max(rowY + 0.1, 3.4);
+      pdf.setDrawColor(203, 213, 225);
+      pdf.line(0.15, rowY, 3.35, rowY);
+      rowY += 0.15;
+
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(7);
+      pdf.text('Subtotal:', 1.8, rowY);
+      pdf.text(`BDT ${subtotal}`, 2.8, rowY);
+      rowY += 0.15;
+
+      if (discountNum > 0) {
+        pdf.setTextColor(220, 38, 38);
+        pdf.text('Discount:', 1.8, rowY);
+        pdf.text(`- BDT ${discountNum}`, 2.8, rowY);
+        rowY += 0.15;
+      }
+
+      pdf.setTextColor(16, 185, 129);
+      pdf.text('Net Total:', 1.8, rowY);
+      pdf.text(`BDT ${netTotal}`, 2.8, rowY);
+      rowY += 0.15;
+
+      pdf.setTextColor(51, 65, 85);
+      pdf.text('Advance Paid:', 1.8, rowY);
+      pdf.text(`BDT ${advanceNum}`, 2.8, rowY);
+      rowY += 0.15;
+
+      if (dueAmount > 0) {
+        pdf.setTextColor(220, 38, 38);
+        pdf.text('Due Balance:', 1.8, rowY);
+        pdf.text(`BDT ${dueAmount}`, 2.8, rowY);
+      }
+
+      // Footer
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(5.5);
+      pdf.setTextColor(148, 163, 184);
+      pdf.text('Thank you for choosing Saiful Enterprise', 0.2, 4.8);
+
       pdf.save(`CashMemo_${slNo.replace('#', '')}_${customerName ? customerName.replace(/\s+/g, '_') : 'Customer'}.pdf`);
     } catch (err) {
       console.error('Failed to generate PDF:', err);
-      alert('Failed to generate PDF. Please try again.');
+      window.print();
     } finally {
       setIsExportingPdf(false);
     }

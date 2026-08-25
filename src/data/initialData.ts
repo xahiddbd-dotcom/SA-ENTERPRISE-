@@ -17,7 +17,9 @@ import {
   DailyCounterSale,
   StoreExpenseRecord,
   OperatorDailyLedger,
-  StoreLedgerSettings
+  StoreLedgerSettings,
+  CustomLedgerCategory,
+  DailyCashReconciliation
 } from '../types';
 
 export const initialSettings: WebsiteSettings = {
@@ -1195,4 +1197,269 @@ export const initialSEOSettings: Record<string, SectionSEO> = {
     canonicalUrl: 'https://saifulenterprise.com/contact'
   }
 };
+
+export const initialCustomLedgerCategories: CustomLedgerCategory[] = [
+  // Income categories
+  { id: 'cat_inc_photocopy', name: 'Photocopy & Laser Print', nameBn: 'ফটোকপি ও লেজার প্রিন্ট', type: 'income', color: 'emerald', isCustom: false },
+  { id: 'cat_inc_admission', name: 'Online Admission & Form Fillup', nameBn: 'অনলাইন ভর্তি ও আবেদন ফি', type: 'income', color: 'teal', isCustom: false },
+  { id: 'cat_inc_photo', name: 'Studio & Passport Photo Lab', nameBn: 'স্টুডিও পাসপোর্ট ও ল্যাব ছবি', type: 'income', color: 'cyan', isCustom: false },
+  { id: 'cat_inc_stationery', name: 'Stationery & Paper Retail', nameBn: 'স্টেশনারি ও পেপার বিক্রয়', type: 'income', color: 'blue', isCustom: false },
+  { id: 'cat_inc_binding', name: 'Lamination & Spiral Binding', nameBn: 'ল্যামিনেশন ও স্পাইরাল বাইন্ডিং', type: 'income', color: 'amber', isCustom: false },
+  { id: 'cat_inc_typing', name: 'Bengali/English Typing & CV', nameBn: 'বাংলা/ইংরেজি টাইপিং ও সিভি তৈরি', type: 'income', color: 'indigo', isCustom: false },
+  { id: 'cat_inc_due_rec', name: 'Customer Due Recovery', nameBn: 'কাস্টমার বকেয়া/বাকি আদায়', type: 'income', color: 'green', isCustom: false },
+  { id: 'cat_inc_other', name: 'Other Counter Income', nameBn: 'অন্যান্য খুচরা কাউন্টার আয়', type: 'income', color: 'slate', isCustom: false },
+
+  // Expense categories
+  { id: 'cat_exp_tea', name: 'Tea, Snacks & Refreshment', nameBn: 'চা-নাস্তা ও আপ্যায়ন', type: 'expense', color: 'amber', isCustom: false },
+  { id: 'cat_exp_paper', name: 'Paper Reams & Supply Purchase', nameBn: 'পেপার রিম ও মালামাল ক্রয়', type: 'expense', color: 'rose', isCustom: false },
+  { id: 'cat_exp_toner', name: 'Toner Cartridge & Refill Ink', nameBn: 'টোনার ও প্রিন্টার কালি', type: 'expense', color: 'purple', isCustom: false },
+  { id: 'cat_exp_electric', name: 'Electricity & Generator Diesel', nameBn: 'বিদ্যুৎ বিল ও জেনারেটর', type: 'expense', color: 'yellow', isCustom: false },
+  { id: 'cat_exp_rent', name: 'Shop Rent & Market Service Charge', nameBn: 'দোকান ভাড়া ও মার্কেট সার্ভিস চার্জ', type: 'expense', color: 'red', isCustom: false },
+  { id: 'cat_exp_wifi', name: 'Internet Router & WiFi Bill', nameBn: 'ইন্টারনেট ও রাউটার বিল', type: 'expense', color: 'sky', isCustom: false },
+  { id: 'cat_exp_transport', name: 'Transport & Delivery Freight', nameBn: 'যাতায়াত ও মালামাল পরিবহন', type: 'expense', color: 'orange', isCustom: false },
+  { id: 'cat_exp_repair', name: 'Machine Servicing & Spares', nameBn: 'মেশিন সার্ভিসিং ও যন্ত্রাংশ মেরামত', type: 'expense', color: 'stone', isCustom: false },
+  { id: 'cat_exp_staff_adv', name: 'Staff Salary Advance / Food', nameBn: 'কর্মচারী অগ্রিম বেতন / খোরাকি', type: 'expense', color: 'pink', isCustom: false },
+  { id: 'cat_exp_misc', name: 'Miscellaneous Retail Petty Cash', nameBn: 'বিবিধ খুচরা দোকান খরচ', type: 'expense', color: 'neutral', isCustom: false }
+];
+
+export const initialStoreLedgerSettings: StoreLedgerSettings = {
+  defaultOpeningCash: 3500,
+  defaultDeductionPercentage: 60, // 60% দোকান শেয়ার / ৪০% অপারেটর কমিশন
+  shopShareLabel: 'দোকান শেয়ার (Shop Share - 60%)',
+  operatorShareLabel: 'অপারেটর কমিশন (Operator Commission - 40%)',
+  enableVoucherNumbering: true,
+  voucherPrefix: 'VCH-2026-',
+  currencySymbol: '৳',
+  autoReconciliation: true,
+  businessNameBn: 'সাইফুল এন্টারপ্রাইজ',
+  addressBn: '২০/১, সাগর-সৈকত মার্কেট, ইন্দিরা রোড, ফার্মগেট, ঢাকা',
+  phonePrimary: '01540004966',
+  customCategories: initialCustomLedgerCategories
+};
+
+export const initialDailyCounterSales: DailyCounterSale[] = [
+  {
+    id: 'dcs_101',
+    date: '2026-08-25',
+    time: '09:15 AM',
+    category: 'cat_inc_photocopy',
+    title: 'Tejgaon College Lecture Note Photocopy (120 Pages)',
+    customerName: 'Student - Sakib',
+    customerPhone: '01711223344',
+    paymentMethod: 'cash',
+    amount: 360,
+    operatorId: 'usr_operator',
+    operatorName: 'Tanvir Ahmed',
+    counterNo: 'Counter-1',
+    voucherNo: 'VCH-2026-081',
+    notes: 'B/W double-sided photocopy on 70 GSM paper'
+  },
+  {
+    id: 'dcs_102',
+    date: '2026-08-25',
+    time: '10:30 AM',
+    category: 'cat_inc_admission',
+    title: 'National University Degree Admission Form + Fee Slip',
+    customerName: 'Farhana Akter',
+    customerPhone: '01988776655',
+    paymentMethod: 'bkash',
+    amount: 450,
+    operatorId: 'usr_admin',
+    operatorName: 'Saiful Islam',
+    counterNo: 'Counter-2',
+    voucherNo: 'VCH-2026-082',
+    notes: 'Paid via bKash TrxID: 9HB32KL7'
+  },
+  {
+    id: 'dcs_103',
+    date: '2026-08-25',
+    time: '11:45 AM',
+    category: 'cat_inc_photo',
+    title: 'Biometric Passport Size Urgent Lab Photo (8 Copies)',
+    customerName: 'Jashim Uddin',
+    customerPhone: '01822334455',
+    paymentMethod: 'cash',
+    amount: 180,
+    operatorId: 'usr_operator',
+    operatorName: 'Tanvir Ahmed',
+    counterNo: 'Counter-1',
+    voucherNo: 'VCH-2026-083',
+    notes: 'Background white, high-gloss 300 GSM'
+  },
+  {
+    id: 'dcs_104',
+    date: '2026-08-25',
+    time: '01:10 PM',
+    category: 'cat_inc_stationery',
+    title: 'Double A 80 GSM Paper Ream (1 Box)',
+    customerName: 'Coaching Center Teacher',
+    customerPhone: '01511223344',
+    paymentMethod: 'cash',
+    amount: 510,
+    operatorId: 'usr_manager',
+    operatorName: 'Md. Rafiqul Hassan',
+    counterNo: 'Counter-2',
+    voucherNo: 'VCH-2026-084',
+    notes: 'Cash sale counter'
+  },
+  {
+    id: 'dcs_105',
+    date: '2026-08-25',
+    time: '02:40 PM',
+    category: 'cat_inc_binding',
+    title: 'Thesis Paper Color Laser Print + Hard Spiral Binding',
+    customerName: 'Md. Al-Amin (Master Thesis)',
+    customerPhone: '01655443322',
+    paymentMethod: 'nagad',
+    amount: 650,
+    operatorId: 'usr_admin',
+    operatorName: 'Saiful Islam',
+    counterNo: 'Counter-2',
+    voucherNo: 'VCH-2026-085',
+    notes: 'Color 45 pages + Transparent spiral cover'
+  },
+  {
+    id: 'dcs_106',
+    date: '2026-08-24',
+    time: '04:20 PM',
+    category: 'cat_inc_typing',
+    title: 'Bangla Legal Deed & Agreement Typing (3 Pages)',
+    customerName: 'Advocate Client',
+    customerPhone: '01799887766',
+    paymentMethod: 'cash',
+    amount: 300,
+    operatorId: 'usr_operator',
+    operatorName: 'Tanvir Ahmed',
+    counterNo: 'Counter-1',
+    voucherNo: 'VCH-2026-079',
+    notes: 'Legal stamp paper formatting'
+  }
+];
+
+export const initialStoreExpenses: StoreExpenseRecord[] = [
+  {
+    id: 'ser_201',
+    date: '2026-08-25',
+    time: '10:00 AM',
+    category: 'cat_exp_tea',
+    title: 'Morning Staff Tea, Biscuits & Water',
+    amount: 140,
+    paymentMethod: 'cash',
+    voucherNo: 'EXP-2026-051',
+    paidBy: 'Saiful Islam',
+    paidTo: 'Indira Road Tea Stall',
+    note: 'Daily shop morning refreshment'
+  },
+  {
+    id: 'ser_202',
+    date: '2026-08-25',
+    time: '01:30 PM',
+    category: 'cat_exp_transport',
+    title: 'Patuatuly Paper Wholesale Rickshaw Freight',
+    amount: 250,
+    paymentMethod: 'cash',
+    voucherNo: 'EXP-2026-052',
+    paidBy: 'Tanvir Ahmed',
+    paidTo: 'Van Puller Rahim',
+    note: 'Transported 5 boxes of paper to shop'
+  },
+  {
+    id: 'ser_203',
+    date: '2026-08-25',
+    time: '03:15 PM',
+    category: 'cat_exp_toner',
+    title: 'Canon NPG-59 Laser Toner Refill Black Powder',
+    amount: 850,
+    paymentMethod: 'bkash',
+    voucherNo: 'EXP-2026-053',
+    paidBy: 'Saiful Islam',
+    paidTo: 'Elephant Road Toner Depot',
+    note: 'Photocopier machine toner cartridge reload'
+  },
+  {
+    id: 'ser_204',
+    date: '2026-08-24',
+    time: '05:00 PM',
+    category: 'cat_exp_wifi',
+    title: 'Link3 Optical Fiber Broadband Monthly Bill',
+    amount: 1200,
+    paymentMethod: 'bkash',
+    voucherNo: 'EXP-2026-048',
+    paidBy: 'Saiful Islam',
+    paidTo: 'Link3 Technologies Ltd.',
+    note: '50 Mbps dedicated shop internet'
+  }
+];
+
+export const initialOperatorDailyLedgers: OperatorDailyLedger[] = [
+  {
+    id: 'odl_301',
+    date: '2026-08-25',
+    operatorId: 'usr_operator',
+    operatorName: 'Tanvir Ahmed',
+    operatorPhone: '01700000000',
+    counterNo: 'Counter-1 (Printing & Photocopy)',
+    shift: 'morning',
+    grossServiceSales: 2450,
+    counterCashInHand: 2100,
+    digitalCollection: 350,
+    deductionPercentage: 60,
+    deductionAmount: 1470, // 60% to Shop
+    netAfterDeduction: 980, // 40% Operator share
+    pagesPrintedCount: 480,
+    paperReamsUsed: 1,
+    status: 'settled',
+    verifiedBy: 'Saiful Islam',
+    notes: 'Morning shift settled properly with verified drawer cash.'
+  },
+  {
+    id: 'odl_302',
+    date: '2026-08-24',
+    operatorId: 'usr_operator',
+    operatorName: 'Tanvir Ahmed',
+    operatorPhone: '01700000000',
+    counterNo: 'Counter-1',
+    shift: 'full_day',
+    grossServiceSales: 4100,
+    counterCashInHand: 3450,
+    digitalCollection: 650,
+    deductionPercentage: 60,
+    deductionAmount: 2460,
+    netAfterDeduction: 1640,
+    pagesPrintedCount: 790,
+    paperReamsUsed: 2,
+    status: 'verified',
+    verifiedBy: 'Saiful Islam',
+    notes: 'Full day verified. All notes counted correctly.'
+  }
+];
+
+export const initialDailyCashReconciliations: DailyCashReconciliation[] = [
+  {
+    id: 'dcr_401',
+    date: '2026-08-25',
+    openingCash: 3500,
+    totalCashIn: 1050,
+    totalCashOut: 390,
+    digitalIn: 1100,
+    closingCashExpected: 4160,
+    actualCashCounted: 4160,
+    discrepancy: 0,
+    noteCounts: {
+      note1000: 2,
+      note500: 3,
+      note200: 2,
+      note100: 2,
+      note50: 1,
+      note20: 0,
+      note10: 1,
+      note5: 0,
+      coins: 0
+    },
+    status: 'balanced',
+    closedBy: 'Saiful Islam',
+    notes: 'Cash drawer tally is 100% matched.'
+  }
+];
+
 

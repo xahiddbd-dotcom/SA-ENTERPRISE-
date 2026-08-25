@@ -481,20 +481,33 @@ export type StoreExpenseCategory =
   | 'transport'        // যাতায়াত ও মালামাল পরিবহন
   | 'equipment_repair' // মেশিন সার্ভিসিং ও যন্ত্রাংশ
   | 'salary_advance'   // কর্মচারী অগ্রিম বেতন
-  | 'miscellaneous';   // বিবিধ খুচরা খরচ
+  | 'miscellaneous'    // বিবিধ খুচরা খরচ
+  | string;            // কাস্টম ইউজার তৈরি করা ক্যাটাগরি
+
+export interface CustomLedgerCategory {
+  id: string;
+  name: string;
+  nameBn: string;
+  type: 'income' | 'expense';
+  icon?: string;
+  color?: string;
+  isCustom?: boolean;
+}
 
 export interface DailyCounterSale {
   id: string;
   date: string; // YYYY-MM-DD
   time?: string;
-  category: 'photocopy_print' | 'online_admission' | 'studio_photo' | 'stationery_retail' | 'computer_service' | 'lamination_binding' | 'other_counter';
+  category: string;
   title: string;
   customerName?: string;
-  paymentMethod: 'cash' | 'bkash' | 'nagad' | 'card';
+  customerPhone?: string;
+  paymentMethod: 'cash' | 'bkash' | 'nagad' | 'card' | 'bank' | 'due';
   amount: number;
   operatorId?: string;
   operatorName?: string;
   counterNo?: string;
+  voucherNo?: string;
   notes?: string;
 }
 
@@ -502,11 +515,13 @@ export interface StoreExpenseRecord {
   id: string;
   date: string; // YYYY-MM-DD
   time?: string;
-  category: StoreExpenseCategory;
+  category: string;
   title: string;
   amount: number;
+  paymentMethod?: 'cash' | 'bkash' | 'nagad' | 'bank';
   voucherNo?: string;
   paidBy?: string;
+  paidTo?: string;
   note?: string;
 }
 
@@ -517,7 +532,7 @@ export interface OperatorDailyLedger {
   operatorName: string;
   operatorPhone?: string;
   counterNo: string;
-  shift: 'morning' | 'evening' | 'full_day';
+  shift: 'morning' | 'evening' | 'full_day' | 'night';
   grossServiceSales: number; // সারাদিনের মোট সেবা ইনকাম
   counterCashInHand: number; // ক্যাশ ড্রয়ারে ক্যাশ
   digitalCollection: number; // বিকাশ/নগদে আদায়
@@ -531,10 +546,47 @@ export interface OperatorDailyLedger {
   notes?: string;
 }
 
+export interface CashNoteCount {
+  note1000: number;
+  note500: number;
+  note200: number;
+  note100: number;
+  note50: number;
+  note20: number;
+  note10: number;
+  note5: number;
+  coins: number;
+}
+
+export interface DailyCashReconciliation {
+  id: string;
+  date: string;
+  openingCash: number;
+  totalCashIn: number;
+  totalCashOut: number;
+  digitalIn: number;
+  closingCashExpected: number;
+  actualCashCounted: number;
+  discrepancy: number; // actual - expected
+  noteCounts?: CashNoteCount;
+  status: 'balanced' | 'surplus' | 'deficit';
+  closedBy?: string;
+  notes?: string;
+}
+
 export interface StoreLedgerSettings {
-  defaultDeductionPercentage: number; // 60
+  defaultOpeningCash: number;
+  defaultDeductionPercentage: number; // 60%
   shopShareLabel: string;
   operatorShareLabel: string;
   enableVoucherNumbering: boolean;
+  voucherPrefix: string;
+  currencySymbol: string;
+  autoReconciliation: boolean;
+  businessNameBn?: string;
+  addressBn?: string;
+  phonePrimary?: string;
+  customCategories: CustomLedgerCategory[];
 }
+
 

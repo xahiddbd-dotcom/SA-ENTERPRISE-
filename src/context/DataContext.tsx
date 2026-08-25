@@ -18,7 +18,13 @@ import {
   ApplicationStatus,
   Invoice,
   HeroSlide,
-  SectionSEO
+  SectionSEO,
+  DailyCounterSale,
+  StoreExpenseRecord,
+  OperatorDailyLedger,
+  StoreLedgerSettings,
+  CustomLedgerCategory,
+  DailyCashReconciliation
 } from '../types';
 import {
   initialCategories,
@@ -33,7 +39,13 @@ import {
   initialPOSSales,
   initialSettings,
   initialHeroSlides,
-  initialSEOSettings
+  initialSEOSettings,
+  initialStoreLedgerSettings,
+  initialCustomLedgerCategories,
+  initialDailyCounterSales,
+  initialStoreExpenses,
+  initialOperatorDailyLedgers,
+  initialDailyCashReconciliations
 } from '../data/initialData';
 
 interface DataContextType {
@@ -130,6 +142,31 @@ interface DataContextType {
   // Activity Logs
   activityLogs: ActivityLog[];
   logActivity: (action: string, details: string, user?: { id: string; name: string; role: string }) => void;
+
+  // Daily Shop Accounts Ledger & Khata (দৈনিক দোকানের হিসাব খাতা)
+  dailyCounterSales: DailyCounterSale[];
+  addDailyCounterSale: (sale: Omit<DailyCounterSale, 'id'>) => DailyCounterSale;
+  updateDailyCounterSale: (id: string, updates: Partial<DailyCounterSale>) => void;
+  deleteDailyCounterSale: (id: string) => void;
+
+  storeExpenses: StoreExpenseRecord[];
+  addStoreExpense: (expense: Omit<StoreExpenseRecord, 'id'>) => StoreExpenseRecord;
+  updateStoreExpense: (id: string, updates: Partial<StoreExpenseRecord>) => void;
+  deleteStoreExpense: (id: string) => void;
+
+  operatorLedgers: OperatorDailyLedger[];
+  saveOperatorLedger: (ledger: Omit<OperatorDailyLedger, 'id'>) => OperatorDailyLedger;
+  updateOperatorLedger: (id: string, updates: Partial<OperatorDailyLedger>) => void;
+  deleteOperatorLedger: (id: string) => void;
+
+  cashReconciliations: DailyCashReconciliation[];
+  saveCashReconciliation: (rec: Omit<DailyCashReconciliation, 'id'>) => DailyCashReconciliation;
+  deleteCashReconciliation: (id: string) => void;
+
+  ledgerSettings: StoreLedgerSettings;
+  updateLedgerSettings: (settings: Partial<StoreLedgerSettings>) => void;
+  addCustomCategory: (category: Omit<CustomLedgerCategory, 'id'>) => CustomLedgerCategory;
+  deleteCustomCategory: (id: string) => void;
 
   // Reset / Export Data
   resetAllData: () => void;
@@ -280,6 +317,32 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : initialSEOSettings;
   });
 
+  // Daily Shop Accounts Ledger States (দৈনিক দোকানের হিসাব খাতা)
+  const [dailyCounterSales, setDailyCounterSales] = useState<DailyCounterSale[]>(() => {
+    const saved = localStorage.getItem('se_daily_counter_sales');
+    return saved ? JSON.parse(saved) : initialDailyCounterSales;
+  });
+
+  const [storeExpenses, setStoreExpenses] = useState<StoreExpenseRecord[]>(() => {
+    const saved = localStorage.getItem('se_store_expenses');
+    return saved ? JSON.parse(saved) : initialStoreExpenses;
+  });
+
+  const [operatorLedgers, setOperatorLedgers] = useState<OperatorDailyLedger[]>(() => {
+    const saved = localStorage.getItem('se_operator_ledgers');
+    return saved ? JSON.parse(saved) : initialOperatorDailyLedgers;
+  });
+
+  const [cashReconciliations, setCashReconciliations] = useState<DailyCashReconciliation[]>(() => {
+    const saved = localStorage.getItem('se_cash_reconciliations');
+    return saved ? JSON.parse(saved) : initialDailyCashReconciliations;
+  });
+
+  const [ledgerSettings, setLedgerSettings] = useState<StoreLedgerSettings>(() => {
+    const saved = localStorage.getItem('se_ledger_settings');
+    return saved ? JSON.parse(saved) : initialStoreLedgerSettings;
+  });
+
   // Sync to local storage
   useEffect(() => { localStorage.setItem('se_settings', JSON.stringify(settings)); }, [settings]);
   useEffect(() => { localStorage.setItem('se_categories', JSON.stringify(categories)); }, [categories]);
@@ -297,6 +360,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => { localStorage.setItem('se_activity_logs', JSON.stringify(activityLogs)); }, [activityLogs]);
   useEffect(() => { localStorage.setItem('se_hero_slides', JSON.stringify(heroSlides)); }, [heroSlides]);
   useEffect(() => { localStorage.setItem('se_seo_settings', JSON.stringify(seoSettings)); }, [seoSettings]);
+  useEffect(() => { localStorage.setItem('se_daily_counter_sales', JSON.stringify(dailyCounterSales)); }, [dailyCounterSales]);
+  useEffect(() => { localStorage.setItem('se_store_expenses', JSON.stringify(storeExpenses)); }, [storeExpenses]);
+  useEffect(() => { localStorage.setItem('se_operator_ledgers', JSON.stringify(operatorLedgers)); }, [operatorLedgers]);
+  useEffect(() => { localStorage.setItem('se_cash_reconciliations', JSON.stringify(cashReconciliations)); }, [cashReconciliations]);
+  useEffect(() => { localStorage.setItem('se_ledger_settings', JSON.stringify(ledgerSettings)); }, [ledgerSettings]);
 
   const updateSettings = (newSettings: Partial<WebsiteSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
@@ -942,6 +1010,121 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActivityLogs(prev => [newLog, ...prev.slice(0, 99)]);
   };
 
+  // Daily Counter Sales / Income (দৈনিক নগদ জমার হিসাব)
+  const addDailyCounterSale = (saleData: Omit<DailyCounterSale, 'id'>) => {
+    const newSale: DailyCounterSale = {
+      ...saleData,
+      id: `dcs_${Date.now()}`
+    };
+    setDailyCounterSales(prev => [newSale, ...prev]);
+    logActivity('Daily Income Logged', `Logged ৳${newSale.amount} for "${newSale.title}" via ${newSale.paymentMethod}`);
+    return newSale;
+  };
+
+  const updateDailyCounterSale = (id: string, updates: Partial<DailyCounterSale>) => {
+    setDailyCounterSales(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+    logActivity('Daily Income Updated', `Updated daily sale record ${id}`);
+  };
+
+  const deleteDailyCounterSale = (id: string) => {
+    setDailyCounterSales(prev => prev.filter(s => s.id !== id));
+    logActivity('Daily Income Deleted', `Deleted daily sale record ${id}`);
+  };
+
+  // Store Operational Expenses (দোকানের খরচ ও ভাউচার)
+  const addStoreExpense = (expenseData: Omit<StoreExpenseRecord, 'id'>) => {
+    const newExpense: StoreExpenseRecord = {
+      ...expenseData,
+      id: `ser_${Date.now()}`
+    };
+    setStoreExpenses(prev => [newExpense, ...prev]);
+    logActivity('Store Expense Logged', `Logged expense ৳${newExpense.amount} for "${newExpense.title}"`);
+    return newExpense;
+  };
+
+  const updateStoreExpense = (id: string, updates: Partial<StoreExpenseRecord>) => {
+    setStoreExpenses(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e));
+    logActivity('Store Expense Updated', `Updated store expense record ${id}`);
+  };
+
+  const deleteStoreExpense = (id: string) => {
+    setStoreExpenses(prev => prev.filter(e => e.id !== id));
+    logActivity('Store Expense Deleted', `Deleted store expense record ${id}`);
+  };
+
+  // Operator Shift Daily Ledgers (অপারেটর শিফট ও কমিশন লেজার)
+  const saveOperatorLedger = (ledgerData: Omit<OperatorDailyLedger, 'id'>) => {
+    const newLedger: OperatorDailyLedger = {
+      ...ledgerData,
+      id: `odl_${Date.now()}`
+    };
+    setOperatorLedgers(prev => {
+      const existingIdx = prev.findIndex(l => l.date === newLedger.date && l.operatorId === newLedger.operatorId && l.shift === newLedger.shift);
+      if (existingIdx >= 0) {
+        const updated = [...prev];
+        updated[existingIdx] = newLedger;
+        return updated;
+      }
+      return [newLedger, ...prev];
+    });
+    logActivity('Operator Ledger Saved', `Recorded shift ledger for operator ${newLedger.operatorName} (৳${newLedger.grossServiceSales})`);
+    return newLedger;
+  };
+
+  const updateOperatorLedger = (id: string, updates: Partial<OperatorDailyLedger>) => {
+    setOperatorLedgers(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
+  };
+
+  const deleteOperatorLedger = (id: string) => {
+    setOperatorLedgers(prev => prev.filter(l => l.id !== id));
+  };
+
+  // Daily Cash Reconciliations (ক্যাশ ড্রয়ার হিসাব মিলকরণ)
+  const saveCashReconciliation = (recData: Omit<DailyCashReconciliation, 'id'>) => {
+    const newRec: DailyCashReconciliation = {
+      ...recData,
+      id: `dcr_${Date.now()}`
+    };
+    setCashReconciliations(prev => {
+      const filtered = prev.filter(r => r.date !== newRec.date);
+      return [newRec, ...filtered];
+    });
+    logActivity('Cash Drawer Reconciled', `Reconciled cash for ${newRec.date} with status ${newRec.status}`);
+    return newRec;
+  };
+
+  const deleteCashReconciliation = (id: string) => {
+    setCashReconciliations(prev => prev.filter(r => r.id !== id));
+  };
+
+  // Ledger Customization Settings (হিসাব খাতা কাস্টমাইজেশন)
+  const updateLedgerSettings = (newSettings: Partial<StoreLedgerSettings>) => {
+    setLedgerSettings(prev => ({ ...prev, ...newSettings }));
+    logActivity('Ledger Settings Updated', 'Updated Daily Shop Accounts Ledger settings and parameters');
+  };
+
+  const addCustomCategory = (categoryData: Omit<CustomLedgerCategory, 'id'>) => {
+    const newCat: CustomLedgerCategory = {
+      ...categoryData,
+      id: `cat_custom_${Date.now()}`,
+      isCustom: true
+    };
+    setLedgerSettings(prev => ({
+      ...prev,
+      customCategories: [...prev.customCategories, newCat]
+    }));
+    logActivity('Custom Ledger Category Added', `Added ${newCat.type} category "${newCat.nameBn || newCat.name}"`);
+    return newCat;
+  };
+
+  const deleteCustomCategory = (id: string) => {
+    setLedgerSettings(prev => ({
+      ...prev,
+      customCategories: prev.customCategories.filter(c => c.id !== id)
+    }));
+    logActivity('Custom Ledger Category Deleted', `Deleted category ${id}`);
+  };
+
   // Reset & Backup
   const resetAllData = () => {
     localStorage.removeItem('se_settings');
@@ -957,6 +1140,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('se_cart');
     localStorage.removeItem('se_notifications');
     localStorage.removeItem('se_activity_logs');
+    localStorage.removeItem('se_daily_counter_sales');
+    localStorage.removeItem('se_store_expenses');
+    localStorage.removeItem('se_operator_ledgers');
+    localStorage.removeItem('se_cash_reconciliations');
+    localStorage.removeItem('se_ledger_settings');
 
     setSettings(initialSettings);
     setCategories(initialCategories);
@@ -969,6 +1157,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setExpenses(initialExpenses);
     setPOSSales(initialPOSSales);
     setCart([]);
+    setDailyCounterSales(initialDailyCounterSales);
+    setStoreExpenses(initialStoreExpenses);
+    setOperatorLedgers(initialOperatorDailyLedgers);
+    setCashReconciliations(initialDailyCashReconciliations);
+    setLedgerSettings(initialStoreLedgerSettings);
   };
 
   const exportDatabaseJSON = () => {
@@ -985,7 +1178,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         customersCount: customers.length,
         staffCount: staff.length,
         posSalesCount: posSales.length,
-        expensesCount: expenses.length
+        expensesCount: expenses.length,
+        dailySalesCount: dailyCounterSales.length,
+        storeExpensesCount: storeExpenses.length
       },
       settings,
       categories,
@@ -998,7 +1193,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       applications,
       expenses,
       posSales,
-      activityLogs
+      activityLogs,
+      dailyCounterSales,
+      storeExpenses,
+      operatorLedgers,
+      cashReconciliations,
+      ledgerSettings
     };
     return JSON.stringify(payload, null, 2);
   };
@@ -1061,6 +1261,26 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.seoSettings) {
         setSeoSettings(data.seoSettings);
         localStorage.setItem('se_seo_settings', JSON.stringify(data.seoSettings));
+      }
+      if (data.dailyCounterSales && Array.isArray(data.dailyCounterSales)) {
+        setDailyCounterSales(data.dailyCounterSales);
+        localStorage.setItem('se_daily_counter_sales', JSON.stringify(data.dailyCounterSales));
+      }
+      if (data.storeExpenses && Array.isArray(data.storeExpenses)) {
+        setStoreExpenses(data.storeExpenses);
+        localStorage.setItem('se_store_expenses', JSON.stringify(data.storeExpenses));
+      }
+      if (data.operatorLedgers && Array.isArray(data.operatorLedgers)) {
+        setOperatorLedgers(data.operatorLedgers);
+        localStorage.setItem('se_operator_ledgers', JSON.stringify(data.operatorLedgers));
+      }
+      if (data.cashReconciliations && Array.isArray(data.cashReconciliations)) {
+        setCashReconciliations(data.cashReconciliations);
+        localStorage.setItem('se_cash_reconciliations', JSON.stringify(data.cashReconciliations));
+      }
+      if (data.ledgerSettings) {
+        setLedgerSettings(data.ledgerSettings);
+        localStorage.setItem('se_ledger_settings', JSON.stringify(data.ledgerSettings));
       }
       return true;
     } catch (e) {
@@ -1131,6 +1351,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         expenses,
         addExpense,
         deleteExpense,
+        dailyCounterSales,
+        addDailyCounterSale,
+        updateDailyCounterSale,
+        deleteDailyCounterSale,
+        storeExpenses,
+        addStoreExpense,
+        updateStoreExpense,
+        deleteStoreExpense,
+        operatorLedgers,
+        saveOperatorLedger,
+        updateOperatorLedger,
+        deleteOperatorLedger,
+        cashReconciliations,
+        saveCashReconciliation,
+        deleteCashReconciliation,
+        ledgerSettings,
+        updateLedgerSettings,
+        addCustomCategory,
+        deleteCustomCategory,
         notifications,
         markNotificationAsRead,
         markAllNotificationsAsRead,

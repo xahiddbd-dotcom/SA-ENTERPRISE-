@@ -11,6 +11,7 @@ import { SEOMetaManager } from './SEOMetaManager';
 import { CashMemo } from './CashMemo';
 import { AdminAnalyticsDashboard } from './AdminAnalyticsDashboard';
 import { BackgroundSettingsManager } from './BackgroundSettingsManager';
+import { DailyShopLedger } from './DailyShopLedger';
 import { ADMIN_THEMES, AdminThemeKey } from './AdminTheme';
 import { AdminThemeSwitcher } from './AdminThemeSwitcher';
 import {
@@ -20,6 +21,7 @@ import {
   FileCheck,
   ShoppingBag,
   Calculator,
+  BookOpen,
   Users,
   UserCheck,
   Ban,
@@ -112,7 +114,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
   const [timelineNewDescBn, setTimelineNewDescBn] = useState('');
 
   const [activeMenu, setActiveMenu] = useState<
-    'overview' | 'analytics' | 'cashmemo' | 'services' | 'products' | 'applications' | 'orders' | 'pos' | 'finance' | 'customers' | 'staff' | 'hero_slides' | 'seo_meta' | 'background_settings' | 'settings' | 'backup'
+    'overview' | 'analytics' | 'ledger' | 'cashmemo' | 'services' | 'products' | 'applications' | 'orders' | 'pos' | 'finance' | 'customers' | 'staff' | 'hero_slides' | 'seo_meta' | 'background_settings' | 'settings' | 'backup'
   >('overview');
 
   // Modals & form states
@@ -497,6 +499,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
             <nav className="space-y-1 text-xs font-semibold">
               {[
                 { id: 'overview', label: language === 'bn' ? 'ড্যাশবোর্ড ওভারভিউ' : 'Dashboard Overview', icon: LayoutDashboard },
+                { id: 'ledger', label: language === 'bn' ? 'দৈনিক হিসাব খাতা' : 'Daily Shop Ledger', icon: BookOpen, badge: 'Special', badgeColor: 'bg-amber-500 text-black font-bold' },
                 { id: 'analytics', label: language === 'bn' ? 'আয়-ব্যয় ও পারফরম্যান্স' : 'Revenue & Analytics', icon: PieChart, badge: 'Live', badgeColor: 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' },
                 { id: 'cashmemo', label: language === 'bn' ? 'ডিজিটাল ক্যাশ মেমো' : 'Digital Cash Memo', icon: Receipt, badge: '3.5x5', badgeColor: 'bg-teal-950 text-teal-300 border border-teal-500/40' },
                 { id: 'services', label: language === 'bn' ? 'অনলাইন সেবা CMS' : 'Services Manager', icon: Layers, badge: services.length },
@@ -570,6 +573,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
+                  {/* Special Ledger Button */}
+                  <button
+                    onClick={() => setActiveMenu('ledger')}
+                    className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500/30 to-emerald-500/30 hover:brightness-110 border border-amber-500/50 text-amber-300 font-bold text-xs flex items-center gap-2 transition-all shadow-md"
+                  >
+                    <BookOpen className="w-4 h-4 text-amber-400 animate-pulse" />
+                    <span>{language === 'bn' ? 'দৈনিক হিসাব খাতা' : 'Daily Shop Ledger'}</span>
+                  </button>
                   <button
                     onClick={() => setActiveMenu('cashmemo')}
                     className="px-3.5 py-2 rounded-xl bg-teal-950 hover:bg-teal-900 border border-teal-500/40 text-teal-300 font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-teal-950"
@@ -745,6 +756,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
                 </div>
               </div>
             </div>
+          )}
+
+          {/* VIEW: DAILY SHOP LEDGER (স্পেশাল দৈনিক হিসাব খাতা) */}
+          {activeMenu === 'ledger' && (
+            <DailyShopLedger isEmbedded={true} />
           )}
 
           {/* VIEW 2: SERVICES MANAGER */}
