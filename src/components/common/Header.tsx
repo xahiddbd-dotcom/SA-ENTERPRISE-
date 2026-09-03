@@ -120,10 +120,14 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Desktop Navigation Links */}
         <nav className="hidden lg:flex items-center gap-1 bg-neutral-900/60 p-1 rounded-xl border border-neutral-800">
           {navLinks.map(link => (
-            <button
+            <a
               key={link.id}
               id={`nav-${link.id}`}
-              onClick={() => handleNavClick(link.id)}
+              href={link.id === 'home' ? '/' : `/${link.id}`}
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick(link.id);
+              }}
               className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 activeTab === link.id
                   ? 'bg-emerald-600 text-white shadow-sm'
@@ -131,7 +135,7 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               {link.label}
-            </button>
+            </a>
           ))}
         </nav>
 
@@ -335,17 +339,21 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="lg:hidden bg-neutral-950 border-b border-neutral-800 px-4 py-4 space-y-3 animate-in slide-in-from-top duration-200">
           <div className="grid grid-cols-2 gap-2 pb-2 border-b border-neutral-800">
             {navLinks.map(link => (
-              <button
+              <a
                 key={link.id}
-                onClick={() => handleNavClick(link.id)}
-                className={`text-left px-3 py-2 rounded-lg text-sm font-medium ${
+                href={link.id === 'home' ? '/' : `/${link.id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick(link.id);
+                }}
+                className={`text-left px-3 py-2 rounded-lg text-sm font-medium block ${
                   activeTab === link.id
                     ? 'bg-emerald-600/30 text-emerald-400 border border-emerald-500/40'
                     : 'bg-neutral-900 text-neutral-300'
                 }`}
               >
                 {link.label}
-              </button>
+              </a>
             ))}
           </div>
 

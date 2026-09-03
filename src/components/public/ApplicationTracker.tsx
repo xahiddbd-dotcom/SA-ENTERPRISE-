@@ -30,6 +30,9 @@ import {
   LockOpen
 } from 'lucide-react';
 
+import { ShareProofButton } from '../common/ShareProofButton';
+import { updateBrowserUrl, buildUrl, copyToClipboard } from '../../utils/navigation';
+
 interface ApplicationTrackerProps {
   initialSearchId?: string;
 }
@@ -61,6 +64,7 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
       if (found) {
         setMatchedApplication(found);
         setHasSearched(true);
+        updateBrowserUrl({ tab: 'tracker', trackerId: found.applicationNumber }, true);
       }
     }
   }, [initialSearchId, applications]);
@@ -78,6 +82,9 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
            (a.applicantEmail && a.applicantEmail.toLowerCase().includes(clean))
     );
     setMatchedApplication(found || null);
+    if (found) {
+      updateBrowserUrl({ tab: 'tracker', trackerId: found.applicationNumber });
+    }
   };
 
   const handleCopyShareLink = (appNumber: string) => {
@@ -297,16 +304,13 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
                     {matchedApplication.paymentStatus === 'paid' ? 'Fee Paid (৳' + matchedApplication.paidAmount + ')' : 'Payment Pending'}
                   </span>
 
-                  {/* Copy Shareable Link Button */}
-                  <button
-                    type="button"
-                    onClick={() => handleCopyShareLink(matchedApplication.applicationNumber)}
-                    className="px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-teal-300 text-xs font-semibold flex items-center gap-1.5 transition-colors border border-teal-500/30"
-                    title="Copy Direct Tracking Link"
-                  >
-                    {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-teal-400" />}
-                    <span>{copiedLink ? (language === 'bn' ? 'লিঙ্ক কপি হয়েছে!' : 'Link Copied!') : (language === 'bn' ? 'ট্র্যাকিং লিঙ্ক' : 'Copy Link')}</span>
-                  </button>
+                  {/* Shareable Proof Link Button */}
+                  <ShareProofButton
+                    type="tracker"
+                    id={matchedApplication.applicationNumber}
+                    title={`Application #${matchedApplication.applicationNumber} - Saiful Enterprise`}
+                    variant="badge"
+                  />
 
                   {/* Print Slip Button */}
                   <button

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { Product } from '../../types';
 import { Image } from '../common/Image';
+import { ShareProofButton } from '../common/ShareProofButton';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ShoppingBag,
@@ -20,9 +21,15 @@ import {
 
 interface ShopSectionProps {
   openCart: () => void;
+  initialProductId?: string | null;
+  onProductSelect?: (productId: string | null) => void;
 }
 
-export const ShopSection: React.FC<ShopSectionProps> = ({ openCart }) => {
+export const ShopSection: React.FC<ShopSectionProps> = ({
+  openCart,
+  initialProductId,
+  onProductSelect
+}) => {
   const { language, t } = useLanguage();
   const { products, gsmOptions, addToCart } = useData();
 
@@ -31,6 +38,30 @@ export const ShopSection: React.FC<ShopSectionProps> = ({ openCart }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedProductModal, setSelectedProductModal] = useState<Product | null>(null);
   const [addedNotification, setAddedNotification] = useState<string | null>(null);
+
+  // Sync initialProductId when deep-linked
+  useEffect(() => {
+    if (initialProductId && products.length > 0) {
+      const found = products.find(p => p.id === initialProductId || p.sku.toLowerCase() === initialProductId.toLowerCase());
+      if (found) {
+        setSelectedProductModal(found);
+      }
+    }
+  }, [initialProductId, products]);
+
+  const handleOpenProduct = (product: Product) => {
+    setSelectedProductModal(product);
+    if (onProductSelect) {
+      onProductSelect(product.id);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedProductModal(null);
+    if (onProductSelect) {
+      onProductSelect(null);
+    }
+  };
 
   const filteredProducts = products.filter(product => {
     if (!product.isActive) return false;
@@ -180,7 +211,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({ openCart }) => {
                   transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.3), ease: [0.25, 1, 0.5, 1] }}
                   whileHover={{ y: -4 }}
                   id={`product-card-${product.id}`}
-                  onClick={() => setSelectedProductModal(product)}
+                  onClick={() => handleOpenProduct(product)}
                   className="bg-neutral-900 border border-neutral-800 hover:border-emerald-500/50 rounded-2xl overflow-hidden flex flex-col justify-between cursor-pointer group transition-colors duration-300 hover:shadow-xl hover:shadow-emerald-950/30"
                 >
                   {/* Product Image & Badges */}
@@ -198,7 +229,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({ openCart }) => {
                     )}
 
                     {/* Top Badges */}
-                    <div className="absolute top-3 left-3 flex flex-col gap-1">
+                    <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
                       {product.gsm && (
                         <span className="px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 text-[10px] font-mono font-bold">
                           {product.gsm} GSM
@@ -211,11 +242,20 @@ export const ShopSection: React.FC<ShopSectionProps> = ({ openCart }) => {
                       )}
                     </div>
 
-                    {hasDiscount && (
-                      <span className="absolute top-3 right-3 px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold">
-                        SAVE ৳{product.price - (product.discountPrice || product.price)}
-                      </span>
-                    )}
+                    {/* Top Right: Save Badge & Proof Share Button */}
+                    <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
+                      {hasDiscount && (
+                        <span className="px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold shadow-md">
+                          SAVE ৳{product.price - (product.discountPrice || product.price)}
+                        </span>
+                      )}
+                      <ShareProofButton
+                        type="product"
+                        id={product.id}
+                        title={language === 'bn' ? product.nameBn : product.name}
+                        variant="icon-only"
+                      />
+                    </div>
                   </div>
 
                   {/* Info */}
@@ -288,15 +328,29 @@ export const ShopSection: React.FC<ShopSectionProps> = ({ openCart }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-neutral-900 border border-neutral-800 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
             <div className="px-6 py-4 bg-neutral-950 border-b border-neutral-800 flex items-center justify-between">
-              <span className="text-xs font-bold text-emerald-400 uppercase">
-                {selectedProductModal.brand} • {selectedProductModal.gsm ? `${selectedProductModal.gsm} GSM` : 'Supplies'}
-              </span>
-              <button
-                onClick={() => setSelectedProductModal(null)}
-                className="p-1 rounded-lg text-neutral-400 hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-emerald-400 uppercase">
+                  {selectedProductModal.brand} • {selectedProductModal.gsm ? `${selectedProductModal.gsm} GSM` : 'Supplies'}
+                </span>
+                <span className="text-neutral-600 text-xs hidden sm:inline">•</span>
+                <span className="text-[11px] text-neutral-400 font-mono hidden sm:inline">
+                  SKU: {selectedProductModal.sku}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ShareProofButton
+                  type="product"
+                  id={selectedProductModal.id}
+                  title={language === 'bn' ? selectedProductModal.nameBn : selectedProductModal.name}
+                  variant="badge"
+                />
+                <button
+                  onClick={handleCloseModal}
+                  className="p-1 rounded-lg text-neutral-400 hover:text-white transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             <div className="p-6 overflow-y-auto space-y-5">
@@ -343,20 +397,30 @@ export const ShopSection: React.FC<ShopSectionProps> = ({ openCart }) => {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                  <ShareProofButton
+                    type="product"
+                    id={selectedProductModal.id}
+                    title={language === 'bn' ? selectedProductModal.nameBn : selectedProductModal.name}
+                    variant="button"
+                  />
+
                   <button
                     onClick={() => {
                       addToCart(selectedProductModal, 1, selectedProductModal.gsm);
-                      setSelectedProductModal(null);
+                      handleCloseModal();
                     }}
-                    className="px-4 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-bold"
+                    className="px-4 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-bold transition-all active:scale-95"
                   >
                     {t('add_to_cart')}
                   </button>
 
                   <button
-                    onClick={() => handleQuickBuy(selectedProductModal)}
-                    className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 text-xs font-bold flex items-center gap-1.5 shadow-lg"
+                    onClick={() => {
+                      handleQuickBuy(selectedProductModal);
+                      handleCloseModal();
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 text-xs font-bold flex items-center gap-1.5 shadow-lg transition-all active:scale-95"
                   >
                     <span>{t('buy_now')}</span>
                     <ArrowRight className="w-3.5 h-3.5" />

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { Service, ServiceCategory } from '../../types';
+import { ShareProofButton } from '../common/ShareProofButton';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Printer,
@@ -25,15 +26,39 @@ import {
 
 interface ServicesSectionProps {
   onOpenTrackerWithId?: (appId: string) => void;
+  initialServiceId?: string | null;
+  onServiceSelect?: (serviceId: string | null) => void;
 }
 
-export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenTrackerWithId }) => {
+export const ServicesSection: React.FC<ServicesSectionProps> = ({
+  onOpenTrackerWithId,
+  initialServiceId,
+  onServiceSelect
+}) => {
   const { language, t } = useLanguage();
   const { services, categories, createApplication, settings } = useData();
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeServiceModal, setActiveServiceModal] = useState<Service | null>(null);
+
+  // Sync initialServiceId when deep-linked
+  useEffect(() => {
+    if (initialServiceId && services.length > 0) {
+      const found = services.find(s => s.id === initialServiceId);
+      if (found) {
+        setActiveServiceModal(found);
+      }
+    }
+  }, [initialServiceId, services]);
+
+  const handleCloseModal = () => {
+    setActiveServiceModal(null);
+    setCreatedAppNumber(null);
+    if (onServiceSelect) {
+      onServiceSelect(null);
+    }
+  };
 
   // Application form state
   const [applicantName, setApplicantName] = useState('');
@@ -79,6 +104,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenTrackerW
     setPaymentMethod('cash_counter');
     setTrxId('');
     setUploadedFiles([]);
+    if (onServiceSelect) {
+      onServiceSelect(service.id);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -242,19 +270,27 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenTrackerW
                       {/* Dark gradient overlay for badge readability */}
                       <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/30 to-black/40 pointer-events-none" />
 
-                      {/* Floating Top Bar on Photo: Category & Popular Tag */}
+                      {/* Floating Top Bar on Photo: Category & Popular Tag & Share Proof Button */}
                       <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
                         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-950/80 backdrop-blur-md border border-neutral-700/60 text-emerald-300 text-[11px] font-semibold shadow-sm">
                           <IconComponent className="w-3.5 h-3.5 text-emerald-400" />
                           <span>{language === 'bn' ? category?.nameBn : category?.name}</span>
                         </div>
 
-                        {service.isPopular && (
-                          <span className="px-2.5 py-1 rounded-full bg-amber-500/90 text-neutral-950 text-[10px] font-extrabold shadow-md flex items-center gap-1">
-                            <span>🔥</span>
-                            <span>{language === 'bn' ? 'জনপ্রিয়' : 'Popular'}</span>
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                          {service.isPopular && (
+                            <span className="px-2.5 py-1 rounded-full bg-amber-500/90 text-neutral-950 text-[10px] font-extrabold shadow-md flex items-center gap-1">
+                              <span>🔥</span>
+                              <span>{language === 'bn' ? 'জনপ্রিয়' : 'Popular'}</span>
+                            </span>
+                          )}
+                          <ShareProofButton
+                            type="service"
+                            id={service.id}
+                            title={language === 'bn' ? service.nameBn : service.name}
+                            variant="icon-only"
+                          />
+                        </div>
                       </div>
 
                       {/* Bottom-right on Photo: Estimated Time Badge */}
@@ -345,14 +381,22 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenTrackerW
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/60 to-black/50" />
 
-              {/* Close Button */}
-              <button
-                id="close-service-modal-btn"
-                onClick={() => setActiveServiceModal(null)}
-                className="absolute top-3 right-3 z-20 p-2 rounded-full bg-neutral-950/80 backdrop-blur-md text-neutral-300 hover:text-white border border-neutral-700/60 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              {/* Header Buttons: Share Proof Link & Close */}
+              <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
+                <ShareProofButton
+                  type="service"
+                  id={activeServiceModal.id}
+                  title={language === 'bn' ? activeServiceModal.nameBn : activeServiceModal.name}
+                  variant="badge"
+                />
+                <button
+                  id="close-service-modal-btn"
+                  onClick={handleCloseModal}
+                  className="p-2 rounded-full bg-neutral-950/80 backdrop-blur-md text-neutral-300 hover:text-white border border-neutral-700/60 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
 
               {/* Header Details on Photo */}
               <div className="absolute bottom-3 left-4 right-4 z-10">
@@ -400,15 +444,22 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenTrackerW
                   </div>
 
                   <div className="pt-3 flex flex-wrap items-center justify-center gap-3">
+                    <ShareProofButton
+                      type="tracker"
+                      id={createdAppNumber}
+                      title={`Application #${createdAppNumber}`}
+                      variant="button"
+                    />
+
                     <button
                       id="view-tracker-now-btn"
                       onClick={() => {
                         if (onOpenTrackerWithId && createdAppNumber) {
                           onOpenTrackerWithId(createdAppNumber);
                         }
-                        setActiveServiceModal(null);
+                        handleCloseModal();
                       }}
-                      className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950"
+                      className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950 transition-all active:scale-95"
                     >
                       <span>{t('track_status')}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -416,8 +467,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenTrackerW
 
                     <button
                       id="close-success-modal-btn"
-                      onClick={() => setActiveServiceModal(null)}
-                      className="px-5 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold"
+                      onClick={handleCloseModal}
+                      className="px-5 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold transition-all active:scale-95"
                     >
                       {language === 'bn' ? 'বন্ধ করুন' : 'Close'}
                     </button>

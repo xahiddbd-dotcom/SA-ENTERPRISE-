@@ -129,11 +129,11 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab, openAuthModal }) =
               <li>
                 <button
                   id="footer-app-track-btn"
-                  onClick={() => handleLinkClick('applications')}
+                  onClick={() => handleLinkClick('tracker')}
                   className="text-left text-neutral-300 hover:text-emerald-400 flex items-center gap-2 transition-colors"
                 >
                   <ExternalLink className="w-4 h-4 text-neutral-400" />
-                  <span>{t('applications')}</span>
+                  <span>{t('applications')} / {language === 'bn' ? 'আবেদন ট্র্যাকিং' : 'Track App'}</span>
                 </button>
               </li>
               <li>

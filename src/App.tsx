@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { LanguageProvider } from './context/LanguageContext';
 import { DataProvider } from './context/DataContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -26,17 +26,62 @@ import { POSCounter } from './components/pos/POSCounter';
 import { DynamicSEO } from './components/common/DynamicSEO';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { BackgroundLayer } from './components/common/BackgroundLayer';
+import { parseCurrentRoute, updateBrowserUrl } from './utils/navigation';
 import { Shield, Lock } from 'lucide-react';
 
 const MainLayout: React.FC = () => {
   const { currentUser, isAuthenticated, isAdmin, isSuperAdmin, isStaffOrAdmin, logout } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<string>('home');
+  // Read initial route from URL parameters or path on initial page load
+  const initialRoute = useMemo(() => parseCurrentRoute(), []);
+
+  const [activeTab, setActiveTabState] = useState<string>(initialRoute.tab || 'home');
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(initialRoute.productId || null);
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(initialRoute.serviceId || null);
+  const [trackerInitialId, setTrackerInitialId] = useState<string>(initialRoute.trackerId || '');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register' | 'staff' | 'admin'>('login');
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [trackerInitialId, setTrackerInitialId] = useState<string>('');
+
+  // Sync browser back/forward history buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = parseCurrentRoute();
+      setActiveTabState(route.tab || 'home');
+      setSelectedProductId(route.productId || null);
+      setSelectedServiceId(route.serviceId || null);
+      if (route.trackerId) {
+        setTrackerInitialId(route.trackerId);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const setActiveTab = (tab: string) => {
+    setActiveTabState(tab);
+    if (tab !== 'shop') setSelectedProductId(null);
+    if (tab !== 'services') setSelectedServiceId(null);
+    updateBrowserUrl({ tab });
+  };
+
+  const handleSelectProduct = (productId: string | null) => {
+    setSelectedProductId(productId);
+    updateBrowserUrl({
+      tab: activeTab === 'home' ? 'shop' : activeTab,
+      productId: productId || undefined
+    });
+  };
+
+  const handleSelectService = (serviceId: string | null) => {
+    setSelectedServiceId(serviceId);
+    updateBrowserUrl({
+      tab: activeTab === 'home' ? 'services' : activeTab,
+      serviceId: serviceId || undefined
+    });
+  };
 
   const handleOpenAuth = (mode: 'login' | 'register' | 'staff' | 'admin') => {
     setAuthModalMode(mode);
@@ -45,7 +90,8 @@ const MainLayout: React.FC = () => {
 
   const handleOpenTrackerWithId = (id: string) => {
     setTrackerInitialId(id);
-    setActiveTab('tracker');
+    setActiveTabState('tracker');
+    updateBrowserUrl({ tab: 'tracker', trackerId: id });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -66,9 +112,15 @@ const MainLayout: React.FC = () => {
         <GlobalSearchModal
           isOpen={isSearchModalOpen}
           onClose={() => setIsSearchModalOpen(false)}
-          onSelectService={() => setActiveTab('services')}
+          onSelectService={serviceId => {
+            setActiveTab('services');
+            if (serviceId) handleSelectService(serviceId);
+          }}
           onSelectApplication={appId => handleOpenTrackerWithId(appId)}
-          onSelectProduct={() => setActiveTab('shop')}
+          onSelectProduct={prodId => {
+            setActiveTab('shop');
+            if (prodId) handleSelectProduct(prodId);
+          }}
         />
       </div>
     );
@@ -80,7 +132,11 @@ const MainLayout: React.FC = () => {
       <BackgroundLayer />
 
       {/* Dynamic SEO Meta Tag Manager */}
-      <DynamicSEO currentTab={activeTab} />
+      <DynamicSEO
+        currentTab={activeTab}
+        activeProductId={selectedProductId}
+        activeServiceId={selectedServiceId}
+      />
 
       {/* PWA Install Prompt and Offline Banner */}
       <PWAInstallPrompt />
@@ -105,9 +161,22 @@ const MainLayout: React.FC = () => {
             <Hero setActiveTab={setActiveTab} />
             {/* 30-35s Auto Product Slider */}
             <ProductSlider openCart={() => setIsCartOpen(true)} />
-            <TejgaonSpecial onSelectService={() => setActiveTab('services')} />
-            <ServicesSection onOpenTrackerWithId={handleOpenTrackerWithId} />
-            <ShopSection openCart={() => setIsCartOpen(true)} />
+            <TejgaonSpecial
+              onSelectService={(serviceId) => {
+                setActiveTab('services');
+                if (serviceId) handleSelectService(serviceId);
+              }}
+            />
+            <ServicesSection
+              onOpenTrackerWithId={handleOpenTrackerWithId}
+              initialServiceId={selectedServiceId}
+              onServiceSelect={handleSelectService}
+            />
+            <ShopSection
+              openCart={() => setIsCartOpen(true)}
+              initialProductId={selectedProductId}
+              onProductSelect={handleSelectProduct}
+            />
             {/* Staff & Founder Profiles Section */}
             <TeamSection />
             <TrustSection />
@@ -126,15 +195,28 @@ const MainLayout: React.FC = () => {
         {/* SERVICES CATALOG */}
         {activeTab === 'services' && (
           <div className="space-y-6 pt-4">
-            <TejgaonSpecial onSelectService={() => setActiveTab('services')} />
-            <ServicesSection onOpenTrackerWithId={handleOpenTrackerWithId} />
+            <TejgaonSpecial
+              onSelectService={(serviceId) => {
+                setActiveTab('services');
+                if (serviceId) handleSelectService(serviceId);
+              }}
+            />
+            <ServicesSection
+              onOpenTrackerWithId={handleOpenTrackerWithId}
+              initialServiceId={selectedServiceId}
+              onServiceSelect={handleSelectService}
+            />
           </div>
         )}
 
         {/* E-COMMERCE SHOP */}
         {activeTab === 'shop' && (
           <div className="pt-4">
-            <ShopSection openCart={() => setIsCartOpen(true)} />
+            <ShopSection
+              openCart={() => setIsCartOpen(true)}
+              initialProductId={selectedProductId}
+              onProductSelect={handleSelectProduct}
+            />
           </div>
         )}
 

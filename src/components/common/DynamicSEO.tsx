@@ -4,10 +4,16 @@ import { useLanguage } from '../../context/LanguageContext';
 
 interface DynamicSEOProps {
   currentTab: string;
+  activeProductId?: string | null;
+  activeServiceId?: string | null;
 }
 
-export const DynamicSEO: React.FC<DynamicSEOProps> = ({ currentTab }) => {
-  const { seoSettings, settings } = useData();
+export const DynamicSEO: React.FC<DynamicSEOProps> = ({
+  currentTab,
+  activeProductId,
+  activeServiceId
+}) => {
+  const { seoSettings, settings, products, services } = useData();
   const { language } = useLanguage();
 
   useEffect(() => {
@@ -30,10 +36,39 @@ export const DynamicSEO: React.FC<DynamicSEOProps> = ({ currentTab }) => {
       ogImage: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1200&auto=format&fit=crop'
     };
 
+    // Check if a specific product or service is active for proof deep-linking
+    let specificTitle: string | null = null;
+    let specificDesc: string | null = null;
+    let specificImage: string | null = null;
+
+    if (activeProductId && products) {
+      const prod = products.find(p => p.id === activeProductId || p.sku === activeProductId);
+      if (prod) {
+        const prodName = language === 'bn' ? prod.nameBn : prod.name;
+        const price = prod.discountPrice || prod.price;
+        specificTitle = `${prodName} (৳${price}) | ${language === 'bn' ? settings.businessNameBn : settings.businessName}`;
+        specificDesc = language === 'bn' ? prod.descriptionBn : prod.description;
+        if (prod.images && prod.images[0]) {
+          specificImage = prod.images[0];
+        }
+      }
+    } else if (activeServiceId && services) {
+      const srv = services.find(s => s.id === activeServiceId);
+      if (srv) {
+        const srvName = language === 'bn' ? srv.nameBn : srv.name;
+        specificTitle = `${srvName} - ৳${srv.price} | ${language === 'bn' ? settings.businessNameBn : settings.businessName}`;
+        specificDesc = language === 'bn' ? srv.descriptionBn : srv.description;
+        if (srv.image) {
+          specificImage = srv.image;
+        }
+      }
+    }
+
     // Update document title
-    const pageTitle = language === 'bn' 
+    const baseTitle = language === 'bn' 
       ? (currentSEO.titleBn || currentSEO.title || settings.businessNameBn || 'সাইফুল এন্টারপ্রাইজ')
       : (currentSEO.title || settings.businessName || 'Saiful Enterprise');
+    const pageTitle = specificTitle || baseTitle;
     document.title = pageTitle;
 
     // Helper to set or create meta tag
@@ -47,9 +82,10 @@ export const DynamicSEO: React.FC<DynamicSEOProps> = ({ currentTab }) => {
       element.setAttribute('content', content);
     };
 
-    const description = language === 'bn' 
+    const description = specificDesc || (language === 'bn' 
       ? (currentSEO.descriptionBn || currentSEO.description || settings.taglineBn || '')
-      : (currentSEO.description || settings.tagline || '');
+      : (currentSEO.description || settings.tagline || ''));
+    const ogImage = specificImage || currentSEO.ogImage || 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1200&auto=format&fit=crop';
 
     setMetaTag('name', 'description', description);
     setMetaTag('name', 'keywords', currentSEO.keywords || '');
@@ -78,7 +114,7 @@ export const DynamicSEO: React.FC<DynamicSEOProps> = ({ currentTab }) => {
       }
       linkElement.setAttribute('href', currentSEO.canonicalUrl);
     }
-  }, [currentTab, seoSettings, settings, language]);
+  }, [currentTab, activeProductId, activeServiceId, products, services, seoSettings, settings, language]);
 
   return null;
 };
