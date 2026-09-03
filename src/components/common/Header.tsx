@@ -175,22 +175,6 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </button>
 
-          {/* Special Button: Daily Shop Ledger (দৈনিক হিসাব খাতা) */}
-          <button
-            id="header-daily-ledger-special-btn"
-            onClick={() => handleNavClick('ledger')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-lg ${
-              activeTab === 'ledger'
-                ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-black border border-amber-300 ring-2 ring-amber-400/50 shadow-amber-950'
-                : 'bg-gradient-to-r from-amber-500/20 via-emerald-500/10 to-teal-500/20 hover:from-amber-500/30 hover:to-emerald-500/30 text-amber-300 border border-amber-500/40 hover:border-amber-400 hover:scale-105 shadow-emerald-950'
-            }`}
-            title="দৈনিক দোকানের হিসাব খাতা (Daily Shop Ledger & Tally)"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            <span className="hidden sm:inline">{language === 'bn' ? 'দৈনিক হিসাব খাতা' : 'Shop Ledger'}</span>
-            <span className="sm:hidden">{language === 'bn' ? 'খাতা' : 'Ledger'}</span>
-          </button>
-
           {/* User Account / Staff / Admin buttons */}
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
@@ -366,18 +350,6 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div className="flex flex-col gap-2 pt-1">
-            {/* Special Button in Mobile: Daily Shop Ledger */}
-            <button
-              onClick={() => { setMobileMenuOpen(false); handleNavClick('ledger'); }}
-              className="w-full text-left px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500/30 via-emerald-500/20 to-teal-500/20 border border-amber-500/40 text-amber-300 text-sm font-bold flex items-center justify-between shadow-md"
-            >
-              <span className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-amber-400" />
-                <span>{language === 'bn' ? 'দৈনিক দোকানের হিসাব খাতা' : 'Daily Shop Ledger & Tally'}</span>
-              </span>
-              <span className="text-[10px] bg-amber-500 text-black px-2 py-0.5 rounded-full font-bold">Special</span>
-            </button>
-
             {!isAuthenticated ? (
               <button
                 onClick={() => { setMobileMenuOpen(false); openAuthModal('login'); }}

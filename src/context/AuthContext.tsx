@@ -43,8 +43,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Failed to parse user', e);
       }
     }
-    // Default to Super Admin (Saiful Islam) for instant full access to Admin Dashboard
-    return initialStaff[0] || null;
+    // New browsers/visitors must ALWAYS be unauthenticated (null)
+    // Only verified login through Admin Gateway can grant Admin access
+    return null;
   });
 
   useEffect(() => {
@@ -163,21 +164,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const cleanId = emailOrPhone.trim().toLowerCase();
     const cleanPass = password.trim();
 
+    if (!cleanId) {
+      return { success: false, message: 'অনুগ্রহ করে অ্যাডমিন ইউজারনেম বা ইমেইল লিখুন।' };
+    }
+
     if (!cleanPass) {
-      return { success: false, message: 'Please enter the Admin password' };
+      return { success: false, message: 'অনুগ্রহ করে অ্যাডমিন পাসওয়ার্ড লিখুন।' };
     }
 
     const lockout = checkBruteForceLockout('admin');
     if (lockout.locked) {
       return {
         success: false,
-        message: `Security Lockout: Too many failed login attempts. Please wait ${lockout.remainingSec}s before retrying.`
+        message: `নিরাপত্তা সতর্কতা: অনেকবার ভুল চেষ্টা করা হয়েছে। অনুগ্রহ করে ${lockout.remainingSec} সেকেন্ড পর আবার চেষ্টা করুন।`
       };
     }
     
-    // Master Admin credentials check (User ID: sent9696@gmail.com / 01540004966 / Admin, Password: J@hid2045)
+    // Master Admin credentials check (User ID: sent9696@gmail.com / 01540004966 / admin, Password: J@hid2045)
+    const validMasterUsernames = ['admin', 'admin@saifulenterprise.com', 'sent9696@gmail.com', '01540004966', 'saiful', 'se-admin-01'];
+    const isMasterUsername = validMasterUsernames.includes(cleanId);
     const isMasterPassword = cleanPass === 'J@hid2045';
-    const isMasterUsername = !cleanId || cleanId === 'admin' || cleanId === 'admin@saifulenterprise.com' || cleanId === 'sent9696@gmail.com' || cleanId === '01540004966' || cleanId === 'saiful' || cleanId === 'se-admin-01';
 
     if (isMasterPassword && isMasterUsername) {
       resetFailedAttempts('admin');
@@ -206,22 +212,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (foundStaff) {
       if (foundStaff.isBlocked) {
-        return { success: false, message: `Account Blocked: ${foundStaff.blockReason || 'Your admin access has been blocked. Contact Super Admin.'}` };
+        return { success: false, message: `অ্যাকাউন্ট স্থগিত: ${foundStaff.blockReason || 'আপনার অ্যাডমিন অ্যাক্সেস স্থগিত করা হয়েছে। প্রধান প্রশাসকের সাথে যোগাযোগ করুন।'}` };
       }
 
-      if (cleanPass === 'J@hid2045') {
+      if (cleanPass === 'J@hid2045' || (foundStaff.password && cleanPass === foundStaff.password)) {
         resetFailedAttempts('admin');
         setCurrentUser({
           ...foundStaff,
-          role: 'super_admin',
+          role: foundStaff.role === 'manager' ? 'admin' : foundStaff.role,
           permissions: ['all', 'manage_all', 'services', 'products', 'orders', 'applications', 'pos', 'staff', 'customers', 'settings', 'backup', 'finance', 'reports']
         });
         return { success: true };
       }
     }
 
+    // Check if customer attempted to access admin
+    const customersList = getCombinedCustomers();
+    const isCustomerAccount = customersList.some(c => c.phone === cleanId || c.email?.toLowerCase() === cleanId);
+    if (isCustomerAccount) {
+      recordFailedAttempt('admin');
+      return { 
+        success: false, 
+        message: 'অননুমোদিত প্রবেশ! এটি একটি সাধারণ গ্রাহক অ্যাকাউন্ট, যার অ্যাডমিন প্যানেলে প্রবেশের অনুমতি নেই।' 
+      };
+    }
+
     recordFailedAttempt('admin');
-    return { success: false, message: 'Invalid Admin Credentials. User ID: sent9696@gmail.com | Password: J@hid2045' };
+    return { success: false, message: 'ভুল অ্যাডমিন ক্রেডেনশিয়াল! সঠিক ইউজারনেম এবং পাসওয়ার্ড দিয়ে প্রবেশ করুন।' };
   };
 
   const loginStaff = async (employeeIdOrPhone: string, password: string): Promise<{ success: boolean; message?: string }> => {
@@ -229,7 +246,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const cleanPass = password.trim();
 
     if (!cleanId || !cleanPass) {
-      return { success: false, message: 'Please provide Employee ID and password' };
+      return { success: false, message: 'কর্মচারী আইডি/ফোন এবং পাসওয়ার্ড উভয়ই আবশ্যক।' };
     }
 
     const staffList = getCombinedStaff();
@@ -239,25 +256,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (matched) {
       if (matched.isBlocked) {
-        return { success: false, message: `Access Suspended: ${matched.blockReason || 'This staff account is currently blocked by Administrator.'}` };
+        return { success: false, message: `অ্যাক্সেস স্থগিত: ${matched.blockReason || 'এই স্টাফ অ্যাকাউন্টটি প্রশাসক কর্তৃক সাময়িকভাবে ব্লক করা হয়েছে।'}` };
       }
 
-      if (cleanPass === 'J@hid2045') {
+      if (cleanPass === 'J@hid2045' || (matched.password && cleanPass === matched.password)) {
         setCurrentUser(matched);
         return { success: true };
       }
     }
 
-    return { success: false, message: 'Invalid Staff Credentials or access code.' };
+    return { success: false, message: 'ভুল স্টাফ তথ্য বা পাসওয়ার্ড! অনুগ্রহ করে সঠিক তথ্য দিন।' };
   };
 
   const loginCustomer = async (emailOrPhone: string, password?: string): Promise<{ success: boolean; message?: string }> => {
     const clean = emailOrPhone.trim();
-    if (!clean) return { success: false, message: 'Please enter mobile number or email' };
+    if (!clean) return { success: false, message: 'অনুগ্রহ করে মোবাইল নম্বর বা ইমেইল লিখুন।' };
 
     const customersList = getCombinedCustomers();
     const cleanLower = clean.toLowerCase();
-    const matched = customersList.find(c => c.phone === clean || c.email?.toLowerCase() === cleanLower || c.name.toLowerCase() === cleanLower);
+    const matched = customersList.find(c => c.phone === clean || c.email?.toLowerCase() === cleanLower);
 
     if (matched) {
       if (matched.isBlocked) {
@@ -266,11 +283,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           message: `আপনার অ্যাকাউন্টটি স্থগিত (Blocked) করা হয়েছে। কারণ: ${matched.blockReason || 'অ্যাডমিনের সাথে যোগাযোগ করুন।'}`
         };
       }
+
+      // If user has a password set and password is provided, verify it
+      if (password && matched.password && matched.password !== password.trim()) {
+        return { success: false, message: 'ভুল পাসওয়ার্ড! অনুগ্রহ করে সঠিক পাসওয়ার্ড দিন অথবা ওটিপি ব্যবহার করুন।' };
+      }
+
       setCurrentUser(matched);
       return { success: true };
     }
 
-    // Auto-create customer if not existing
+    // Account does not exist
+    if (password) {
+      return {
+        success: false,
+        message: 'এই তথ্য দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি। অনুগ্রহ করে প্রথমে সাইন-আপ (Sign Up) করুন।'
+      };
+    }
+
+    // Phone OTP login auto-registration fallback
     const newCustomerUser: User = {
       id: `usr_cust_${clean.replace(/[^a-zA-Z0-9]/g, '') || Date.now()}`,
       name: clean.includes('@') ? clean.split('@')[0] : `Customer (${clean})`,
@@ -391,28 +422,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     password?: string,
     authProvider: 'phone_otp' | 'google' | 'facebook' | 'email_password' = 'phone_otp'
   ): Promise<{ success: boolean; message?: string }> => {
-    if (!name.trim() || !phone.trim()) {
-      return { success: false, message: 'Name and Phone number are required' };
+    const cleanPhone = phone.trim();
+    const cleanName = name.trim();
+
+    if (!cleanName || !cleanPhone) {
+      return { success: false, message: 'নাম এবং মোবাইল নম্বর উভয়ই আবশ্যক।' };
+    }
+
+    if (cleanPhone.length < 11) {
+      return { success: false, message: 'অনুগ্রহ করে সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন।' };
+    }
+
+    if (authProvider === 'email_password' && password && password.trim().length < 6) {
+      return { success: false, message: 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।' };
     }
 
     const customersList = getCombinedCustomers();
-    const existing = customersList.find(c => c.phone === phone.trim());
+    const existing = customersList.find(c => c.phone === cleanPhone);
     if (existing) {
       if (existing.isBlocked) {
         return { success: false, message: 'এই ফোন নম্বরটির অ্যাকাউন্ট বর্তমানে ব্লক করা আছে।' };
       }
-      setCurrentUser(existing);
-      return { success: true, message: 'Existing profile found and signed in!' };
+      return { 
+        success: false, 
+        message: 'এই ফোন নম্বরে ইতিমধ্যে একটি অ্যাকাউন্ট তৈরি করা আছে। অনুগ্রহ করে লগইন করুন।' 
+      };
     }
 
     const customerUser: User = {
       id: `usr_cust_${Date.now()}`,
-      name: name.trim(),
-      phone: phone.trim(),
-      email: email?.trim() || `${phone.trim()}@customer.bd`,
+      name: cleanName,
+      phone: cleanPhone,
+      email: email?.trim() || `${cleanPhone}@customer.bd`,
       address: address?.trim() || "Tejgaon, Dhaka",
       role: 'customer',
       authProvider,
+      password: password ? password.trim() : undefined,
       isPhoneVerified: true,
       isEmailVerified: !!email,
       isActive: true,
@@ -420,8 +465,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       registeredAt: new Date().toISOString(),
       avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80",
       socialLinks: {
-        phone: phone.trim(),
-        whatsapp: phone.trim()
+        phone: cleanPhone,
+        whatsapp: cleanPhone
       }
     };
 

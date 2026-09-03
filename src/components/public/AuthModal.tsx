@@ -147,7 +147,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     try {
       if (authSubMode === 'register') {
-        const res = await registerCustomer(name || 'Valued Customer', phone, email, address, undefined, 'phone_otp');
+        const res = await registerCustomer(name || 'Valued Customer', phone, email, address, password || undefined, password ? 'email_password' : 'phone_otp');
         if (res.success) {
           setSuccessMsg(language === 'bn' ? 'একাউন্ট সফলভাবে তৈরি হয়েছে!' : 'Account created successfully!');
           setTimeout(() => {
@@ -506,6 +506,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
                       <label className="block text-xs font-semibold text-neutral-300 mb-1">
+                        {language === 'bn' ? 'একটি নিরাপদ পাসওয়ার্ড দিন *' : 'Set a Secure Password *'}
+                      </label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          required
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          placeholder="কমপক্ষে ৬ অক্ষর"
+                          className="w-full pl-9 pr-8 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-neutral-100 font-mono focus:outline-none focus:border-emerald-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-200"
+                        >
+                          {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-neutral-300 mb-1">
                         {language === 'bn' ? 'ইমেইল (ঐচ্ছিক)' : 'Email (Optional)'}
                       </label>
                       <input
@@ -516,18 +540,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-neutral-100 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                        {language === 'bn' ? 'ডেলিভারি ঠিকানা (ঐচ্ছিক)' : 'Delivery Address (Optional)'}
-                      </label>
-                      <input
-                        type="text"
-                        value={address}
-                        onChange={e => setAddress(e.target.value)}
-                        placeholder="Tejgaon, Dhaka"
-                        className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-neutral-100 focus:outline-none focus:border-emerald-500"
-                      />
-                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-neutral-300 mb-1">
+                      {language === 'bn' ? 'ডেলিভারি ঠিকানা (ঐচ্ছিক)' : 'Delivery Address (Optional)'}
+                    </label>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={e => setAddress(e.target.value)}
+                      placeholder="Tejgaon, Dhaka"
+                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-neutral-100 focus:outline-none focus:border-emerald-500"
+                    />
                   </div>
 
                   {/* "I'm not a robot" Verification on Signup */}
@@ -607,6 +632,75 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       />
                     </div>
                   </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-semibold text-neutral-300">
+                        {language === 'bn' ? 'পাসওয়ার্ড (Password)' : 'Password'}
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        className="text-[11px] text-emerald-400 hover:underline"
+                      >
+                        {language === 'bn' ? 'OTP কোড চান?' : 'Get SMS OTP instead'}
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        placeholder={language === 'bn' ? 'পাসওয়ার্ড লিখুন' : 'Enter your password'}
+                        className="w-full pl-9 pr-10 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs sm:text-sm text-neutral-100 font-mono focus:outline-none focus:border-emerald-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-200"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {otpSent && (
+                    <div className="p-3.5 rounded-2xl bg-neutral-950 border border-emerald-500/40 space-y-2 animate-in fade-in">
+                      <div className="flex items-center justify-between text-xs text-emerald-300">
+                        <span className="flex items-center gap-1">
+                          <Smartphone className="w-3.5 h-3.5" />
+                          <span>{language === 'bn' ? '৪ ডিজিটের OTP কোড লিখুন:' : 'Enter 4-digit OTP code:'}</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setOtpCode(generatedOtp)}
+                          className="font-mono font-bold bg-emerald-950/80 px-2 py-0.5 rounded text-emerald-400 border border-emerald-500/30 text-[11px] underline"
+                        >
+                          Code: {generatedOtp} (Auto-Fill)
+                        </button>
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          maxLength={4}
+                          value={otpCode}
+                          onChange={e => setOtpCode(e.target.value)}
+                          placeholder="4966"
+                          className="w-full text-center tracking-widest text-lg font-mono font-bold py-1.5 bg-neutral-900 border border-neutral-700 rounded-xl text-white focus:outline-none focus:border-emerald-400"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleVerifyOtpAndLogin}
+                          disabled={loading || otpCode.length !== 4 || !isRobotVerified}
+                          className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-xs shrink-0 flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>{language === 'bn' ? 'ওটিপি যাচাই' : 'Verify'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* "I'm not a robot" Verification on Signin */}
                   <div className="pt-0.5">

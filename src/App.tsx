@@ -29,9 +29,9 @@ import { BackgroundLayer } from './components/common/BackgroundLayer';
 import { Shield, Lock } from 'lucide-react';
 
 const MainLayout: React.FC = () => {
-  const { currentUser, isAuthenticated, isAdmin, isSuperAdmin, isStaffOrAdmin } = useAuth();
+  const { currentUser, isAuthenticated, isAdmin, isSuperAdmin, isStaffOrAdmin, logout } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<string>('admin');
+  const [activeTab, setActiveTab] = useState<string>('home');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register' | 'staff' | 'admin'>('login');
@@ -49,7 +49,7 @@ const MainLayout: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // If Admin CMS is active and authenticated, render the dedicated standalone Full CMS workspace
+  // If Admin CMS is active and authenticated as Admin, render the dedicated standalone Full CMS workspace
   if (activeTab === 'admin' && isAuthenticated && (isSuperAdmin || isAdmin)) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans">
@@ -164,10 +164,36 @@ const MainLayout: React.FC = () => {
           </div>
         )}
 
-        {/* DAILY SHOP LEDGER (দৈনিক দোকানের হিসাব খাতা - Special Direct Access) */}
+        {/* DAILY SHOP LEDGER (দৈনিক দোকানের হিসাব খাতা - Authorized Staff & Admin only) */}
         {activeTab === 'ledger' && (
           <div className="max-w-7xl mx-auto px-4 py-6">
-            <DailyShopLedger onNavigate={setActiveTab} />
+            {isAuthenticated && isStaffOrAdmin ? (
+              <DailyShopLedger onNavigate={setActiveTab} />
+            ) : (
+              <div className="text-center py-20 bg-neutral-900 border border-neutral-800 rounded-3xl max-w-md mx-auto p-8 space-y-4 shadow-2xl">
+                <div className="w-14 h-14 rounded-2xl bg-amber-950/60 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto">
+                  <Lock className="w-6 h-6" />
+                </div>
+                <h2 className="text-xl font-bold text-white">দৈনিক হিসাব খাতা প্রবেশাধিকার সংরক্ষিত</h2>
+                <p className="text-xs text-neutral-400">
+                  দোকানের আর্থিক হিসাব খাতা দেখতে স্টাফ অথবা অ্যাডমিন হিসেবে অনুমোদিত লগইন থাকতে হবে।
+                </p>
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={() => setActiveTab('home')}
+                    className="flex-1 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white font-semibold text-xs transition-colors"
+                  >
+                    হোমপেজে ফিরুন
+                  </button>
+                  <button
+                    onClick={() => handleOpenAuth('admin')}
+                    className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-950 transition-all"
+                  >
+                    লগইন করুন
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -205,7 +231,10 @@ const MainLayout: React.FC = () => {
 
         {/* ADMIN LOGIN GATEWAY */}
         {activeTab === 'admin' && (
-          <AdminDirectLogin onSuccess={() => setActiveTab('admin')} />
+          <AdminDirectLogin
+            onSuccess={() => setActiveTab('admin')}
+            onExitToHome={() => setActiveTab('home')}
+          />
         )}
       </main>
 

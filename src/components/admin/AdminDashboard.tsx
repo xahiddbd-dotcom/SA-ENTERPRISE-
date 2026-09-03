@@ -91,7 +91,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
     heroSlides,
     settings, updateSettings
   } = useData();
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, isAdmin, isSuperAdmin } = useAuth();
+
+  // Strict Authorization Check: If not authenticated or not admin, restrict immediately
+  if (!currentUser || (!isAdmin && !isSuperAdmin)) {
+    return (
+      <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4">
+        <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8 max-w-md w-full text-center space-y-5 shadow-2xl">
+          <div className="w-16 h-16 rounded-2xl bg-rose-950/60 border border-rose-500/40 text-rose-400 flex items-center justify-center mx-auto">
+            <Lock className="w-8 h-8" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-white">অ্যাডমিন প্রবেশাধিকার সংরক্ষিত</h2>
+            <p className="text-xs text-neutral-400 mt-2">
+              এই কন্ট্রোল প্যানেল শুধুমাত্র অনুমোদিত অ্যাডমিনিস্ট্রেটরদের জন্য। আপনার অ্যাকাউন্টটির এই প্যানেলে প্রবেশের অনুমতি নেই।
+            </p>
+          </div>
+          <button
+            onClick={onExitToStore}
+            className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-950 transition-all"
+          >
+            হোমপেজে ফিরে যান (Return to Store)
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Admin Theme state
   const [adminTheme, setAdminTheme] = useState<AdminThemeKey>(() => {
