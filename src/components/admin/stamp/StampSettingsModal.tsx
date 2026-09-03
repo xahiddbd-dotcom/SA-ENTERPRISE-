@@ -6,19 +6,19 @@ import { initialStampConfigs } from '../../../data/initialData';
 interface StampSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  stampConfigs: StampItemConfig[];
-  updateStampConfig: (id: string, updates: Partial<StampItemConfig>) => void;
-  addStampConfig: (configData: Omit<StampItemConfig, 'id'>) => StampItemConfig;
-  deleteStampConfig: (id: string) => void;
+  stampConfigs?: StampItemConfig[];
+  updateStampConfig?: (id: string, updates: Partial<StampItemConfig>) => void;
+  addStampConfig?: (configData: Omit<StampItemConfig, 'id'>) => StampItemConfig;
+  deleteStampConfig?: (id: string) => void;
 }
 
 export const StampSettingsModal: React.FC<StampSettingsModalProps> = ({
   isOpen,
   onClose,
-  stampConfigs,
-  updateStampConfig,
-  addStampConfig,
-  deleteStampConfig
+  stampConfigs = [],
+  updateStampConfig = () => {},
+  addStampConfig = () => ({} as any),
+  deleteStampConfig = () => {}
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newItem, setNewItem] = useState({
@@ -292,15 +292,52 @@ export const StampSettingsModal: React.FC<StampSettingsModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-neutral-400 font-medium mb-1">
-                    বিক্রয় মূল্য (৳)
-                  </label>
-                  <input
-                    type="number"
-                    value={item.defaultSalePrice}
-                    onChange={e => updateStampConfig(item.id, { defaultSalePrice: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-white font-bold font-mono focus:outline-none focus:border-amber-500"
-                  />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-neutral-400 font-medium">
+                      বিক্রয় মূল্য (৳)
+                    </label>
+                    <span className="text-[10px] text-emerald-400 font-bold">বাড়ান / কমান</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => updateStampConfig(item.id, { defaultSalePrice: Math.max(0, item.defaultSalePrice - 5) })}
+                      className="px-1.5 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-rose-400 font-bold text-xs"
+                      title="৫ টাকা কমান"
+                    >
+                      -৫
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateStampConfig(item.id, { defaultSalePrice: Math.max(0, item.defaultSalePrice - 1) })}
+                      className="px-1.5 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold text-xs"
+                      title="১ টাকা কমান"
+                    >
+                      -১
+                    </button>
+                    <input
+                      type="number"
+                      value={item.defaultSalePrice}
+                      onChange={e => updateStampConfig(item.id, { defaultSalePrice: parseFloat(e.target.value) || 0 })}
+                      className="flex-1 min-w-[50px] px-2 py-1 rounded-lg bg-neutral-900 border border-neutral-700 text-emerald-300 font-bold font-mono text-center focus:outline-none focus:border-amber-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => updateStampConfig(item.id, { defaultSalePrice: item.defaultSalePrice + 1 })}
+                      className="px-1.5 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold text-xs"
+                      title="১ টাকা বাড়ান"
+                    >
+                      +১
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateStampConfig(item.id, { defaultSalePrice: item.defaultSalePrice + 5 })}
+                      className="px-1.5 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-emerald-400 font-bold text-xs"
+                      title="৫ টাকা বাড়ান"
+                    >
+                      +৫
+                    </button>
+                  </div>
                 </div>
 
                 <div>

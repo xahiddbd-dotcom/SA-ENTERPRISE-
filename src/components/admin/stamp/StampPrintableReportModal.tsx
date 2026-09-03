@@ -5,9 +5,9 @@ import { X, Printer, Download } from 'lucide-react';
 interface StampPrintableReportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  sales: StampSaleRecord[];
-  settings: WebsiteSettings;
-  stats: {
+  sales?: StampSaleRecord[];
+  settings?: Partial<WebsiteSettings>;
+  stats?: {
     totalSalesAmount: number;
     totalBuyCost: number;
     totalProfit: number;
@@ -17,20 +17,36 @@ interface StampPrintableReportModalProps {
     cartridgeCount: number;
     otherCount: number;
   };
-  totalStockPurchasesCost: number;
-  dateFilter: string;
+  totalStockPurchasesCost?: number;
+  dateFilter?: string;
+  customStartDate?: string;
+  customEndDate?: string;
+  configs?: any[];
+  purchases?: any[];
 }
 
 export const StampPrintableReportModal: React.FC<StampPrintableReportModalProps> = ({
   isOpen,
   onClose,
-  sales,
-  settings,
-  stats,
-  totalStockPurchasesCost,
-  dateFilter
+  sales = [],
+  settings = {},
+  stats: incomingStats,
+  totalStockPurchasesCost = 0,
+  dateFilter = 'all'
 }) => {
   if (!isOpen) return null;
+
+  // Fallback stats computation if not passed
+  const stats = incomingStats || {
+    totalSalesAmount: sales.reduce((sum, s) => sum + (s.totalSaleAmount || 0), 0),
+    totalBuyCost: sales.reduce((sum, s) => sum + (s.totalBuyCost || 0), 0),
+    totalProfit: sales.reduce((sum, s) => sum + (s.totalProfit || 0), 0),
+    totalQuantity: sales.reduce((sum, s) => sum + (s.quantity || 0), 0),
+    stamp50Count: sales.filter(s => s.itemType === 'stamp_50').reduce((sum, s) => sum + (s.quantity || 0), 0),
+    stamp100Count: sales.filter(s => s.itemType === 'stamp_100').reduce((sum, s) => sum + (s.quantity || 0), 0),
+    cartridgeCount: sales.filter(s => s.itemType === 'cartridge_paper').reduce((sum, s) => sum + (s.quantity || 0), 0),
+    otherCount: sales.filter(s => !['stamp_50', 'stamp_100', 'cartridge_paper'].includes(s.itemType)).reduce((sum, s) => sum + (s.quantity || 0), 0)
+  };
 
   const getBengaliMonthAndDate = () => {
     const d = new Date();

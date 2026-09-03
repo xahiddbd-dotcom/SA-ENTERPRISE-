@@ -38,6 +38,7 @@ const MainLayout: React.FC = () => {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(() => parseCurrentRoute().productId || null);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(() => parseCurrentRoute().serviceId || null);
   const [trackerInitialId, setTrackerInitialId] = useState<string>(() => parseCurrentRoute().trackerId || '');
+  const [adminInitialSection, setAdminInitialSection] = useState<string | null>(() => parseCurrentRoute().adminSection || null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register' | 'staff' | 'admin'>('login');
@@ -52,6 +53,9 @@ const MainLayout: React.FC = () => {
       setSelectedServiceId(route.serviceId || null);
       if (route.trackerId) {
         setTrackerInitialId(route.trackerId);
+      }
+      if (route.adminSection) {
+        setAdminInitialSection(route.adminSection);
       }
     };
 
@@ -120,7 +124,10 @@ const MainLayout: React.FC = () => {
   if (activeTab === 'admin' && isAuthenticated && (isSuperAdmin || isAdmin)) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans">
-        <AdminDashboard onExitToStore={() => setActiveTab('home')} />
+        <AdminDashboard
+          onExitToStore={() => setActiveTab('home')}
+          initialSection={adminInitialSection}
+        />
         <CartModal isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
         <AuthModal
           isOpen={isAuthModalOpen}

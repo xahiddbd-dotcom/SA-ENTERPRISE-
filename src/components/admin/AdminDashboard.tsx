@@ -62,11 +62,62 @@ import {
   Palette,
   Sparkles,
   Camera,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Link2,
+  Copy,
+  Check
 } from 'lucide-react';
+import {
+  buildAdminSectionUrl,
+  copyToClipboard,
+  parseCurrentRoute,
+  updateBrowserUrl
+} from '../../utils/navigation';
+
+export type AdminMenuKey =
+  | 'overview'
+  | 'analytics'
+  | 'ledger'
+  | 'stamps'
+  | 'cashmemo'
+  | 'services'
+  | 'products'
+  | 'applications'
+  | 'orders'
+  | 'pos'
+  | 'finance'
+  | 'customers'
+  | 'staff'
+  | 'hero_slides'
+  | 'seo_meta'
+  | 'background_settings'
+  | 'settings'
+  | 'backup';
+
+const VALID_ADMIN_MENUS: AdminMenuKey[] = [
+  'overview',
+  'analytics',
+  'ledger',
+  'stamps',
+  'cashmemo',
+  'services',
+  'products',
+  'applications',
+  'orders',
+  'pos',
+  'finance',
+  'customers',
+  'staff',
+  'hero_slides',
+  'seo_meta',
+  'background_settings',
+  'settings',
+  'backup'
+];
 
 interface AdminDashboardProps {
   onExitToStore?: () => void;
+  initialSection?: string | null;
 }
 
 interface ExpenseItem {
@@ -78,7 +129,7 @@ interface ExpenseItem {
   note?: string;
 }
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore }) => {
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, initialSection }) => {
   const { language, toggleLanguage } = useLanguage();
   const {
     services, addService, updateService, deleteService,
@@ -139,9 +190,58 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore })
   const [timelineNewDesc, setTimelineNewDesc] = useState('');
   const [timelineNewDescBn, setTimelineNewDescBn] = useState('');
 
-  const [activeMenu, setActiveMenu] = useState<
-    'overview' | 'analytics' | 'ledger' | 'stamps' | 'cashmemo' | 'services' | 'products' | 'applications' | 'orders' | 'pos' | 'finance' | 'customers' | 'staff' | 'hero_slides' | 'seo_meta' | 'background_settings' | 'settings' | 'backup'
-  >('overview');
+  const getInitialMenu = (): AdminMenuKey => {
+    if (initialSection && VALID_ADMIN_MENUS.includes(initialSection as AdminMenuKey)) {
+      return initialSection as AdminMenuKey;
+    }
+    const currentRoute = parseCurrentRoute();
+    if (currentRoute.adminSection && VALID_ADMIN_MENUS.includes(currentRoute.adminSection as AdminMenuKey)) {
+      return currentRoute.adminSection as AdminMenuKey;
+    }
+    return 'overview';
+  };
+
+  const [activeMenu, setActiveMenu] = useState<AdminMenuKey>(getInitialMenu);
+  const [copiedLinkSection, setCopiedLinkSection] = useState<string | null>(null);
+
+  const navigateToMenu = (menuId: AdminMenuKey) => {
+    setActiveMenu(menuId);
+    updateBrowserUrl({ tab: 'admin', adminSection: menuId });
+  };
+
+  const handleCopySectionLink = (e: React.MouseEvent, sectionId: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const url = buildAdminSectionUrl(sectionId);
+    copyToClipboard(url);
+    setCopiedLinkSection(sectionId);
+    setTimeout(() => {
+      setCopiedLinkSection(null);
+    }, 2500);
+  };
+
+  // Sync activeMenu with URL popstate / hash changes
+  useEffect(() => {
+    const handleUrlSync = () => {
+      const route = parseCurrentRoute();
+      if (route.adminSection && VALID_ADMIN_MENUS.includes(route.adminSection as AdminMenuKey)) {
+        setActiveMenu(route.adminSection as AdminMenuKey);
+      }
+    };
+    window.addEventListener('popstate', handleUrlSync);
+    window.addEventListener('hashchange', handleUrlSync);
+    return () => {
+      window.removeEventListener('popstate', handleUrlSync);
+      window.removeEventListener('hashchange', handleUrlSync);
+    };
+  }, []);
+
+  // Sync when initialSection prop updates
+  useEffect(() => {
+    if (initialSection && VALID_ADMIN_MENUS.includes(initialSection as AdminMenuKey)) {
+      setActiveMenu(initialSection as AdminMenuKey);
+    }
+  }, [initialSection]);
 
   // Modals & form states
   const [editingService, setEditingService] = useState<Partial<Service> | null>(null);

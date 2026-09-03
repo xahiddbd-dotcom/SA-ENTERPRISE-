@@ -1883,6 +1883,10 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
       <StampSettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+        stampConfigs={stampConfigs}
+        updateStampConfig={updateStampConfig}
+        addStampConfig={addStampConfig}
+        deleteStampConfig={deleteStampConfig}
       />
 
       {/* MODAL: PROFESSIONAL PRINTABLE / PDF REPORT (SHOP NAME & MONTHLY/DAILY STATEMENT) */}
@@ -1890,11 +1894,14 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
         isOpen={isPrintReportOpen}
         onClose={() => setIsPrintReportOpen(false)}
         sales={filteredSales}
-        purchases={stampPurchases}
-        configs={stampConfigs}
+        settings={settings}
+        stats={stats}
+        totalStockPurchasesCost={totalStockPurchasesCost}
         dateFilter={dateFilter}
         customStartDate={customStartDate}
         customEndDate={customEndDate}
+        configs={stampConfigs}
+        purchases={stampPurchases}
       />
 
       {/* MODAL: PRINT CASH MEMO / RECEIPT */}

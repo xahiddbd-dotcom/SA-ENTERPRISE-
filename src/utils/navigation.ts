@@ -10,6 +10,7 @@ export interface ParsedRoute {
   serviceId: string | null;
   trackerId: string | null;
   categoryId: string | null;
+  adminSection: string | null;
 }
 
 export const VALID_TABS = [
@@ -45,7 +46,7 @@ export function getCanonicalDomain(): string {
  */
 export function parseCurrentRoute(): ParsedRoute {
   if (typeof window === 'undefined') {
-    return { tab: 'home', productId: null, serviceId: null, trackerId: null, categoryId: null };
+    return { tab: 'home', productId: null, serviceId: null, trackerId: null, categoryId: null, adminSection: null };
   }
 
   const rawPath = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
@@ -58,8 +59,9 @@ export function parseCurrentRoute(): ParsedRoute {
   let serviceId: string | null = searchParams.get('service') || searchParams.get('srv') || null;
   let trackerId: string | null = searchParams.get('app') || searchParams.get('tracker') || searchParams.get('tracking') || null;
   let categoryId: string | null = searchParams.get('category') || searchParams.get('cat') || null;
+  let adminSection: string | null = searchParams.get('section') || searchParams.get('sec') || searchParams.get('adminTab') || null;
 
-  // 1. Check path matches (e.g. /services, /shop, /product/123, /service/123, /tracker/APP-123)
+  // 1. Check path matches (e.g. /services, /shop, /product/123, /service/123, /tracker/APP-123, /admin/stamps)
   const pathSegments = rawPath.split('/').filter(seg => seg && seg !== 'index.html');
 
   if (pathSegments.length > 0) {
@@ -90,18 +92,23 @@ export function parseCurrentRoute(): ParsedRoute {
       if (pathSegments.length > 1) {
         trackerId = pathSegments[1];
       }
+    } else if (firstSegment === 'admin') {
+      tab = 'admin';
+      if (pathSegments.length > 1) {
+        adminSection = pathSegments[1];
+      }
     } else if (VALID_TABS.includes(firstSegment)) {
       tab = firstSegment;
     }
   }
 
-  // 2. Check query parameter overrides (e.g. ?tab=services, ?tab=shop)
+  // 2. Check query parameter overrides (e.g. ?tab=services, ?tab=shop, ?tab=admin&section=stamps)
   const tabParam = searchParams.get('tab');
   if (tabParam && VALID_TABS.includes(tabParam.toLowerCase())) {
     tab = tabParam.toLowerCase();
   }
 
-  // 3. Check hash overrides (e.g. #services, #/services, #product=123, #service=123)
+  // 3. Check hash overrides (e.g. #services, #/services, #admin/stamps, #section=stamps)
   if (rawHash) {
     const cleanHash = rawHash.replace(/^\/+/, '');
     const hashSegments = cleanHash.split('/').filter(Boolean);
@@ -113,6 +120,7 @@ export function parseCurrentRoute(): ParsedRoute {
         if (hashFirst === 'services') serviceId = hashSegments[1];
         if (hashFirst === 'shop') productId = hashSegments[1];
         if (hashFirst === 'tracker') trackerId = hashSegments[1];
+        if (hashFirst === 'admin') adminSection = hashSegments[1];
       }
     } else if (cleanHash.startsWith('product=')) {
       tab = 'shop';
@@ -123,6 +131,9 @@ export function parseCurrentRoute(): ParsedRoute {
     } else if (cleanHash.startsWith('tracker=') || cleanHash.startsWith('app=')) {
       tab = 'tracker';
       trackerId = cleanHash.replace(/^(tracker|app)=/, '');
+    } else if (cleanHash.startsWith('section=') || cleanHash.startsWith('admin=')) {
+      tab = 'admin';
+      adminSection = cleanHash.replace(/^(section|admin)=/, '');
     }
   }
 
@@ -141,7 +152,12 @@ export function parseCurrentRoute(): ParsedRoute {
     tab = 'tracker';
   }
 
-  return { tab, productId, serviceId, trackerId, categoryId };
+  // If an admin section is specified, ensure tab is admin
+  if (adminSection && tab === 'home') {
+    tab = 'admin';
+  }
+
+  return { tab, productId, serviceId, trackerId, categoryId, adminSection };
 }
 
 /**
@@ -153,6 +169,7 @@ export function buildUrl(route: {
   serviceId?: string | null;
   trackerId?: string | null;
   categoryId?: string | null;
+  adminSection?: string | null;
 }): string {
   const currentOrigin = getCanonicalDomain();
 
@@ -169,6 +186,9 @@ export function buildUrl(route: {
   } else if (route.trackerId) {
     params.set('app', route.trackerId);
     path = '/tracker';
+  } else if (route.adminSection) {
+    params.set('section', route.adminSection);
+    path = '/admin';
   }
 
   if (route.categoryId && route.categoryId !== 'all') {
@@ -177,6 +197,14 @@ export function buildUrl(route: {
 
   const queryStr = params.toString() ? `?${params.toString()}` : '';
   return `${currentOrigin}${path}${queryStr}`;
+}
+
+/**
+ * Builds a direct shareable URL for a specific Admin Dashboard option/module
+ */
+export function buildAdminSectionUrl(section: string): string {
+  const currentOrigin = getCanonicalDomain();
+  return `${currentOrigin}/admin?section=${encodeURIComponent(section)}`;
 }
 
 /**
@@ -197,6 +225,7 @@ export function updateBrowserUrl(
     serviceId?: string | null;
     trackerId?: string | null;
     categoryId?: string | null;
+    adminSection?: string | null;
   },
   replace: boolean = false
 ) {
@@ -215,6 +244,9 @@ export function updateBrowserUrl(
   } else if (route.trackerId) {
     params.set('app', route.trackerId);
     path = '/tracker';
+  } else if (route.adminSection) {
+    params.set('section', route.adminSection);
+    path = '/admin';
   }
 
   if (route.categoryId && route.categoryId !== 'all') {
