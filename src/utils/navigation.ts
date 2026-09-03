@@ -12,7 +12,7 @@ export interface ParsedRoute {
   categoryId: string | null;
 }
 
-const VALID_TABS = [
+export const VALID_TABS = [
   'home',
   'services',
   'shop',
@@ -27,6 +27,19 @@ const VALID_TABS = [
 ];
 
 /**
+ * Gets the production canonical domain or current window origin
+ */
+export function getCanonicalDomain(): string {
+  if (typeof window === 'undefined') return 'https://saentbd.vercel.app';
+  const origin = window.location.origin;
+  // If previewing in local container, default canonical to the user's Vercel deployment
+  if (origin && !origin.includes('localhost') && !origin.includes('3000')) {
+    return origin;
+  }
+  return 'https://saentbd.vercel.app';
+}
+
+/**
  * Parses the current window location (pathname, search params, and hash)
  * into a structured route object.
  */
@@ -35,9 +48,10 @@ export function parseCurrentRoute(): ParsedRoute {
     return { tab: 'home', productId: null, serviceId: null, trackerId: null, categoryId: null };
   }
 
-  const pathname = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
+  const rawPath = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
   const searchParams = new URLSearchParams(window.location.search);
-  const hash = window.location.hash.toLowerCase().replace(/^#/, '');
+  // Normalize hash (strip leading # and #/)
+  const rawHash = window.location.hash.toLowerCase().replace(/^#\/?/, '');
 
   let tab = 'home';
   let productId: string | null = searchParams.get('product') || searchParams.get('prod') || null;
@@ -46,7 +60,7 @@ export function parseCurrentRoute(): ParsedRoute {
   let categoryId: string | null = searchParams.get('category') || searchParams.get('cat') || null;
 
   // 1. Check path matches (e.g. /services, /shop, /product/123, /service/123, /tracker/APP-123)
-  const pathSegments = pathname.split('/').filter(Boolean);
+  const pathSegments = rawPath.split('/').filter(seg => seg && seg !== 'index.html');
 
   if (pathSegments.length > 0) {
     const firstSegment = pathSegments[0];
@@ -81,39 +95,48 @@ export function parseCurrentRoute(): ParsedRoute {
     }
   }
 
-  // 2. Check query parameter overrides (e.g. ?tab=services)
+  // 2. Check query parameter overrides (e.g. ?tab=services, ?tab=shop)
   const tabParam = searchParams.get('tab');
   if (tabParam && VALID_TABS.includes(tabParam.toLowerCase())) {
     tab = tabParam.toLowerCase();
   }
 
-  // 3. Check hash overrides (e.g. #services, #product=123, #service=123)
-  if (hash) {
-    if (VALID_TABS.includes(hash)) {
-      tab = hash;
-    } else if (hash.startsWith('product=')) {
+  // 3. Check hash overrides (e.g. #services, #/services, #product=123, #service=123)
+  if (rawHash) {
+    const cleanHash = rawHash.replace(/^\/+/, '');
+    const hashSegments = cleanHash.split('/').filter(Boolean);
+    const hashFirst = hashSegments[0];
+
+    if (VALID_TABS.includes(hashFirst)) {
+      tab = hashFirst;
+      if (hashSegments.length > 1) {
+        if (hashFirst === 'services') serviceId = hashSegments[1];
+        if (hashFirst === 'shop') productId = hashSegments[1];
+        if (hashFirst === 'tracker') trackerId = hashSegments[1];
+      }
+    } else if (cleanHash.startsWith('product=')) {
       tab = 'shop';
-      productId = hash.replace('product=', '');
-    } else if (hash.startsWith('service=')) {
+      productId = cleanHash.replace('product=', '');
+    } else if (cleanHash.startsWith('service=')) {
       tab = 'services';
-      serviceId = hash.replace('service=', '');
-    } else if (hash.startsWith('tracker=') || hash.startsWith('app=')) {
+      serviceId = cleanHash.replace('service=', '');
+    } else if (cleanHash.startsWith('tracker=') || cleanHash.startsWith('app=')) {
       tab = 'tracker';
-      trackerId = hash.replace(/^(tracker|app)=/, '');
+      trackerId = cleanHash.replace(/^(tracker|app)=/, '');
     }
   }
 
-  // If a product is specified, default to shop tab if still on home
-  if (productId && tab === 'home') {
+  // If a product is specified, ensure tab is shop
+  if (productId && (tab === 'home' || tab === 'services')) {
     tab = 'shop';
   }
 
-  // If a service is specified, default to services tab if still on home
-  if (serviceId && tab === 'home') {
+  // If a service is specified, ensure tab is services
+  if (serviceId && (tab === 'home' || tab === 'shop')) {
     tab = 'services';
   }
 
-  // If a tracker ID is specified, default to tracker tab
+  // If a tracker ID is specified, ensure tab is tracker
   if (trackerId && tab === 'home') {
     tab = 'tracker';
   }
@@ -131,9 +154,7 @@ export function buildUrl(route: {
   trackerId?: string | null;
   categoryId?: string | null;
 }): string {
-  const currentOrigin = typeof window !== 'undefined' && window.location.origin
-    ? window.location.origin
-    : 'https://saentbd.vercel.app';
+  const currentOrigin = getCanonicalDomain();
 
   const tab = route.tab || 'home';
   let path = tab === 'home' ? '/' : `/${tab}`;
@@ -141,21 +162,29 @@ export function buildUrl(route: {
 
   if (route.productId) {
     params.set('product', route.productId);
-    if (tab !== 'shop') path = '/shop';
+    path = '/shop';
   } else if (route.serviceId) {
     params.set('service', route.serviceId);
-    if (tab !== 'services') path = '/services';
+    path = '/services';
   } else if (route.trackerId) {
     params.set('app', route.trackerId);
-    if (tab !== 'tracker') path = '/tracker';
+    path = '/tracker';
   }
 
-  if (route.categoryId) {
+  if (route.categoryId && route.categoryId !== 'all') {
     params.set('category', route.categoryId);
   }
 
   const queryStr = params.toString() ? `?${params.toString()}` : '';
   return `${currentOrigin}${path}${queryStr}`;
+}
+
+/**
+ * Builds a WhatsApp share link with pre-filled message text
+ */
+export function buildWhatsAppShareUrl(title: string, url: string): string {
+  const message = `*সাইফুল এন্টারপ্রাইজ (Saiful Enterprise)*\n${title}\n\n📌 বিস্তারিত ও সরাসরি প্রমাণ লিঙ্ক:\n${url}`;
+  return `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
 }
 
 /**
@@ -188,7 +217,7 @@ export function updateBrowserUrl(
     path = '/tracker';
   }
 
-  if (route.categoryId) {
+  if (route.categoryId && route.categoryId !== 'all') {
     params.set('category', route.categoryId);
   }
 
@@ -197,10 +226,19 @@ export function updateBrowserUrl(
 
   const currentRelative = `${window.location.pathname}${window.location.search}`;
   if (currentRelative !== newUrl) {
-    if (replace) {
-      window.history.replaceState({ tab, ...route }, '', newUrl);
-    } else {
-      window.history.pushState({ tab, ...route }, '', newUrl);
+    try {
+      if (replace) {
+        window.history.replaceState({ tab, ...route }, '', newUrl);
+      } else {
+        window.history.pushState({ tab, ...route }, '', newUrl);
+      }
+    } catch (e) {
+      try {
+        // Fallback for restricted sandboxes
+        window.location.hash = newUrl;
+      } catch {
+        // ignore
+      }
     }
   }
 }

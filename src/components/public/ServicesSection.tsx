@@ -3,6 +3,8 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { Service, ServiceCategory } from '../../types';
 import { ShareProofButton } from '../common/ShareProofButton';
+import { ProofLinkBox } from '../common/ProofLinkBox';
+import { buildUrl } from '../../utils/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Printer,
@@ -477,6 +479,14 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
               ) : (
                 /* Submission Form */
                 <form onSubmit={handleSubmitApplication} className="space-y-4">
+                  {/* Direct Proof Link Card */}
+                  <ProofLinkBox
+                    url={buildUrl({ tab: 'services', serviceId: activeServiceModal.id })}
+                    title={language === 'bn' ? activeServiceModal.nameBn : activeServiceModal.name}
+                    subtitle={language === 'bn' ? 'কাস্টমার বা প্রার্থীর কাছে পাঠানোর জন্য এই সেবার অফিসিয়াল প্রমাণ লিঙ্ক' : 'Official proof link to share with candidate/customer'}
+                    badgeLabel={language === 'bn' ? 'সেবার সরাসরি প্রমাণ লিঙ্ক' : 'Service Direct Proof Link'}
+                  />
+
                   {/* Service info summary */}
                   <div className="p-3.5 rounded-xl bg-neutral-950 border border-neutral-800 flex flex-wrap items-center justify-between gap-2 text-xs">
                     <div>

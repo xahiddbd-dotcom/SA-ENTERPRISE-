@@ -4,6 +4,8 @@ import { useData } from '../../context/DataContext';
 import { Product } from '../../types';
 import { Image } from '../common/Image';
 import { ShareProofButton } from '../common/ShareProofButton';
+import { ProofLinkBox } from '../common/ProofLinkBox';
+import { buildUrl } from '../../utils/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ShoppingBag,
@@ -388,6 +390,14 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Direct Proof Link Card */}
+              <ProofLinkBox
+                url={buildUrl({ tab: 'shop', productId: selectedProductModal.id })}
+                title={language === 'bn' ? selectedProductModal.nameBn : selectedProductModal.name}
+                subtitle={language === 'bn' ? 'কাস্টমারদের কাছে পাঠানোর জন্য এই পণ্যের অফিসিয়াল সরাসরি প্রমাণ লিঙ্ক' : 'Official proof link to share with customer'}
+                badgeLabel={language === 'bn' ? 'পণ্যের সরাসরি প্রমাণ লিঙ্ক' : 'Product Direct Proof Link'}
+              />
 
               <div className="flex items-center justify-between pt-2">
                 <div>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saiful Enterprise - Digital Service & Print Solutions</title>
+  <style>
+    /* Reset & Base Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #0a0f1d;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    /* Fullscreen Hero Section */
+    .hero-section {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      min-height: 600px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Background Media Layer */
+    .hero-media-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+      pointer-events: none; /* Prevents user clicks on background */
+    }
+
+    /* Direct Video & Image Elements */
+    .hero-media-element {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    /* YouTube Iframe - Auto-Covering & Crop Ratio */
+    /* Scales by 1.35x to completely crop out YouTube title bar, watermarks, and progress controls */
+    .hero-yt-iframe {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 177.78vh; /* 100 * (16 / 9) */
+      height: 56.25vw;  /* 100 * (9 / 16) */
+      min-width: 100%;
+      min-height: 100%;
+      transform: translate(-50%, -50%) scale(1.38);
+      pointer-events: none;
+      border: 0;
+    }
+
+    /* Dark Semi-Transparent Gradient Overlay */
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: radial-gradient(circle at center, rgba(10, 15, 29, 0.65) 0%, rgba(5, 8, 18, 0.88) 100%),
+                  linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.75) 100%);
+      backdrop-filter: blur(1.5px);
+    }
+
+    /* Content Container */
+    .hero-content {
+      position: relative;
+      z-index: 3;
+      max-width: 860px;
+      padding: 0 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Top Badge */
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+
+    .hero-badge-pulse {
+      width: 8px;
+      height: 8px;
+      background-color: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 1.8s infinite;
+    }
+
+    /* Titles */
+    .hero-title {
+      font-size: clamp(2.4rem, 5.5vw, 4rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin-bottom: 12px;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.1rem, 2.3vw, 1.45rem);
+      font-weight: 500;
+      color: #38bdf8;
+      margin-bottom: 18px;
+      letter-spacing: -0.01em;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Description */
+    .hero-description {
+      font-size: clamp(0.95rem, 1.6vw, 1.12rem);
+      line-height: 1.65;
+      color: #cbd5e1;
+      max-width: 720px;
+      margin-bottom: 34px;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Buttons Group */
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      width: 100%;
+    }
+
+    /* Call to Action Button */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      min-width: 170px;
+    }
+
+    /* Call Button */
+    .btn-call {
+      background: #0284c7;
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+    }
+
+    .btn-call:hover {
+      background: #0369a1;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+    }
+
+    /* WhatsApp Button */
+    .btn-whatsapp {
+      background: #10b981;
+      color: #062b1e;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+
+    .btn-whatsapp:hover {
+      background: #059669;
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    }
+
+    .btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    /* Keyframe Animations */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive Mobile Tweaks */
+    @media (max-width: 480px) {
+      .hero-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO SECTION -->
+  <section class="hero-section" id="hero">
+    <!-- Dynamic Media Container (Controlled by JS) -->
+    <div class="hero-media-container" id="heroMediaContainer"></div>
+
+    <!-- Dark Contrast Overlay -->
+    <div class="hero-overlay"></div>
+
+    <!-- Content -->
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="hero-badge-pulse"></span>
+        <span>Farmgate • Indira Road, Dhaka</span>
+      </div>
+
+      <h1 class="hero-title">Saiful Enterprise</h1>
+      <h2 class="hero-subtitle">Digital Service, Online Application &amp; Print Solutions</h2>
+
+      <p class="hero-description">
+        High-speed typing, admission forms, defense &amp; government recruitment center in Farmgate. 
+        Computer typing, photocopy, color printing, photo lab, government &amp; defense recruitment 
+        online application, and Tejgaon College admission assistance.
+      </p>
+
+      <div class="hero-actions">
+        <!-- Call Now Action (tel link) -->
+        <a href="tel:+8801700000000" class="btn btn-call" id="btnCall">
+          <svg viewBox="0 0 24 24">
+            <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+          </svg>
+          <span>Call Now</span>
+        </a>
+
+        <!-- WhatsApp Action (wa.me link) -->
+        <a href="https://wa.me/8801700000000?text=Hello%20Saiful%20Enterprise,%20I%20need%20assistance." target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp" id="btnWhatsapp">
+          <svg viewBox="0 0 24 24">
+            <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 012.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.44 0-2.85-.38-4.08-1.1l-.29-.17-3.03.79.81-2.95-.19-.3a8.217 8.217 0 01-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24zm4.51 11.64c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.38-1.72-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43s-.56-1.34-.76-1.84c-.2-.49-.4-.42-.56-.43h-.47c-.17 0-.43.06-.66.31-.22.25-.86.84-.86 2.05s.88 2.38 1 2.54c.12.17 1.73 2.65 4.2 3.71.59.25 1.05.4 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.07-.11-.23-.17-.48-.3z"/>
+          </svg>
+          <span>WhatsApp</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- JAVASCRIPT: OnAir Background Switcher -->
+  <script>
+    /**
+     * =========================================================================
+     *  ONAIR BACKGROUND CONFIGURATION
+     * =========================================================================
+     *  Set `type` to:
+     *    - "video" : Supports direct MP4 video file URLs OR any YouTube video URL.
+     *    - "image" : Direct image URL (JPG, PNG, WebP, Unsplash, etc.).
+     *
+     *  Examples:
+     *    1. YouTube:
+     *       url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+     *       url: "https://youtu.be/M7lc1UVf-VE"
+     *    2. Direct MP4:
+     *       url: "https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-screen-close-up-1728-large.mp4"
+     *    3. Image:
+     *       type: "image",
+     *       url: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1920&auto=format&fit=crop"
+     * =========================================================================
+     */
+    const backgroundConfig = {
+      type: "video", // "video" | "image"
+      url: "https://www.youtube.com/watch?v=5qap5aO4i9A" // Paste YouTube link, MP4 URL, or Image URL here
+    };
+
+    /**
+     * Helper: Extract YouTube Video ID from any standard format
+     */
+    function extractYouTubeId(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    /**
+     * Helper: Detect if string is a YouTube URL
+     */
+    function isYouTubeUrl(url) {
+      return /youtube\.com|youtu\.be/i.test(url) || extractYouTubeId(url) !== null;
+    }
+
+    /**
+     * Render the background media dynamically with zero logos & clean cover
+     */
+    function renderBackground(config) {
+      const container = document.getElementById("heroMediaContainer");
+      if (!container) return;
+
+      container.innerHTML = ""; // Clear current media
+
+      if (config.type === "video") {
+        const ytId = extractYouTubeId(config.url);
+
+        if (ytId || isYouTubeUrl(config.url)) {
+          // YouTube Embed with zero UI, zero controls, zero branding & looped autoplay
+          const cleanId = ytId || config.url;
+          const iframe = document.createElement("iframe");
+          iframe.className = "hero-yt-iframe";
+          iframe.src = `https://www.youtube-nocookie.com/embed/${cleanId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${cleanId}&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&enablejsapi=1`;
+          iframe.allow = "autoplay; encrypted-media; picture-in-picture";
+          iframe.setAttribute("tabindex", "-1");
+          iframe.setAttribute("aria-hidden", "true");
+          container.appendChild(iframe);
+        } else {
+          // Direct HTML5 MP4 / WebM video file
+          const video = document.createElement("video");
+          video.className = "hero-media-element";
+          video.src = config.url;
+          video.autoplay = true;
+          video.muted = true;
+          video.loop = true;
+          video.playsInline = true;
+          video.setAttribute("playsinline", "");
+          container.appendChild(video);
+        }
+      } else if (config.type === "image") {
+        // High-resolution image background
+        const img = document.createElement("img");
+        img.className = "hero-media-element";
+        img.src = config.url;
+        img.alt = "Saiful Enterprise Background";
+        container.appendChild(img);
+      }
+    }
+
+    // Initialize OnAir Background on DOM ready
+    document.addEventListener("DOMContentLoaded", () => {
+      renderBackground(backgroundConfig);
+    });
+  </script>
+</body>
+</html>

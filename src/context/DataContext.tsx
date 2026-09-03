@@ -365,7 +365,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Judicial Stamp & Cartridge States
   const [stampConfigs, setStampConfigs] = useState<StampItemConfig[]>(() => {
     const saved = localStorage.getItem('se_stamp_configs');
-    return saved ? JSON.parse(saved) : initialStampConfigs;
+    if (saved) {
+      try {
+        const parsed: StampItemConfig[] = JSON.parse(saved);
+        // Retain only valid configs, purging obsolete ones requested to be deleted
+        const cleaned = parsed.filter(
+          item => !['stamp_200', 'stamp_300', 'stamp_500', 'stamp_writing'].includes(item.id)
+        );
+        return cleaned.length > 0 ? cleaned : initialStampConfigs;
+      } catch (e) {
+        return initialStampConfigs;
+      }
+    }
+    return initialStampConfigs;
   });
 
   const [stampSales, setStampSales] = useState<StampSaleRecord[]>(() => {

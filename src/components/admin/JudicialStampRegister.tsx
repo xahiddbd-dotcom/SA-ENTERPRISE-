@@ -28,10 +28,15 @@ import {
   ShieldCheck,
   ShoppingBag,
   Eye,
+  EyeOff,
+  Lock,
+  Unlock,
   FileSpreadsheet
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
+import { StampSettingsModal } from './stamp/StampSettingsModal';
+import { StampPrintableReportModal } from './stamp/StampPrintableReportModal';
 
 interface JudicialStampRegisterProps {
   lang: Language;
@@ -53,6 +58,10 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
     deleteStampConfig
   } = useData();
 
+  // Customer Privacy Mode: hides purchase cost and profits in counter/customer view
+  const [customerPrivacyMode, setCustomerPrivacyMode] = useState<boolean>(true);
+  const [showProfitValues, setShowProfitValues] = useState<boolean>(false);
+
   // Active Tab
   const [activeTab, setActiveTab] = useState<'sales' | 'stock' | 'purchases' | 'pricing'>('sales');
 
@@ -69,8 +78,31 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
   const [isAddSaleOpen, setIsAddSaleOpen] = useState(false);
   const [isAddPurchaseOpen, setIsAddPurchaseOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isPrintReportOpen, setIsPrintReportOpen] = useState(false);
   const [editingSale, setEditingSale] = useState<StampSaleRecord | null>(null);
   const [selectedSaleForMemo, setSelectedSaleForMemo] = useState<StampSaleRecord | null>(null);
+
+  // Helper for Bengali Month and Date
+  const getMonthAndDateBn = (dateStr?: string) => {
+    const d = dateStr ? new Date(dateStr) : new Date();
+    const monthsBn = [
+      'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
+      'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'
+    ];
+    const monthsEn = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const mIndex = d.getMonth();
+    const year = d.getFullYear();
+    const day = d.getDate();
+    return {
+      monthBn: `${monthsBn[mIndex]} ${year}`,
+      dateBn: `${day} ${monthsBn[mIndex]}, ${year}`,
+      monthEn: `${monthsEn[mIndex]} ${year}`,
+      dateEn: d.toLocaleDateString('en-GB')
+    };
+  };
 
   // New Sale Form State
   const [saleForm, setSaleForm] = useState({
@@ -180,6 +212,11 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
       totalStockValue
     };
   }, [filteredSales, stampConfigs]);
+
+  // Total stock purchases cost from Treasury / Vendor
+  const totalStockPurchasesCost = useMemo(() => {
+    return stampPurchases.reduce((sum, p) => sum + (p.totalCost || 0), 0);
+  }, [stampPurchases]);
 
   // Handle Item selection in sale form
   const handleItemSelect = (typeId: string) => {
@@ -309,98 +346,209 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
     setIsAddPurchaseOpen(false);
   };
 
-  // Export to Excel
+  // Export to Excel with Shop Name, Month, Date, Total Profit, and Serial Numbers
   const exportToExcel = () => {
-    const data = filteredSales.map((s, idx) => ({
-      'ক্রমিক নং': idx + 1,
-      'তারিখ': s.date,
-      'সময়': s.time || '-',
-      'আইটেমের নাম': s.itemNameBn,
-      'পরিমাণ (পিস)': s.quantity,
-      'একক ক্রয় মূল্য (৳)': s.buyPricePerUnit,
-      'একক বিক্রয় মূল্য (৳)': s.salePricePerUnit,
-      'মোট ক্রয় খরচ (৳)': s.totalBuyCost,
-      'মোট বিক্রয় মূল্য (৳)': s.totalSaleAmount,
-      'নিট লাভ / মুনাফা (৳)': s.totalProfit,
-      'দলিলের ধরন': s.deedType || '-',
-      'স্ট্যাম্প ক্রমিক নং': s.serialNumbers || '-',
-      'ক্রেতার নাম': s.customerName || '-',
-      'মোবাইল': s.customerPhone || '-',
-      'পেমেন্ট মাধ্যম': s.paymentMethod,
-      'অপারেটর': s.operatorName || '-'
-    }));
+    const { monthBn, dateBn } = getMonthAndDateBn();
+    const shopName = settings.businessNameBn || 'সাইফুল এন্টারপ্রাইজ (Saiful Enterprise)';
+    const shopAddress = settings.addressBn || '২০/১, সাগর-সৈকত মার্কেট, ইন্দিরা রোড, তেজগাঁও, ঢাকা';
+    const shopPhone = settings.phonePrimary || '০১৫৪০০০৪৯৬৬';
 
-    const ws = XLSX.utils.json_to_sheet(data);
+    const metaRows: any[][] = [
+      [shopName],
+      [`ঠিকানা: ${shopAddress} | মোবাইল: ${shopPhone}`],
+      ['জুডিশিয়াল স্ট্যাম্প ও কার্টিজ পেপার বিক্রয়, ক্রয় ব্যয় ও মুনাফা রেজিস্টার'],
+      [`রিপোর্টের মাস: ${monthBn} | তৈরির তারিখ: ${dateBn} | সময়সীমা: ${dateFilter.toUpperCase()}`],
+      [`মোট বিক্রয় মূল্য: ৳${stats.totalSalesAmount} | মোট ক্রয় ব্যয়: ৳${stats.totalBuyCost} | মোট অর্জিত নিট মুনাফা: ৳${stats.totalProfit} | মোট স্টক ক্রয় ব্যয়: ৳${totalStockPurchasesCost}`],
+      [`মোট বিক্রিত সংখ্যা: ${stats.totalQuantity} পিস (৫০৳ স্ট্যাম্প: ${stats.stamp50Count} পিস, ১০০৳ স্ট্যাম্প: ${stats.stamp100Count} পিস, কার্টিজ পেপার: ${stats.cartridgeCount} পাতা)`],
+      [] // spacer
+    ];
+
+    const tableHeaders = [
+      'ক্রমিক নং',
+      'তারিখ',
+      'সময়',
+      'আইটেম / স্ট্যাম্পের বিবরণ',
+      'স্ট্যাম্পের ক্রমিক নং (Serial No)',
+      'পরিমাণ (পিস)',
+      'একক ক্রয় মূল্য (৳)',
+      'একক বিক্রয় মূল্য (৳)',
+      'মোট বিক্রয় মূল্য (৳)',
+      'মোট ক্রয় ব্যয় (৳)',
+      'মোট অর্জিত নিট মুনাফা (৳)',
+      'দলিলের ধরন / উদ্দেশ্য',
+      'ক্রেতার নাম',
+      'মোবাইল নম্বর',
+      'পেমেন্ট মাধ্যম',
+      'অপারেটর'
+    ];
+
+    const dataRows = filteredSales.map((s, idx) => [
+      idx + 1,
+      s.date,
+      s.time || '-',
+      s.itemNameBn || s.itemName,
+      s.serialNumbers || '-',
+      s.quantity,
+      s.buyPricePerUnit,
+      s.salePricePerUnit,
+      s.totalSaleAmount,
+      s.totalBuyCost,
+      s.totalProfit,
+      s.deedType || '-',
+      s.customerName || 'নগদ ক্রেতা',
+      s.customerPhone || '-',
+      s.paymentMethod,
+      s.operatorName || '-'
+    ]);
+
+    const allRows = [...metaRows, tableHeaders, ...dataRows];
+    const ws = XLSX.utils.aoa_to_sheet(allRows);
+
+    ws['!cols'] = [
+      { wch: 10 },
+      { wch: 13 },
+      { wch: 10 },
+      { wch: 28 },
+      { wch: 24 },
+      { wch: 14 },
+      { wch: 16 },
+      { wch: 16 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 20 },
+      { wch: 26 },
+      { wch: 20 },
+      { wch: 16 },
+      { wch: 14 },
+      { wch: 18 }
+    ];
+
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'স্ট্যাম্প বিক্রয় খাতা');
-    XLSX.writeFile(wb, `Stamp_Sales_Ledger_${todayStr}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, 'স্ট্যাম্প ও কার্টিজ রেজিস্টার');
+
+    if (stampPurchases.length > 0) {
+      const purchaseRows = [
+        [shopName],
+        [`স্টক ক্রয় ও ভেন্ডার ব্যয় হিস্ট্রি - মাস: ${monthBn}`],
+        [`মোট স্টক ক্রয় খরচ: ৳${totalStockPurchasesCost}`],
+        [],
+        ['ক্রমিক নং', 'ক্রয়ের তারিখ', 'আইটেমের নাম', 'পরিমাণ (পিস)', 'একক ক্রয় রেট (৳)', 'মোট ক্রয় খরচ (৳)', 'ভেন্ডার / ট্রেজারি সোর্স', 'ক্রমিক নম্বর রেঞ্জ', 'পরিশোধকারী'],
+        ...stampPurchases.map((p, i) => [
+          i + 1,
+          p.date,
+          p.itemNameBn,
+          p.quantity,
+          p.buyPricePerUnit,
+          p.totalCost,
+          p.vendorSource || '-',
+          p.serialRange || '-',
+          p.paidBy || '-'
+        ])
+      ];
+      const ws2 = XLSX.utils.aoa_to_sheet(purchaseRows);
+      XLSX.utils.book_append_sheet(wb, ws2, 'স্টক ক্রয় হিস্ট্রি');
+    }
+
+    XLSX.writeFile(wb, `Stamp_Cartridge_Register_${monthBn.replace(/\s+/g, '_')}_${todayStr}.xlsx`);
   };
 
-  // Export PDF Report
+  // Export PDF Report with Shop Name, Month, Date, Total Profit, and Serial Numbers
   const exportPDF = () => {
     const doc = new jsPDF('p', 'mm', 'a4');
-    
+    const { monthEn, dateEn, monthBn } = getMonthAndDateBn();
+    const shopName = settings.businessName || 'Saiful Enterprise';
+
     // Header
     doc.setFontSize(16);
-    doc.text(settings.businessName || 'Saiful Enterprise', 105, 15, { align: 'center' });
+    doc.setFont('helvetica', 'bold');
+    doc.text(shopName, 105, 14, { align: 'center' });
+
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'normal');
+    doc.text('20/1, Sagar-Saikat Market, Indira Road, Tejgaon, Dhaka-1215 | Cell: 01540004966', 105, 19, { align: 'center' });
+
     doc.setFontSize(12);
-    doc.text('Judicial Stamp & Cartridge Paper Sales Ledger', 105, 22, { align: 'center' });
-    doc.setFontSize(9);
-    doc.text(`Report Period: ${dateFilter.toUpperCase()} | Generated: ${new Date().toLocaleString()}`, 105, 27, { align: 'center' });
+    doc.setFont('helvetica', 'bold');
+    doc.text('Judicial Stamp & Cartridge Paper Register', 105, 25, { align: 'center' });
+
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Month: ${monthEn} (${monthBn}) | Date: ${dateEn} | Filter: ${dateFilter.toUpperCase()}`, 105, 30, { align: 'center' });
 
     // Summary Box
-    doc.setDrawColor(200, 200, 200);
-    doc.setFillColor(245, 247, 250);
-    doc.roundedRect(14, 32, 182, 22, 2, 2, 'FD');
+    doc.setDrawColor(200, 205, 212);
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(14, 34, 182, 25, 2, 2, 'FD');
 
-    doc.setFontSize(9);
-    doc.text(`Total Sold: ${stats.totalQuantity} pcs (50Tk: ${stats.stamp50Count}, 100Tk: ${stats.stamp100Count}, Cartridge: ${stats.cartridgeCount})`, 20, 39);
-    doc.text(`Total Sales Amount: BDT ${stats.totalSalesAmount.toLocaleString()}`, 20, 45);
-    doc.text(`Total Purchase Cost: BDT ${stats.totalBuyCost.toLocaleString()}`, 20, 51);
-    doc.setFontSize(10);
-    doc.setTextColor(16, 185, 129);
-    doc.text(`NET PROFIT: BDT ${stats.totalProfit.toLocaleString()}`, 120, 45);
-    doc.setTextColor(0, 0, 0);
-
-    // Simple Table
-    let y = 62;
-    doc.setFontSize(8);
+    doc.setFontSize(8.5);
     doc.setFont('helvetica', 'bold');
-    doc.setFillColor(230, 230, 230);
-    doc.rect(14, y - 4, 182, 6, 'F');
-    doc.text('#', 16, y);
-    doc.text('Date', 23, y);
-    doc.text('Item / Stamp', 42, y);
-    doc.text('Qty', 85, y);
-    doc.text('Buy (Tk)', 96, y);
-    doc.text('Sale (Tk)', 112, y);
-    doc.text('Cost (Tk)', 128, y);
-    doc.text('Total (Tk)', 145, y);
-    doc.text('Profit (Tk)', 165, y);
-    doc.text('Payment', 182, y);
+    doc.text('FINANCIAL & QUANTITY SUMMARY:', 18, 40);
 
     doc.setFont('helvetica', 'normal');
-    y += 6;
+    doc.text(`Total Sales Amount: BDT ${stats.totalSalesAmount.toLocaleString()}`, 18, 46);
+    doc.text(`Total Purchase Cost (Cost of Goods): BDT ${stats.totalBuyCost.toLocaleString()}`, 18, 51);
+    doc.text(`Total Stock Purchases (Expenses): BDT ${totalStockPurchasesCost.toLocaleString()}`, 18, 56);
 
-    filteredSales.slice(0, 35).forEach((sale, index) => {
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(16, 185, 129);
+    doc.setFontSize(10);
+    doc.text(`NET PROFIT: BDT ${stats.totalProfit.toLocaleString()}`, 120, 46);
+
+    doc.setTextColor(70, 70, 70);
+    doc.setFontSize(8);
+    doc.text(`Total Sold: ${stats.totalQuantity} pcs`, 120, 51);
+    doc.text(`50Tk: ${stats.stamp50Count} | 100Tk: ${stats.stamp100Count} | Cartridge: ${stats.cartridgeCount}`, 120, 56);
+    doc.setTextColor(0, 0, 0);
+
+    // Table
+    let y = 66;
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setFillColor(235, 238, 242);
+    doc.rect(14, y - 4, 182, 6, 'F');
+    doc.text('#', 16, y);
+    doc.text('Date', 22, y);
+    doc.text('Item', 38, y);
+    doc.text('Serial No', 72, y);
+    doc.text('Qty', 104, y);
+    doc.text('Sale', 114, y);
+    doc.text('Total Sale', 128, y);
+    doc.text('Cost', 148, y);
+    doc.text('Profit', 166, y);
+    doc.text('Customer', 182, y);
+
+    doc.setFont('helvetica', 'normal');
+    y += 5.5;
+
+    filteredSales.slice(0, 36).forEach((sale, index) => {
       if (y > 275) {
         doc.addPage();
-        y = 20;
+        y = 18;
       }
       doc.text(`${index + 1}`, 16, y);
-      doc.text(`${sale.date}`, 23, y);
-      doc.text(`${sale.itemName || sale.itemType}`.substring(0, 24), 42, y);
-      doc.text(`${sale.quantity}`, 85, y);
-      doc.text(`${sale.buyPricePerUnit}`, 96, y);
-      doc.text(`${sale.salePricePerUnit}`, 112, y);
-      doc.text(`${sale.totalBuyCost}`, 128, y);
-      doc.text(`${sale.totalSaleAmount}`, 145, y);
-      doc.text(`${sale.totalProfit}`, 165, y);
-      doc.text(`${sale.paymentMethod}`, 182, y);
-      y += 6;
+      doc.text(`${sale.date}`, 22, y);
+      const itemName = (sale.itemType === 'stamp_50' ? '50 Tk Stamp' : sale.itemType === 'stamp_100' ? '100 Tk Stamp' : sale.itemType === 'cartridge_paper' ? 'Cartridge Paper' : sale.itemName || sale.itemType).substring(0, 18);
+      doc.text(itemName, 38, y);
+      doc.text(`${sale.serialNumbers || '-'}`.substring(0, 16), 72, y);
+      doc.text(`${sale.quantity}`, 104, y);
+      doc.text(`${sale.salePricePerUnit}`, 114, y);
+      doc.text(`${sale.totalSaleAmount}`, 128, y);
+      doc.text(`${sale.totalBuyCost}`, 148, y);
+      doc.text(`+${sale.totalProfit}`, 166, y);
+      doc.text(`${sale.customerName || 'Cash'}`.substring(0, 10), 182, y);
+      y += 5.5;
     });
 
-    doc.save(`Stamp_Sales_Report_${todayStr}.pdf`);
+    // Footer Signature Block
+    y = Math.max(y + 8, 270);
+    doc.setFontSize(8);
+    doc.setDrawColor(180, 180, 180);
+    doc.line(14, y, 65, y);
+    doc.line(135, y, 186, y);
+    doc.text('Operator Signature', 24, y + 4);
+    doc.text('Proprietor / Official Seal', 142, y + 4);
+
+    doc.save(`Stamp_Register_${todayStr}.pdf`);
   };
 
   return (
@@ -418,12 +566,20 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
               <div>
                 <h1 className="text-xl lg:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
                   <span>জুডিশিয়াল স্ট্যাম্প ও কার্টিজ পেপার রেজিস্টার</span>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium">
-                    লাইভ মুনাফা ট্র্যাকার
-                  </span>
+                  {customerPrivacyMode ? (
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium flex items-center gap-1">
+                      <Lock className="w-3 h-3" />
+                      <span>কাষ্টমার ভিউ (ক্রয় ও লাভ সুরক্ষিত)</span>
+                    </span>
+                  ) : (
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-medium flex items-center gap-1">
+                      <Unlock className="w-3 h-3" />
+                      <span>অ্যাডমিন ভিউ (পূর্ণাঙ্গ লাভ দৃশ্যমান)</span>
+                    </span>
+                  )}
                 </h1>
                 <p className="text-xs lg:text-sm text-neutral-400">
-                  ৫০ টাকা, ১০০ টাকা স্ট্যাম্প ও কার্টিজ পেপারের দৈনিক বিক্রয়, ক্রয় খরচ, মুনাফা হিসাব ও বর্তমান স্টক
+                  কার্টিজ পেপার, ৫০ টাকা ও ১০০ টাকা স্ট্যাম্প বিক্রয় ও সরকারি স্টক খাতা
                 </p>
               </div>
             </div>
@@ -433,26 +589,76 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
               <div className="px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-neutral-800 flex items-center gap-1.5 text-neutral-300">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
                 <span className="font-semibold text-white">৫০ টাকার স্ট্যাম্প:</span>
-                <span>ক্রয় ৫৫৳ | বিক্রয় ৭০৳</span>
-                <span className="text-emerald-400 font-bold">(লাভ ১৫৳)</span>
+                {customerPrivacyMode ? (
+                  <span className="font-mono font-bold text-emerald-400">বিক্রয় ৭০৳</span>
+                ) : (
+                  <>
+                    <span>ক্রয় ৫৫৳ | বিক্রয় ৭০৳</span>
+                    <span className="text-emerald-400 font-bold">(লাভ ১৫৳)</span>
+                  </>
+                )}
               </div>
               <div className="px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-neutral-800 flex items-center gap-1.5 text-neutral-300">
                 <span className="w-2 h-2 rounded-full bg-cyan-500" />
                 <span className="font-semibold text-white">১০০ টাকার স্ট্যাম্প:</span>
-                <span>ক্রয় ১০৫৳ | বিক্রয় ১২০৳</span>
-                <span className="text-emerald-400 font-bold">(লাভ ১৫৳)</span>
+                {customerPrivacyMode ? (
+                  <span className="font-mono font-bold text-cyan-300">বিক্রয় ১২০৳</span>
+                ) : (
+                  <>
+                    <span>ক্রয় ১০৫৳ | বিক্রয় ১২০৳</span>
+                    <span className="text-emerald-400 font-bold">(লাভ ১৫৳)</span>
+                  </>
+                )}
               </div>
               <div className="px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-neutral-800 flex items-center gap-1.5 text-neutral-300">
                 <span className="w-2 h-2 rounded-full bg-amber-500" />
                 <span className="font-semibold text-white">কার্টিজ পেপার:</span>
-                <span>ক্রয় ৫৳ | বিক্রয় ১০৳</span>
-                <span className="text-emerald-400 font-bold">(লাভ ৫৳)</span>
+                {customerPrivacyMode ? (
+                  <span className="font-mono font-bold text-amber-300">বিক্রয় ১০৳</span>
+                ) : (
+                  <>
+                    <span>ক্রয় ৫৳ | বিক্রয় ১০৳</span>
+                    <span className="text-emerald-400 font-bold">(লাভ ৫৳)</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {/* Customer Privacy Mode Toggle */}
+            <button
+              onClick={() => setCustomerPrivacyMode(p => !p)}
+              className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all ${
+                customerPrivacyMode
+                  ? 'bg-emerald-950/40 hover:bg-emerald-900/40 text-emerald-300 border-emerald-500/40'
+                  : 'bg-amber-950/40 hover:bg-amber-900/40 text-amber-300 border-amber-500/40'
+              }`}
+              title={customerPrivacyMode ? 'অ্যাডমিন মোডে মুনাফা দেখুন' : 'কাষ্টমারের সামনে মুনাফা ও ক্রয় রেট লুকান'}
+            >
+              {customerPrivacyMode ? (
+                <>
+                  <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>কাষ্টমার মোড সক্রিয় (মুনাফা গোপন)</span>
+                </>
+              ) : (
+                <>
+                  <Unlock className="w-3.5 h-3.5 text-amber-400" />
+                  <span>অ্যাডমিন মোড (মুনাফা দৃশ্যমান)</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={() => setIsPrintReportOpen(true)}
+              className="px-3 py-2 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/30 font-semibold text-xs flex items-center gap-1.5 transition-all shadow"
+              title="দোকানের নাম ও মাস সহ পূর্ণাঙ্গ রিপোর্ট"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>রিপোর্ট ভিউ / প্রিন্ট</span>
+            </button>
+
             <button
               onClick={() => {
                 setEditingSale(null);
@@ -475,7 +681,7 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
                 });
                 setIsAddSaleOpen(true);
               }}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-900/30 flex items-center gap-2 active:scale-95 transition-all"
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-900/30 flex items-center gap-1.5 active:scale-95 transition-all"
             >
               <Plus className="w-4 h-4" />
               <span>নতুন বিক্রি এন্ট্রি (+)</span>
@@ -483,18 +689,18 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
 
             <button
               onClick={() => setIsAddPurchaseOpen(true)}
-              className="px-3.5 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-semibold text-sm flex items-center gap-2 active:scale-95 transition-all"
+              className="px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-semibold text-xs flex items-center gap-1.5 active:scale-95 transition-all"
             >
-              <Package className="w-4 h-4 text-amber-400" />
+              <Package className="w-3.5 h-3.5 text-amber-400" />
               <span>স্টক ক্রয় / ইনওয়ার্ড</span>
             </button>
 
             <button
               onClick={() => setIsSettingsOpen(true)}
-              className="p-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700 transition-colors"
-              title="মূল্য ও আইটেম সেটিংস"
+              className="p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700 transition-colors"
+              title="আইটেম সংযোজন, বিয়োজন ও রেট সেটিংস"
             >
-              <Sliders className="w-4 h-4" />
+              <Sliders className="w-4 h-4 text-amber-400" />
             </button>
           </div>
         </div>
@@ -505,12 +711,14 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
           <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
-            <span>এক ক্লিকে দ্রুত বিক্রয় শর্টকাট (Quick One-Click Sale):</span>
+            <span>এক ক্লিকে দ্রুত বিক্রয় শর্টকাট (Quick Sale Presets):</span>
           </span>
-          <span className="text-[11px] text-neutral-400">ক্লিক করলেই স্বয়ংক্রিয়ভাবে স্টক কমবে ও লাভ যোগ হবে</span>
+          <span className="text-[11px] text-neutral-400">
+            {customerPrivacyMode ? 'কাষ্টমারের সামনে নিরাপদ বিক্রয় শর্টকাট' : 'ক্লিক করলেই স্বয়ংক্রিয়ভাবে স্টক কমবে ও লাভ যোগ হবে'}
+          </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
           <button
             onClick={() => triggerQuickSale('stamp_50', 1, 'হলফনামা / অঙ্গীকারনামা')}
             className="p-2 rounded-lg bg-neutral-950 hover:bg-emerald-950/40 border border-neutral-800 hover:border-emerald-500/50 text-left transition-all group"
@@ -518,7 +726,22 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
             <div className="text-[10px] text-neutral-400 font-medium">+১ টি ৫০ টাকার স্ট্যাম্প</div>
             <div className="text-xs font-bold text-white flex items-center justify-between mt-0.5">
               <span>বিক্রি: ৭০৳</span>
-              <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+১৫৳ লাভ</span>
+              {!customerPrivacyMode && (
+                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+১৫৳ লাভ</span>
+              )}
+            </div>
+          </button>
+
+          <button
+            onClick={() => triggerQuickSale('stamp_50', 2, '৫০ টাকার স্ট্যাম্প (২ কপি)')}
+            className="p-2 rounded-lg bg-neutral-950 hover:bg-emerald-950/40 border border-neutral-800 hover:border-emerald-500/50 text-left transition-all group"
+          >
+            <div className="text-[10px] text-neutral-400 font-medium">+২ টি ৫০ টাকার স্ট্যাম্প</div>
+            <div className="text-xs font-bold text-white flex items-center justify-between mt-0.5">
+              <span>বিক্রি: ১৪০৳</span>
+              {!customerPrivacyMode && (
+                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+৩০৳ লাভ</span>
+              )}
             </div>
           </button>
 
@@ -529,7 +752,9 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
             <div className="text-[10px] text-neutral-400 font-medium">+১ টি ১০০ টাকার স্ট্যাম্প</div>
             <div className="text-xs font-bold text-white flex items-center justify-between mt-0.5">
               <span>বিক্রি: ১২০৳</span>
-              <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+১৫৳ লাভ</span>
+              {!customerPrivacyMode && (
+                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+১৫৳ লাভ</span>
+              )}
             </div>
           </button>
 
@@ -540,7 +765,9 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
             <div className="text-[10px] text-neutral-400 font-medium">+৩ টি ১০০ টাকার (৩০০৳ চুক্তি)</div>
             <div className="text-xs font-bold text-white flex items-center justify-between mt-0.5">
               <span>বিক্রি: ৩৬০৳</span>
-              <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+৪৫৳ লাভ</span>
+              {!customerPrivacyMode && (
+                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+৪৫৳ লাভ</span>
+              )}
             </div>
           </button>
 
@@ -551,7 +778,9 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
             <div className="text-[10px] text-neutral-400 font-medium">+২ টি কার্টিজ পেপার</div>
             <div className="text-xs font-bold text-white flex items-center justify-between mt-0.5">
               <span>বিক্রি: ২০৳</span>
-              <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+১০৳ লাভ</span>
+              {!customerPrivacyMode && (
+                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+১০৳ লাভ</span>
+              )}
             </div>
           </button>
 
@@ -562,18 +791,9 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
             <div className="text-[10px] text-neutral-400 font-medium">+৫ টি কার্টিজ পেপার</div>
             <div className="text-xs font-bold text-white flex items-center justify-between mt-0.5">
               <span>বিক্রি: ৫০৳</span>
-              <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+২৫৳ লাভ</span>
-            </div>
-          </button>
-
-          <button
-            onClick={() => triggerQuickSale('stamp_writing', 1, 'স্ট্যাম্প টাইপিং ও ড্রাফট ফি')}
-            className="p-2 rounded-lg bg-neutral-950 hover:bg-emerald-950/40 border border-neutral-800 hover:border-emerald-500/50 text-left transition-all group"
-          >
-            <div className="text-[10px] text-neutral-400 font-medium">+স্ট্যাম্প ড্রাফট/কম্পোজ ফি</div>
-            <div className="text-xs font-bold text-white flex items-center justify-between mt-0.5">
-              <span>ফি: ১৫০৳</span>
-              <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+১৫০৳ লাভ</span>
+              {!customerPrivacyMode && (
+                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+২৫৳ লাভ</span>
+              )}
             </div>
           </button>
         </div>
@@ -582,21 +802,45 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
       {/* Real-time Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
         {/* Total Net Profit */}
-        <div className="col-span-2 sm:col-span-1 rounded-2xl bg-gradient-to-br from-emerald-950/40 to-neutral-900 border border-emerald-500/30 p-4 shadow-lg">
+        <div className="col-span-2 sm:col-span-1 rounded-2xl bg-gradient-to-br from-emerald-950/40 to-neutral-900 border border-emerald-500/30 p-4 shadow-lg relative">
           <div className="flex items-center justify-between text-neutral-400 text-xs mb-1">
-            <span className="font-semibold text-emerald-300">নিট লাভ / মুনাফা</span>
+            <span className="font-semibold text-emerald-300 flex items-center gap-1">
+              <span>নিট লাভ / মুনাফা</span>
+              {customerPrivacyMode && (
+                <button
+                  type="button"
+                  onClick={() => setShowProfitValues(p => !p)}
+                  className="p-1 rounded text-neutral-400 hover:text-white"
+                  title={showProfitValues ? 'লুকান' : 'গোপন মুনাফা দেখুন'}
+                >
+                  {showProfitValues ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              )}
+            </span>
             <span className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400">
               <TrendingUp className="w-4 h-4" />
             </span>
           </div>
+
           <div className="text-2xl lg:text-3xl font-extrabold text-emerald-400 tracking-tight">
-            ৳{stats.totalProfit.toLocaleString()}
+            {customerPrivacyMode && !showProfitValues ? (
+              <span className="font-mono text-neutral-500 tracking-widest">••••••</span>
+            ) : (
+              `৳${stats.totalProfit.toLocaleString()}`
+            )}
           </div>
+
           <div className="text-[11px] text-neutral-400 mt-1 flex items-center gap-1">
-            <span className="text-emerald-300 font-medium">
-              {stats.totalSalesAmount > 0 ? Math.round((stats.totalProfit / stats.totalSalesAmount) * 100) : 0}% মার্জিন
-            </span>
-            <span>(ফিল্টার অনুযায়ী)</span>
+            {customerPrivacyMode && !showProfitValues ? (
+              <span className="text-neutral-500 text-[10px]">🔒 কাষ্টমার ভিউতে সুরক্ষিত</span>
+            ) : (
+              <>
+                <span className="text-emerald-300 font-medium">
+                  {stats.totalSalesAmount > 0 ? Math.round((stats.totalProfit / stats.totalSalesAmount) * 100) : 0}% মার্জিন
+                </span>
+                <span>(ফিল্টার অনুযায়ী)</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -619,16 +863,24 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
         {/* Total Cost Value */}
         <div className="rounded-2xl bg-neutral-900 border border-neutral-800 p-4 shadow-lg">
           <div className="flex items-center justify-between text-neutral-400 text-xs mb-1">
-            <span>মোট ক্রয় খরচ</span>
+            <span>মোট বিক্রিত স্ট্যাম্প ব্যয়</span>
             <span className="p-1.5 rounded-lg bg-red-500/10 text-red-400">
               <ShoppingBag className="w-4 h-4" />
             </span>
           </div>
           <div className="text-xl lg:text-2xl font-bold text-neutral-200">
-            ৳{stats.totalBuyCost.toLocaleString()}
+            {customerPrivacyMode && !showProfitValues ? (
+              <span className="font-mono text-neutral-500 tracking-widest">••••••</span>
+            ) : (
+              `৳${stats.totalBuyCost.toLocaleString()}`
+            )}
           </div>
           <div className="text-[11px] text-neutral-400 mt-1">
-            স্ট্যাম্প কেনার আসল খরচ
+            {customerPrivacyMode && !showProfitValues ? (
+              <span className="text-neutral-500 text-[10px]">🔒 ক্রয় ব্যয় গোপন</span>
+            ) : (
+              `স্টক ক্রয় খরচ: ৳${totalStockPurchasesCost.toLocaleString()}`
+            )}
           </div>
         </div>
 
@@ -774,23 +1026,31 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
               </div>
             )}
 
-            {/* Export Buttons */}
-            <button
-              onClick={exportToExcel}
-              className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 transition-colors"
-              title="Excel (.xlsx) ডাউনলোড"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-            </button>
-            <button
-              onClick={exportPDF}
-              className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 transition-colors"
-              title="PDF রিপোর্ট"
-            >
-              <Download className="w-4 h-4 text-blue-400" />
-            </button>
-          </div>
-        )}
+              {/* Export & Report Buttons */}
+              <button
+                onClick={() => setIsPrintReportOpen(true)}
+                className="px-2.5 py-1.5 rounded-xl bg-cyan-950/40 hover:bg-cyan-900/40 text-cyan-300 border border-cyan-800/60 transition-colors flex items-center gap-1.5"
+                title="পূর্ণাঙ্গ প্রিন্ট ভিউ ও PDF রিপোর্ট"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">রিপোর্ট প্রিন্ট</span>
+              </button>
+              <button
+                onClick={exportToExcel}
+                className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 transition-colors"
+                title="Excel (.xlsx) ডাউনলোড"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+              </button>
+              <button
+                onClick={exportPDF}
+                className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 transition-colors"
+                title="PDF রিপোর্ট ডাউনলোড"
+              >
+                <Download className="w-4 h-4 text-blue-400" />
+              </button>
+            </div>
+          )}
       </div>
 
       {/* TAB 1: SALES LEDGER TABLE */}
@@ -832,11 +1092,17 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
                     <th className="py-3 px-3.5">তারিখ ও সময়</th>
                     <th className="py-3 px-3.5">আইটেম / স্ট্যাম্পের বিবরণ</th>
                     <th className="py-3 px-3.5 text-center">পরিমাণ</th>
-                    <th className="py-3 px-3.5 text-right">ক্রয় রেট</th>
+                    {(!customerPrivacyMode || showProfitValues) && (
+                      <th className="py-3 px-3.5 text-right">ক্রয় রেট</th>
+                    )}
                     <th className="py-3 px-3.5 text-right">বিক্রি রেট</th>
                     <th className="py-3 px-3.5 text-right">মোট বিক্রি</th>
-                    <th className="py-3 px-3.5 text-right">ক্রয় খরচ</th>
-                    <th className="py-3 px-3.5 text-right text-emerald-400 font-bold">মুনাফা / লাভ</th>
+                    {(!customerPrivacyMode || showProfitValues) && (
+                      <>
+                        <th className="py-3 px-3.5 text-right">ক্রয় খরচ</th>
+                        <th className="py-3 px-3.5 text-right text-emerald-400 font-bold">মুনাফা / লাভ</th>
+                      </>
+                    )}
                     <th className="py-3 px-3.5">দলিলের বিবরণ / ক্রমিক নং</th>
                     <th className="py-3 px-3.5">ক্রেতার তথ্য</th>
                     <th className="py-3 px-3.5 text-center">অ্যাকশন</th>
@@ -845,7 +1111,7 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
                 <tbody className="divide-y divide-neutral-800/60 text-neutral-300">
                   {filteredSales.length === 0 ? (
                     <tr>
-                      <td colSpan={11} className="py-12 text-center text-neutral-500">
+                      <td colSpan={(!customerPrivacyMode || showProfitValues) ? 11 : 8} className="py-12 text-center text-neutral-500">
                         <FileText className="w-8 h-8 mx-auto mb-2 opacity-40 text-neutral-400" />
                         <p className="font-semibold text-neutral-400">কোনো স্ট্যাম্প বিক্রয় রেকর্ড পাওয়া যায়নি</p>
                         <p className="text-xs text-neutral-500 mt-1">উপরে "নতুন বিক্রি এন্ট্রি (+)" বাটনে ক্লিক করে প্রথম বিক্রি যোগ করুন</p>
@@ -886,9 +1152,11 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
                           </span>
                         </td>
 
-                        <td className="py-3 px-3.5 text-right font-mono text-neutral-400">
-                          ৳{sale.buyPricePerUnit}
-                        </td>
+                        {(!customerPrivacyMode || showProfitValues) && (
+                          <td className="py-3 px-3.5 text-right font-mono text-neutral-400">
+                            ৳{sale.buyPricePerUnit}
+                          </td>
+                        )}
 
                         <td className="py-3 px-3.5 text-right font-mono text-white font-semibold">
                           ৳{sale.salePricePerUnit}
@@ -898,13 +1166,17 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
                           ৳{sale.totalSaleAmount}
                         </td>
 
-                        <td className="py-3 px-3.5 text-right font-mono text-red-400/80">
-                          ৳{sale.totalBuyCost}
-                        </td>
+                        {(!customerPrivacyMode || showProfitValues) && (
+                          <>
+                            <td className="py-3 px-3.5 text-right font-mono text-red-400/80">
+                              ৳{sale.totalBuyCost}
+                            </td>
 
-                        <td className="py-3 px-3.5 text-right font-mono font-extrabold text-emerald-400 bg-emerald-950/20">
-                          +৳{sale.totalProfit}
-                        </td>
+                            <td className="py-3 px-3.5 text-right font-mono font-extrabold text-emerald-400 bg-emerald-950/20">
+                              +৳{sale.totalProfit}
+                            </td>
+                          </>
+                        )}
 
                         <td className="py-3 px-3.5">
                           <div className="text-white font-medium">{sale.deedType || '-'}</div>
@@ -1199,7 +1471,9 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
                   >
                     {stampConfigs.map(item => (
                       <option key={item.id} value={item.id}>
-                        {item.nameBn} (ক্রয়: ৳{item.defaultBuyPrice} | বিক্রয়: ৳{item.defaultSalePrice})
+                        {customerPrivacyMode
+                          ? `${item.nameBn} — ৳${item.defaultSalePrice}`
+                          : `${item.nameBn} (ক্রয়: ৳${item.defaultBuyPrice} | বিক্রয়: ৳${item.defaultSalePrice})`}
                       </option>
                     ))}
                   </select>
@@ -1236,54 +1510,105 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
                 </div>
               </div>
 
-              {/* Row 2: Rates & Live Profit Calculator */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-neutral-950 p-3.5 rounded-xl border border-neutral-800">
-                <div>
-                  <label className="block text-neutral-400 font-semibold mb-1">
-                    একক ক্রয় রেট (৳)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={saleForm.buyPricePerUnit}
-                    onChange={e => setSaleForm(p => ({ ...p, buyPricePerUnit: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-red-300 font-bold font-mono focus:outline-none focus:border-emerald-500"
-                    required
-                  />
+              {/* Row 2: Rates & Live Calculator (Customer Privacy Aware) */}
+              {customerPrivacyMode ? (
+                <div className="bg-neutral-950 p-3.5 rounded-xl border border-neutral-800 space-y-2">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-neutral-400 font-semibold mb-1">
+                        একক বিক্রয় রেট (৳)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={saleForm.salePricePerUnit}
+                        onChange={e => setSaleForm(p => ({ ...p, salePricePerUnit: parseFloat(e.target.value) || 0 }))}
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-white font-bold font-mono focus:outline-none focus:border-emerald-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-neutral-400 font-semibold mb-1">
+                        সর্বমোট প্রদেয় বিক্রয় মূল্য
+                      </label>
+                      <div className="py-1 text-lg font-extrabold text-emerald-400 font-mono">
+                        ৳{saleForm.quantity * saleForm.salePricePerUnit}
+                      </div>
+                    </div>
+                  </div>
+                  <details className="text-[11px] text-neutral-500 pt-1 border-t border-neutral-900">
+                    <summary className="cursor-pointer hover:text-neutral-400 select-none">
+                      🔒 অ্যাডমিন ক্রয় রেট অ্যাডজাস্ট (ঐচ্ছিক)
+                    </summary>
+                    <div className="mt-2 grid grid-cols-2 gap-3 p-2 rounded bg-neutral-900/50">
+                      <div>
+                        <span className="text-neutral-400">একক ক্রয় রেট:</span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={saleForm.buyPricePerUnit}
+                          onChange={e => setSaleForm(p => ({ ...p, buyPricePerUnit: parseFloat(e.target.value) || 0 }))}
+                          className="w-full mt-1 px-2 py-1 rounded bg-neutral-950 border border-neutral-800 text-red-300 font-mono"
+                        />
+                      </div>
+                      <div className="text-right">
+                        <span className="text-neutral-400">অনুমিত লাভ:</span>
+                        <div className="text-emerald-400 font-mono font-bold mt-1">
+                          +৳{(saleForm.quantity * saleForm.salePricePerUnit) - (saleForm.quantity * saleForm.buyPricePerUnit)}
+                        </div>
+                      </div>
+                    </div>
+                  </details>
                 </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-neutral-950 p-3.5 rounded-xl border border-neutral-800">
+                  <div>
+                    <label className="block text-neutral-400 font-semibold mb-1">
+                      একক ক্রয় রেট (৳)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={saleForm.buyPricePerUnit}
+                      onChange={e => setSaleForm(p => ({ ...p, buyPricePerUnit: parseFloat(e.target.value) || 0 }))}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-red-300 font-bold font-mono focus:outline-none focus:border-emerald-500"
+                      required
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-neutral-400 font-semibold mb-1">
-                    একক বিক্রয় রেট (৳)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={saleForm.salePricePerUnit}
-                    onChange={e => setSaleForm(p => ({ ...p, salePricePerUnit: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-white font-bold font-mono focus:outline-none focus:border-emerald-500"
-                    required
-                  />
-                </div>
+                  <div>
+                    <label className="block text-neutral-400 font-semibold mb-1">
+                      একক বিক্রয় রেট (৳)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={saleForm.salePricePerUnit}
+                      onChange={e => setSaleForm(p => ({ ...p, salePricePerUnit: parseFloat(e.target.value) || 0 }))}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-white font-bold font-mono focus:outline-none focus:border-emerald-500"
+                      required
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-neutral-400 font-semibold mb-1">
-                    মোট বিক্রয় মূল্য
-                  </label>
-                  <div className="py-2 text-sm font-extrabold text-white font-mono">
-                    ৳{saleForm.quantity * saleForm.salePricePerUnit}
+                  <div>
+                    <label className="block text-neutral-400 font-semibold mb-1">
+                      মোট বিক্রয় মূল্য
+                    </label>
+                    <div className="py-2 text-sm font-extrabold text-white font-mono">
+                      ৳{saleForm.quantity * saleForm.salePricePerUnit}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-emerald-400 font-semibold mb-1">
+                      মোট নিট লাভ / মুনাফা
+                    </label>
+                    <div className="py-2 text-sm font-extrabold text-emerald-400 font-mono">
+                      +৳{(saleForm.quantity * saleForm.salePricePerUnit) - (saleForm.quantity * saleForm.buyPricePerUnit)}
+                    </div>
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-emerald-400 font-semibold mb-1">
-                    মোট নিট লাভ / মুনাফা
-                  </label>
-                  <div className="py-2 text-sm font-extrabold text-emerald-400 font-mono">
-                    +৳{(saleForm.quantity * saleForm.salePricePerUnit) - (saleForm.quantity * saleForm.buyPricePerUnit)}
-                  </div>
-                </div>
-              </div>
+              )}
 
               {/* Row 3: Deed Type & Serial Numbers */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1301,15 +1626,19 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
                 </div>
 
                 <div>
-                  <label className="block text-neutral-400 font-semibold mb-1">
-                    স্ট্যাম্পের ক্রমিক নম্বর রেঞ্জ (Serial No)
+                  <label className="block text-amber-300 font-semibold mb-1 flex items-center justify-between">
+                    <span className="flex items-center gap-1">
+                      <FileText className="w-3.5 h-3.5 text-amber-400" />
+                      <span>স্ট্যাম্পের ক্রমিক নম্বর (Serial No)</span>
+                    </span>
+                    <span className="text-[10px] text-amber-400 font-normal">রেজিস্টার এন্ট্রি</span>
                   </label>
                   <input
                     type="text"
-                    placeholder="যেমন: খ গ ১৮৭৩২১-১৮৭৩২৫"
+                    placeholder="যেমন: খ গ ১৮৭৩২১ - ১৮৭৩২৫"
                     value={saleForm.serialNumbers}
                     onChange={e => setSaleForm(p => ({ ...p, serialNumbers: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-white font-mono focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-white font-mono focus:outline-none focus:border-amber-500 placeholder:text-neutral-600"
                   />
                 </div>
               </div>
@@ -1550,100 +1879,23 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
         </div>
       )}
 
-      {/* MODAL: ITEM PRICING & STOCK SETTINGS */}
-      {isSettingsOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-          <div className="rounded-2xl bg-neutral-900 border border-neutral-800 w-full max-w-2xl p-6 shadow-2xl relative my-8">
-            <button
-              onClick={() => setIsSettingsOpen(false)}
-              className="absolute top-4 right-4 p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white"
-            >
-              <X className="w-4 h-4" />
-            </button>
+      {/* MODAL: ITEM PRICING & STOCK SETTINGS (ADD/EDIT/REMOVE ITEMS) */}
+      <StampSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
 
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-neutral-800">
-              <span className="p-2 rounded-xl bg-neutral-800 text-amber-400">
-                <Sliders className="w-5 h-5" />
-              </span>
-              <div>
-                <h3 className="text-lg font-bold text-white">স্ট্যাম্প ও কার্টিজ পেপার রেট সেটিংস</h3>
-                <p className="text-xs text-neutral-400">
-                  ৫০ টাকা ও ১০০ টাকা স্ট্যাম্পের ক্রয়-বিক্রয় রেট ও বর্তমান স্টক অ্যাডজাস্ট করুন
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-3.5 max-h-[60vh] overflow-y-auto pr-1">
-              {stampConfigs.map(item => (
-                <div key={item.id} className="p-4 rounded-xl bg-neutral-950 border border-neutral-800 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-white text-sm">{item.nameBn}</span>
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-neutral-900 border border-neutral-700 text-neutral-300">
-                      আইটেম কোড: {item.id}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3 text-xs">
-                    <div>
-                      <label className="block text-neutral-400 font-medium mb-1">
-                        ক্রয় মূল্য (৳)
-                      </label>
-                      <input
-                        type="number"
-                        value={item.defaultBuyPrice}
-                        onChange={e => updateStampConfig(item.id, { defaultBuyPrice: parseFloat(e.target.value) || 0 })}
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-red-400 font-bold font-mono focus:outline-none focus:border-amber-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-neutral-400 font-medium mb-1">
-                        বিক্রয় মূল্য (৳)
-                      </label>
-                      <input
-                        type="number"
-                        value={item.defaultSalePrice}
-                        onChange={e => updateStampConfig(item.id, { defaultSalePrice: parseFloat(e.target.value) || 0 })}
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-white font-bold font-mono focus:outline-none focus:border-amber-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-neutral-400 font-medium mb-1">
-                        বর্তমান স্টক (পিস)
-                      </label>
-                      <input
-                        type="number"
-                        value={item.currentStock}
-                        onChange={e => updateStampConfig(item.id, { currentStock: parseInt(e.target.value) || 0 })}
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-purple-300 font-bold font-mono focus:outline-none focus:border-amber-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between text-[11px] text-neutral-400 pt-1">
-                    <span>
-                      প্রতি পিসে মুনাফা: <strong className="text-emerald-400">৳{item.defaultSalePrice - item.defaultBuyPrice}</strong>
-                    </span>
-                    <span>
-                      অ্যালার্ট থ্রেশহোল্ড: <strong>{item.lowStockThreshold} পিস</strong>
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex items-center justify-end pt-4 border-t border-neutral-800 mt-4">
-              <button
-                onClick={() => setIsSettingsOpen(false)}
-                className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs"
-              >
-                সংরক্ষণ ও বন্ধ করুন
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* MODAL: PROFESSIONAL PRINTABLE / PDF REPORT (SHOP NAME & MONTHLY/DAILY STATEMENT) */}
+      <StampPrintableReportModal
+        isOpen={isPrintReportOpen}
+        onClose={() => setIsPrintReportOpen(false)}
+        sales={filteredSales}
+        purchases={stampPurchases}
+        configs={stampConfigs}
+        dateFilter={dateFilter}
+        customStartDate={customStartDate}
+        customEndDate={customEndDate}
+      />
 
       {/* MODAL: PRINT CASH MEMO / RECEIPT */}
       {selectedSaleForMemo && (

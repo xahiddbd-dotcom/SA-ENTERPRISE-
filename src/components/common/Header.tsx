@@ -44,6 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'home', label: t('home') },
     { id: 'services', label: t('services') },
     { id: 'shop', label: t('shop') },
+    { id: 'tracker', label: language === 'bn' ? 'আবেদন ট্র্যাকিং' : 'Tracker' },
     { id: 'about', label: t('about') },
     { id: 'contact', label: t('contact') }
   ];

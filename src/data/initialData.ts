@@ -794,13 +794,25 @@ export const initialDailyCashReconciliations: DailyCashReconciliation[] = [];
 // ----------------------------------------------------
 export const initialStampConfigs: StampItemConfig[] = [
   {
+    id: 'cartridge_paper',
+    name: 'Cartridge Legal Paper',
+    nameBn: 'কার্টিজ পেপার (দলিল/চুক্তির কাগজ)',
+    faceValue: 0,
+    defaultBuyPrice: 5, // ক্রয় মূল্য ৫ টাকা
+    defaultSalePrice: 10, // বিক্রয় মূল্য ১০ টাকা
+    currentStock: 100,
+    lowStockThreshold: 30,
+    category: 'cartridge',
+    descriptionBn: 'জুডিশিয়াল স্ট্যাম্পের সাথে সংযুক্ত দলিল ড্রাফটিং ও লিগ্যাল প্রিন্টিং পেপার'
+  },
+  {
     id: 'stamp_50',
     name: '50 Taka Non-Judicial Stamp',
     nameBn: '৫০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
     faceValue: 50,
     defaultBuyPrice: 55, // ক্রয় মূল্য ৫৫ টাকা
-    defaultSalePrice: 70, // বিক্রয় মূল্য ৭০ টাকা (মুনাফা ১৫-২০ টাকা)
-    currentStock: 0,
+    defaultSalePrice: 70, // বিক্রয় মূল্য ৭০ টাকা
+    currentStock: 30,
     lowStockThreshold: 10,
     category: 'stamp',
     descriptionBn: 'হলফনামা, সাধারণ অঙ্গীকারনামা ও প্রত্যয়নপত্রে ব্যবহৃত হয়'
@@ -811,71 +823,11 @@ export const initialStampConfigs: StampItemConfig[] = [
     nameBn: '১০০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
     faceValue: 100,
     defaultBuyPrice: 105, // ক্রয় মূল্য ১০৫ টাকা
-    defaultSalePrice: 120, // বিক্রয় মূল্য ১২০ টাকা (মুনাফা ১৫ টাকা)
-    currentStock: 0,
+    defaultSalePrice: 120, // বিক্রয় মূল্য ১২০ টাকা
+    currentStock: 50,
     lowStockThreshold: 10,
     category: 'stamp',
     descriptionBn: 'চুক্তিপত্র, ভাড়ানামা, বায়না ও নোটারি পাবলিক কার্যাদিতে সর্বাধিক ব্যবহৃত'
-  },
-  {
-    id: 'cartridge_paper',
-    name: 'Cartridge Legal Paper',
-    nameBn: 'কার্টিজ পেপার (দলিল/চুক্তির কাগজ)',
-    faceValue: 0,
-    defaultBuyPrice: 5,
-    defaultSalePrice: 10,
-    currentStock: 0,
-    lowStockThreshold: 30,
-    category: 'cartridge',
-    descriptionBn: 'জুডিশিয়াল স্ট্যাম্পের সাথে সংযুক্ত দলিল ড্রাফটিং ও লিগ্যাল প্রিন্টিং পেপার'
-  },
-  {
-    id: 'stamp_200',
-    name: '200 Taka Non-Judicial Stamp',
-    nameBn: '২০০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
-    faceValue: 200,
-    defaultBuyPrice: 210,
-    defaultSalePrice: 240,
-    currentStock: 0,
-    lowStockThreshold: 5,
-    category: 'stamp',
-    descriptionBn: 'বাণিজ্যিক চুক্তি ও বিশেষ ক্ষমতাপত্র'
-  },
-  {
-    id: 'stamp_300',
-    name: '300 Taka Non-Judicial Stamp',
-    nameBn: '৩০০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
-    faceValue: 300,
-    defaultBuyPrice: 315,
-    defaultSalePrice: 350,
-    currentStock: 0,
-    lowStockThreshold: 5,
-    category: 'stamp',
-    descriptionBn: 'জমির বায়না দলিল, অংশীদারি চুক্তি ও প্রধান দলিলপত্র'
-  },
-  {
-    id: 'stamp_500',
-    name: '500 Taka Non-Judicial Stamp',
-    nameBn: '৫০০ টাকার নন-জুডিশিয়াল স্ট্যাম্প',
-    faceValue: 500,
-    defaultBuyPrice: 525,
-    defaultSalePrice: 580,
-    currentStock: 0,
-    lowStockThreshold: 3,
-    category: 'stamp',
-    descriptionBn: 'উচ্চমূল্যের সম্পত্তি হস্তান্তর ও স্পেশাল পাওয়ার অব অ্যাটর্নি'
-  },
-  {
-    id: 'stamp_writing',
-    name: 'Stamp Drafting & Typing Fee',
-    nameBn: 'স্ট্যাম্প ড্রাফটিং ও কম্পিউটার টাইপিং ফি',
-    faceValue: 0,
-    defaultBuyPrice: 0,
-    defaultSalePrice: 150,
-    currentStock: 999,
-    lowStockThreshold: 0,
-    category: 'service',
-    descriptionBn: 'চুক্তিপত্র, হলফনামা বা ভাড়ানামা কম্পিউটার কম্পোজ ও প্রিন্ট সার্ভিস'
   }
 ];
 
