@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { Service, Product, StaffMember, Application, Order, ApplicationStatus, User } from '../../types';
@@ -65,7 +66,9 @@ import {
   Image as ImageIcon,
   Link2,
   Copy,
-  Check
+  Check,
+  Sun,
+  Moon
 } from 'lucide-react';
 import {
   buildAdminSectionUrl,
@@ -131,6 +134,7 @@ interface ExpenseItem {
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, initialSection }) => {
   const { language, toggleLanguage } = useLanguage();
+  const { themeMode, toggleTheme } = useTheme();
   const {
     services, addService, updateService, deleteService,
     products, addProduct, updateProduct, deleteProduct,
@@ -734,12 +738,44 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
 
             {/* Language Switcher */}
             <button
+              id="admin-lang-btn"
               onClick={toggleLanguage}
-              className="px-2.5 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 text-xs font-bold flex items-center gap-1"
-              title="Change Language"
+              className="px-2.5 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 text-xs font-bold flex items-center gap-1 transition-colors"
+              title="Change Language / ভাষা পরিবর্তন"
             >
               <Globe className="w-3.5 h-3.5 text-emerald-400" />
               <span>{language === 'bn' ? 'বাং' : 'EN'}</span>
+            </button>
+
+            {/* Dark & Light Mode Toggle */}
+            <button
+              id="admin-theme-toggle-btn"
+              onClick={() => {
+                toggleTheme();
+                if (themeMode === 'dark') {
+                  handleThemeChange('nordic_light');
+                } else {
+                  handleThemeChange('emerald');
+                }
+              }}
+              className="px-2.5 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+              title={
+                themeMode === 'dark'
+                  ? 'লাইট মোড চালু করুন (Switch to Light Mode)'
+                  : 'ডার্ক মোড চালু করুন (Switch to Dark Mode)'
+              }
+            >
+              {themeMode === 'dark' ? (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="hidden sm:inline font-bold">{language === 'bn' ? 'লাইট' : 'Light'}</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-indigo-400" />
+                  <span className="hidden sm:inline font-bold">{language === 'bn' ? 'ডার্ক' : 'Dark'}</span>
+                </>
+              )}
             </button>
 
             {/* Admin Profile & Logout */}

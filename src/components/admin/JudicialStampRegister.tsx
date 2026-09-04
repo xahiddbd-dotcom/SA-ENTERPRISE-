@@ -104,14 +104,17 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
     };
   };
 
+  // Dynamic initial config reference
+  const initialConfig = stampConfigs.find(c => c.id === 'stamp_100') || stampConfigs[0];
+
   // New Sale Form State
   const [saleForm, setSaleForm] = useState({
     date: new Date().toISOString().split('T')[0],
     time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-    itemType: 'stamp_100',
+    itemType: initialConfig?.id || 'stamp_100',
     quantity: 1,
-    buyPricePerUnit: 105,
-    salePricePerUnit: 120,
+    buyPricePerUnit: initialConfig?.defaultBuyPrice ?? 105,
+    salePricePerUnit: initialConfig?.defaultSalePrice ?? 120,
     serialNumbers: '',
     deedType: 'দোকান ভাড়ানামা চুক্তিপত্র',
     customerName: '',
@@ -126,9 +129,9 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
   // Stock Purchase Form State
   const [purchaseForm, setPurchaseForm] = useState({
     date: new Date().toISOString().split('T')[0],
-    itemType: 'stamp_100',
+    itemType: initialConfig?.id || 'stamp_100',
     quantity: 50,
-    buyPricePerUnit: 105,
+    buyPricePerUnit: initialConfig?.defaultBuyPrice ?? 105,
     vendorSource: 'ডিস্ট্রিক্ট ট্রেজারি ভেন্ডার পয়েন্ট',
     serialRange: '',
     paidBy: 'Saiful Islam',
@@ -235,6 +238,56 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
   const cartBuyPrice = cartConfig?.defaultBuyPrice ?? 5;
   const cartProfit = cartSalePrice - cartBuyPrice;
 
+  // Open New Sale Modal with the latest config prices and stock
+  const openNewSaleModal = (preselectedItemId?: string) => {
+    setEditingSale(null);
+    const targetId = preselectedItemId || saleForm.itemType || stampConfigs[0]?.id || 'stamp_100';
+    const config = stampConfigs.find(c => c.id === targetId) || stampConfigs[0];
+    const defaultDeed =
+      config?.id === 'cartridge_paper'
+        ? 'কার্টিজ লিগ্যাল পেপার'
+        : config?.id === 'stamp_50'
+        ? 'হলফনামা / অঙ্গীকারনামা'
+        : 'দোকান ভাড়ানামা চুক্তিপত্র';
+
+    setSaleForm({
+      date: todayStr,
+      time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+      itemType: config?.id || 'stamp_100',
+      quantity: 1,
+      buyPricePerUnit: config?.defaultBuyPrice ?? 105,
+      salePricePerUnit: config?.defaultSalePrice ?? 120,
+      serialNumbers: '',
+      deedType: defaultDeed,
+      customerName: '',
+      customerPhone: '',
+      advocateOrVendor: '',
+      paymentMethod: 'cash',
+      operatorName: 'সাইফুল ইসলাম (Saiful Islam)',
+      notes: '',
+      syncToLedger: true
+    });
+    setIsAddSaleOpen(true);
+  };
+
+  // Open New Purchase / Stock Inward Modal
+  const openNewPurchaseModal = (preselectedItemId?: string) => {
+    const targetId = preselectedItemId || purchaseForm.itemType || stampConfigs[0]?.id || 'stamp_100';
+    const config = stampConfigs.find(c => c.id === targetId) || stampConfigs[0];
+
+    setPurchaseForm({
+      date: todayStr,
+      itemType: config?.id || 'stamp_100',
+      quantity: 50,
+      buyPricePerUnit: config?.defaultBuyPrice ?? 105,
+      vendorSource: 'ডিস্ট্রিক্ট ট্রেজারি ভেন্ডার পয়েন্ট',
+      serialRange: '',
+      paidBy: 'Saiful Islam',
+      note: ''
+    });
+    setIsAddPurchaseOpen(true);
+  };
+
   // Handle Item selection in sale form
   const handleItemSelect = (typeId: string) => {
     const config = stampConfigs.find(c => c.id === typeId);
@@ -243,7 +296,18 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
         ...prev,
         itemType: typeId,
         buyPricePerUnit: config.defaultBuyPrice,
-        salePricePerUnit: config.defaultSalePrice
+        salePricePerUnit: config.defaultSalePrice,
+        deedType:
+          prev.deedType &&
+          prev.deedType !== 'দোকান ভাড়ানামা চুক্তিপত্র' &&
+          prev.deedType !== 'কার্টিজ লিগ্যাল পেপার' &&
+          prev.deedType !== 'হলফনামা / অঙ্গীকারনামা'
+            ? prev.deedType
+            : typeId === 'cartridge_paper'
+            ? 'কার্টিজ লিগ্যাল পেপার'
+            : typeId === 'stamp_50'
+            ? 'হলফনামা / অঙ্গীকারনামা'
+            : 'দোকান ভাড়ানামা চুক্তিপত্র'
       }));
     } else {
       setSaleForm(prev => ({ ...prev, itemType: typeId }));
@@ -255,8 +319,8 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
     const config = stampConfigs.find(c => c.id === typeId);
     if (!config) return;
 
-    const buyPrice = config.defaultBuyPrice;
-    const salePrice = config.defaultSalePrice;
+    const buyPrice = Number(config.defaultBuyPrice) || 0;
+    const salePrice = Number(config.defaultSalePrice) || 0;
     const totalBuy = qty * buyPrice;
     const totalSale = qty * salePrice;
     const totalProfit = totalSale - totalBuy;
@@ -289,8 +353,11 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
     const itemName = config ? config.name : saleForm.itemType;
     const itemNameBn = config ? config.nameBn : saleForm.itemType;
 
-    const totalBuyCost = saleForm.quantity * saleForm.buyPricePerUnit;
-    const totalSaleAmount = saleForm.quantity * saleForm.salePricePerUnit;
+    const qty = Math.max(1, Number(saleForm.quantity) || 1);
+    const buyPrice = Number(saleForm.buyPricePerUnit) || 0;
+    const salePrice = Number(saleForm.salePricePerUnit) || 0;
+    const totalBuyCost = qty * buyPrice;
+    const totalSaleAmount = qty * salePrice;
     const totalProfit = totalSaleAmount - totalBuyCost;
 
     if (editingSale) {
@@ -300,9 +367,12 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
         itemType: saleForm.itemType,
         itemName,
         itemNameBn,
-        quantity: saleForm.quantity,
-        buyPricePerUnit: saleForm.buyPricePerUnit,
-        salePricePerUnit: saleForm.salePricePerUnit,
+        quantity: qty,
+        buyPricePerUnit: buyPrice,
+        salePricePerUnit: salePrice,
+        totalBuyCost,
+        totalSaleAmount,
+        totalProfit,
         serialNumbers: saleForm.serialNumbers,
         deedType: saleForm.deedType,
         customerName: saleForm.customerName,
@@ -320,9 +390,9 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
         itemType: saleForm.itemType,
         itemName,
         itemNameBn,
-        quantity: saleForm.quantity,
-        buyPricePerUnit: saleForm.buyPricePerUnit,
-        salePricePerUnit: saleForm.salePricePerUnit,
+        quantity: qty,
+        buyPricePerUnit: buyPrice,
+        salePricePerUnit: salePrice,
         totalBuyCost,
         totalSaleAmount,
         totalProfit,
@@ -345,14 +415,16 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
     e.preventDefault();
     const config = stampConfigs.find(c => c.id === purchaseForm.itemType);
     const itemNameBn = config ? config.nameBn : purchaseForm.itemType;
-    const totalCost = purchaseForm.quantity * purchaseForm.buyPricePerUnit;
+    const qty = Math.max(1, Number(purchaseForm.quantity) || 1);
+    const unitCost = Number(purchaseForm.buyPricePerUnit) || 0;
+    const totalCost = qty * unitCost;
 
     recordStampPurchase({
       date: purchaseForm.date,
       itemType: purchaseForm.itemType,
       itemNameBn,
-      quantity: purchaseForm.quantity,
-      buyPricePerUnit: purchaseForm.buyPricePerUnit,
+      quantity: qty,
+      buyPricePerUnit: unitCost,
       totalCost,
       vendorSource: purchaseForm.vendorSource,
       serialRange: purchaseForm.serialRange,
@@ -692,27 +764,7 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
             </button>
 
             <button
-              onClick={() => {
-                setEditingSale(null);
-                setSaleForm({
-                  date: todayStr,
-                  time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-                  itemType: 'stamp_100',
-                  quantity: 1,
-                  buyPricePerUnit: 105,
-                  salePricePerUnit: 120,
-                  serialNumbers: '',
-                  deedType: 'দোকান ভাড়ানামা চুক্তিপত্র',
-                  customerName: '',
-                  customerPhone: '',
-                  advocateOrVendor: '',
-                  paymentMethod: 'cash',
-                  operatorName: 'Saiful Islam',
-                  notes: '',
-                  syncToLedger: true
-                });
-                setIsAddSaleOpen(true);
-              }}
+              onClick={() => openNewSaleModal()}
               className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-900/30 flex items-center gap-1.5 active:scale-95 transition-all"
             >
               <Plus className="w-4 h-4" />
@@ -720,7 +772,7 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
             </button>
 
             <button
-              onClick={() => setIsAddPurchaseOpen(true)}
+              onClick={() => openNewPurchaseModal()}
               className="px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-semibold text-xs flex items-center gap-1.5 active:scale-95 transition-all"
             >
               <Package className="w-3.5 h-3.5 text-amber-400" />
@@ -945,8 +997,15 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
             <span>{stats.totalCurrentStock}</span>
             <span className="text-xs font-normal text-neutral-400">পিস</span>
           </div>
-          <div className="text-[11px] text-neutral-400 mt-1">
-            মজুদ মূল্য: ৳{stats.totalStockValue.toLocaleString()}
+          <div className="text-[11px] text-neutral-400 mt-1 flex flex-wrap items-center gap-1 truncate">
+            <span>৫০৳: <strong className="text-white font-mono">{stamp50Config?.currentStock ?? 0}</strong></span>
+            <span>•</span>
+            <span>১০০৳: <strong className="text-white font-mono">{stamp100Config?.currentStock ?? 0}</strong></span>
+            <span>•</span>
+            <span>কার্টিজ: <strong className="text-white font-mono">{cartConfig?.currentStock ?? 0}</strong></span>
+          </div>
+          <div className="text-[10px] text-neutral-500 mt-0.5">
+            মোট ক্রয় মূল্য: ৳{stats.totalStockValue.toLocaleString()}
           </div>
         </div>
       </div>
@@ -1171,6 +1230,14 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
                               </span>
                             )}
                           </div>
+                          {(() => {
+                            const cfg = stampConfigs.find(c => c.id === sale.itemType);
+                            return cfg && cfg.category !== 'service' ? (
+                              <div className="text-[10px] text-purple-300/80 mt-0.5 flex items-center gap-1 font-mono">
+                                <span>অবশিষ্ট স্টক: {cfg.currentStock} পিস</span>
+                              </div>
+                            ) : null;
+                          })()}
                           {sale.notes && (
                             <div className="text-[10px] text-neutral-400 mt-0.5 truncate max-w-xs">
                               {sale.notes}
@@ -1412,28 +1479,34 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-neutral-800 text-xs">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-neutral-400">বর্তমান স্টক:</span>
-                      <span className={`font-bold ${isLowStock ? 'text-amber-400 font-mono text-sm' : 'text-white font-mono text-sm'}`}>
-                        {item.category === 'service' ? 'সীমাহীন' : `${item.currentStock} পিস`}
-                      </span>
+                  <div className="pt-3 border-t border-neutral-800 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-neutral-400">বর্তমান স্টক:</span>
+                        <span className={`font-bold ${isLowStock ? 'text-amber-400 font-mono text-sm' : 'text-white font-mono text-sm'}`}>
+                          {item.category === 'service' ? 'সীমাহীন' : `${item.currentStock} পিস`}
+                        </span>
+                      </div>
+                      {item.category !== 'service' && (
+                        <button
+                          type="button"
+                          onClick={() => openNewPurchaseModal(item.id)}
+                          className="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white text-[11px] font-medium transition-colors flex items-center gap-1"
+                        >
+                          <Package className="w-3 h-3 text-purple-400" />
+                          <span>+ স্টক ইন</span>
+                        </button>
+                      )}
                     </div>
-                    {item.category !== 'service' && (
-                      <button
-                        onClick={() => {
-                          setPurchaseForm(prev => ({
-                            ...prev,
-                            itemType: item.id,
-                            buyPricePerUnit: item.defaultBuyPrice
-                          }));
-                          setIsAddPurchaseOpen(true);
-                        }}
-                        className="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white text-[11px] font-medium transition-colors"
-                      >
-                        + স্টক ইন
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => openNewSaleModal(item.id)}
+                      className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all"
+                      title={`${item.nameBn} বিক্রয় এন্ট্রি করুন`}
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>এই আইটেম বিক্রি করুন (৳{item.defaultSalePrice})</span>
+                    </button>
                   </div>
                 </div>
               );
@@ -1544,6 +1617,52 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
             </div>
 
             <form onSubmit={handleSaveSale} className="space-y-4 text-xs">
+              {/* Live Item Stock & Price Status Indicator */}
+              {(() => {
+                const currentItem = stampConfigs.find(c => c.id === saleForm.itemType);
+                if (!currentItem) return null;
+                const isOutOfStock = currentItem.category !== 'service' && currentItem.currentStock <= 0;
+                const isLow = currentItem.category !== 'service' && currentItem.currentStock <= 10;
+                return (
+                  <div className={`p-3 rounded-xl border flex flex-wrap items-center justify-between gap-2 ${
+                    isOutOfStock
+                      ? 'bg-rose-950/40 border-rose-800/60 text-rose-300'
+                      : isLow
+                      ? 'bg-amber-950/30 border-amber-800/50 text-amber-200'
+                      : 'bg-neutral-950 border-neutral-800 text-neutral-300'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <Package className={`w-4 h-4 ${isOutOfStock ? 'text-rose-400' : isLow ? 'text-amber-400' : 'text-purple-400'}`} />
+                      <div>
+                        <span className="font-semibold text-white">{currentItem.nameBn}</span>:
+                        <span className="ml-1 text-neutral-400">দোকানে মজুদ:</span>{' '}
+                        <strong className={`font-mono text-sm ${isOutOfStock ? 'text-rose-400' : isLow ? 'text-amber-400' : 'text-emerald-400'}`}>
+                          {currentItem.category === 'service' ? 'সীমাহীন' : `${currentItem.currentStock} পিস`}
+                        </strong>
+                        {isOutOfStock && <span className="ml-2 text-rose-400 font-bold">(স্টক শূন্য!)</span>}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-neutral-400">সেটিংসে নির্ধারিত বিক্রয় রেট: <strong className="text-white">৳{currentItem.defaultSalePrice}</strong></span>
+                      {Number(saleForm.salePricePerUnit) !== Number(currentItem.defaultSalePrice) && (
+                        <button
+                          type="button"
+                          onClick={() => setSaleForm(p => ({
+                            ...p,
+                            buyPricePerUnit: currentItem.defaultBuyPrice,
+                            salePricePerUnit: currentItem.defaultSalePrice
+                          }))}
+                          className="px-2 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-[11px] font-medium transition-colors"
+                          title="আপডেট করা সেটিং মূল্যে রিসেট করুন"
+                        >
+                          আপডেট রেট বসান (৳{currentItem.defaultSalePrice})
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Row 1: Item Selection & Quantity */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>

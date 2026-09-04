@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 import {
   Zap,
   ShieldCheck,
@@ -13,6 +14,7 @@ import {
 
 export const TrustSection: React.FC = () => {
   const { language, t } = useLanguage();
+  const { isDark } = useTheme();
 
   const trustItems = [
     {
@@ -60,19 +62,30 @@ export const TrustSection: React.FC = () => {
   ];
 
   return (
-    <section id="trust-section" className="py-16 bg-neutral-900/60 border-y border-neutral-800">
+    <section
+      id="trust-section"
+      className={`py-16 border-y transition-colors duration-300 ${
+        isDark ? 'bg-neutral-900/60 border-neutral-800' : 'bg-slate-50/90 border-slate-200'
+      }`}
+    >
       <div className="container mx-auto px-4">
         <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
+              isDark
+                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
             <span>{language === 'bn' ? 'আমাদের বিশেষত্ব ও বিশ্বাসযোগ্যতা' : 'Why We Are Trusted'}</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+          <h2 className={`text-3xl sm:text-4xl font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>
             {t('why_saiful_title')}
           </h2>
 
-          <p className="text-neutral-400 text-xs sm:text-sm">
+          <p className={`text-xs sm:text-sm ${isDark ? 'text-neutral-400' : 'text-slate-600 font-medium'}`}>
             {language === 'bn'
               ? 'আমরা প্রতিটি গ্রাহকের সময়, ডকুমেন্ট নিরাপত্তা ও তথ্যের গোপনীয়তাকে সর্বোচ্চ অগ্রাধিকার দিই।'
               : 'Prioritizing document safety, data privacy, and prompt assistance for every client.'}
@@ -85,23 +98,33 @@ export const TrustSection: React.FC = () => {
             return (
               <div
                 key={idx}
-                className="bg-neutral-950/80 border border-neutral-800/80 hover:border-emerald-500/30 rounded-2xl p-6 transition-all hover:bg-neutral-900/60 flex flex-col justify-between"
+                className={`border rounded-2xl p-6 transition-all flex flex-col justify-between shadow-xs ${
+                  isDark
+                    ? 'bg-neutral-950/80 border-neutral-800/80 hover:border-emerald-500/30 hover:bg-neutral-900/60'
+                    : 'bg-white/95 border-slate-200/90 hover:border-emerald-400 hover:shadow-md'
+                }`}
               >
                 <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+                      isDark
+                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                        : 'bg-emerald-50 border-emerald-200 text-emerald-600'
+                    }`}
+                  >
                     <Icon className="w-5 h-5" />
                   </div>
 
-                  <h3 className="text-base font-bold text-white leading-snug">
+                  <h3 className={`text-base font-bold leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {language === 'bn' ? item.titleBn : item.titleEn}
                   </h3>
 
-                  <p className="text-xs text-neutral-400 leading-relaxed">
+                  <p className={`text-xs leading-relaxed ${isDark ? 'text-neutral-400' : 'text-slate-600'}`}>
                     {language === 'bn' ? item.descBn : item.descEn}
                   </p>
                 </div>
 
-                <div className="pt-4 mt-2 flex items-center gap-1 text-[11px] text-emerald-400 font-medium">
+                <div className={`pt-4 mt-2 flex items-center gap-1 text-[11px] font-semibold ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>{language === 'bn' ? 'গ্যারান্টিযুক্ত সেবা' : 'Verified Quality'}</span>
                 </div>

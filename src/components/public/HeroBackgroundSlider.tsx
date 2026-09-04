@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
+import { useTheme } from '../../context/ThemeContext';
 import {
   ChevronLeft,
   ChevronRight,
@@ -22,6 +23,7 @@ interface HeroBackgroundSliderProps {
 export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({ onSlideChange }) => {
   const { language } = useLanguage();
   const { heroSlides, settings } = useData();
+  const { isDark } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -127,10 +129,26 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({ onSl
         })}
       </div>
 
-      {/* Multi-layered Dark Vignettes & Soft Gradients for High-Contrast Text Readability (WCAG AA Compliant) */}
-      <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/70 via-neutral-950/50 to-neutral-950 z-20" />
-      <div className="absolute inset-0 bg-radial from-transparent via-neutral-950/50 to-neutral-950/90 z-20" />
-      <div className="absolute inset-0 bg-neutral-950/20 backdrop-blur-[1px] z-20" />
+      {/* Multi-layered Vignettes & Soft Gradients for High-Contrast Text Readability */}
+      <div
+        className={`absolute inset-0 z-20 transition-colors duration-300 ${
+          isDark
+            ? 'bg-gradient-to-b from-neutral-950/70 via-neutral-950/50 to-neutral-950'
+            : 'bg-gradient-to-b from-slate-100/90 via-slate-100/75 to-slate-100/95'
+        }`}
+      />
+      <div
+        className={`absolute inset-0 z-20 pointer-events-none transition-colors duration-300 ${
+          isDark
+            ? 'bg-radial from-transparent via-neutral-950/50 to-neutral-950/90'
+            : 'bg-radial from-transparent via-slate-900/5 to-slate-900/15'
+        }`}
+      />
+      <div
+        className={`absolute inset-0 z-20 backdrop-blur-[1px] ${
+          isDark ? 'bg-neutral-950/20' : 'bg-white/20'
+        }`}
+      />
 
       {/* Ambient glowing orbs */}
       <div className="absolute top-10 left-1/4 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl z-20 pointer-events-none animate-pulse" />
@@ -139,16 +157,28 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({ onSl
       {/* Interactive Controls Overlay Bar */}
       <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 z-30 container mx-auto px-4 pointer-events-auto flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Slide Info Pill */}
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-neutral-900/90 backdrop-blur-md border border-neutral-700/70 shadow-xl text-xs text-neutral-200">
+        <div
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-md shadow-xl text-xs transition-colors ${
+            isDark
+              ? 'bg-neutral-900/90 border border-neutral-700/70 text-neutral-200'
+              : 'bg-white/95 border border-slate-200 text-slate-800 shadow-slate-300/40'
+          }`}
+        >
           <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-          <span className="font-semibold text-emerald-300">
+          <span className={`font-semibold ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
             {language === 'bn' ? currentSlide.tagBn : currentSlide.tagEn}
           </span>
-          <span className="text-neutral-500">•</span>
-          <span className="text-neutral-400 font-mono text-[11px]">
+          <span className={isDark ? 'text-neutral-500' : 'text-slate-400'}>•</span>
+          <span className={`font-mono text-[11px] ${isDark ? 'text-neutral-400' : 'text-slate-500'}`}>
             {currentIndex + 1} / {slides.length}
           </span>
-          <span className="ml-1 px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800/40 text-[10px] font-mono">
+          <span
+            className={`ml-1 px-1.5 py-0.5 rounded text-[10px] font-mono ${
+              isDark
+                ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/40'
+                : 'bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold'
+            }`}
+          >
             {intervalSeconds}s
           </span>
         </div>
@@ -160,13 +190,23 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({ onSl
             type="button"
             onClick={handlePrev}
             aria-label="Previous Slide"
-            className="p-1.5 rounded-lg bg-neutral-900/80 hover:bg-neutral-800 backdrop-blur-md border border-neutral-700/60 text-neutral-300 hover:text-white transition-all active:scale-95"
+            className={`p-1.5 rounded-lg backdrop-blur-md transition-all active:scale-95 shadow-sm ${
+              isDark
+                ? 'bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-700/60 text-neutral-300 hover:text-white'
+                : 'bg-white/95 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900'
+            }`}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
 
           {/* Dots / Progress Bars */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-neutral-900/80 backdrop-blur-md border border-neutral-700/60">
+          <div
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full backdrop-blur-md shadow-sm ${
+              isDark
+                ? 'bg-neutral-900/80 border border-neutral-700/60'
+                : 'bg-white/95 border border-slate-200'
+            }`}
+          >
             {slides.map((slide, idx) => {
               const active = idx === currentIndex;
               return (
@@ -177,13 +217,13 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({ onSl
                   aria-label={`Go to slide ${idx + 1}`}
                   className={`h-2 rounded-full transition-all duration-300 overflow-hidden relative ${
                     active
-                      ? 'w-8 bg-neutral-700'
-                      : 'w-2 bg-neutral-600 hover:bg-neutral-400'
+                      ? isDark ? 'w-8 bg-neutral-700' : 'w-8 bg-slate-200'
+                      : isDark ? 'w-2 bg-neutral-600 hover:bg-neutral-400' : 'w-2 bg-slate-300 hover:bg-slate-400'
                   }`}
                 >
                   {active && (
                     <div
-                      className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 h-full rounded-full transition-all duration-100"
+                      className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-100"
                       style={{ width: `${progress}%` }}
                     />
                   )}
@@ -197,7 +237,11 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({ onSl
             type="button"
             onClick={handleNext}
             aria-label="Next Slide"
-            className="p-1.5 rounded-lg bg-neutral-900/80 hover:bg-neutral-800 backdrop-blur-md border border-neutral-700/60 text-neutral-300 hover:text-white transition-all active:scale-95"
+            className={`p-1.5 rounded-lg backdrop-blur-md transition-all active:scale-95 shadow-sm ${
+              isDark
+                ? 'bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-700/60 text-neutral-300 hover:text-white'
+                : 'bg-white/95 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900'
+            }`}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -207,10 +251,18 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({ onSl
             type="button"
             onClick={togglePlay}
             aria-label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
-            className="p-1.5 rounded-lg bg-neutral-900/80 hover:bg-neutral-800 backdrop-blur-md border border-neutral-700/60 text-neutral-300 hover:text-white transition-all active:scale-95 ml-1"
+            className={`p-1.5 rounded-lg backdrop-blur-md transition-all active:scale-95 ml-1 shadow-sm ${
+              isDark
+                ? 'bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-700/60 text-neutral-300 hover:text-white'
+                : 'bg-white/95 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900'
+            }`}
             title={isPlaying ? 'Pause Slide Motion' : 'Resume Slide Motion'}
           >
-            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-400" />}
+            {isPlaying ? (
+              <Pause className="w-3.5 h-3.5" />
+            ) : (
+              <Play className="w-3.5 h-3.5 text-emerald-500" />
+            )}
           </button>
         </div>
       </div>

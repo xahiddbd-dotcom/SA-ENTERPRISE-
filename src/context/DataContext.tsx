@@ -1180,19 +1180,33 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     saleData: Omit<StampSaleRecord, 'id' | 'createdAt'>,
     syncToLedger = true
   ) => {
+    const qty = Math.max(1, Number(saleData.quantity) || 1);
+    const buyPrice = Number(saleData.buyPricePerUnit) || 0;
+    const salePrice = Number(saleData.salePricePerUnit) || 0;
+    const totalBuyCost = saleData.totalBuyCost !== undefined ? Number(saleData.totalBuyCost) : qty * buyPrice;
+    const totalSaleAmount = saleData.totalSaleAmount !== undefined ? Number(saleData.totalSaleAmount) : qty * salePrice;
+    const totalProfit = totalSaleAmount - totalBuyCost;
+
     const newSale: StampSaleRecord = {
       ...saleData,
-      id: `st_sale_${Date.now()}`,
+      quantity: qty,
+      buyPricePerUnit: buyPrice,
+      salePricePerUnit: salePrice,
+      totalBuyCost,
+      totalSaleAmount,
+      totalProfit,
+      id: `st_sale_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       createdAt: new Date().toISOString()
     };
 
     setStampSales(prev => [newSale, ...prev]);
 
-    // Update remaining stock
+    // Update remaining stock (strictly decrement numeric quantity)
     setStampConfigs(prev =>
       prev.map(item => {
         if (item.id === newSale.itemType) {
-          const updatedStock = Math.max(0, (item.currentStock || 0) - newSale.quantity);
+          const current = Number(item.currentStock) || 0;
+          const updatedStock = Math.max(0, current - qty);
           return { ...item, currentStock: updatedStock };
         }
         return item;
@@ -1225,13 +1239,41 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateStampSale = (id: string, updates: Partial<StampSaleRecord>) => {
+    const existing = stampSales.find(s => s.id === id);
+
+    // Adjust stock in stampConfigs if quantity or itemType changes
+    if (existing) {
+      const oldItemType = existing.itemType;
+      const oldQty = Number(existing.quantity) || 0;
+      const newItemType = updates.itemType ?? oldItemType;
+      const newQty = updates.quantity !== undefined ? (Number(updates.quantity) || 0) : oldQty;
+
+      setStampConfigs(prev =>
+        prev.map(item => {
+          let stock = Number(item.currentStock) || 0;
+          if (item.id === oldItemType) {
+            stock += oldQty;
+          }
+          if (item.id === newItemType) {
+            stock = Math.max(0, stock - newQty);
+          }
+          return { ...item, currentStock: stock };
+        })
+      );
+    }
+
     setStampSales(prev =>
       prev.map(sale => {
         if (sale.id === id) {
           const updated = { ...sale, ...updates };
-          // Recalculate totals
-          updated.totalBuyCost = updated.quantity * updated.buyPricePerUnit;
-          updated.totalSaleAmount = updated.quantity * updated.salePricePerUnit;
+          const qty = Math.max(1, Number(updated.quantity) || 1);
+          const buyPrice = Number(updated.buyPricePerUnit) || 0;
+          const salePrice = Number(updated.salePricePerUnit) || 0;
+          updated.quantity = qty;
+          updated.buyPricePerUnit = buyPrice;
+          updated.salePricePerUnit = salePrice;
+          updated.totalBuyCost = qty * buyPrice;
+          updated.totalSaleAmount = qty * salePrice;
           updated.totalProfit = updated.totalSaleAmount - updated.totalBuyCost;
           return updated;
         }
@@ -1248,7 +1290,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setStampConfigs(prev =>
         prev.map(item => {
           if (item.id === saleToDelete.itemType) {
-            return { ...item, currentStock: (item.currentStock || 0) + saleToDelete.quantity };
+            const current = Number(item.currentStock) || 0;
+            const qty = Number(saleToDelete.quantity) || 0;
+            return { ...item, currentStock: current + qty };
           }
           return item;
         })
@@ -1259,9 +1303,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const recordStampPurchase = (purchaseData: Omit<StampStockPurchase, 'id' | 'createdAt'>) => {
+    const qty = Math.max(1, Number(purchaseData.quantity) || 1);
+    const unitPrice = Number(purchaseData.buyPricePerUnit) || 0;
+    const totalCost = purchaseData.totalCost !== undefined ? Number(purchaseData.totalCost) : qty * unitPrice;
+
     const newPurchase: StampStockPurchase = {
       ...purchaseData,
-      id: `st_pur_${Date.now()}`,
+      quantity: qty,
+      buyPricePerUnit: unitPrice,
+      totalCost,
+      id: `st_pur_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       createdAt: new Date().toISOString()
     };
 
@@ -1271,7 +1322,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setStampConfigs(prev =>
       prev.map(item => {
         if (item.id === newPurchase.itemType) {
-          return { ...item, currentStock: (item.currentStock || 0) + newPurchase.quantity };
+          const current = Number(item.currentStock) || 0;
+          return { ...item, currentStock: current + qty };
         }
         return item;
       })
@@ -1291,9 +1343,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setStampConfigs(prev =>
         prev.map(item => {
           if (item.id === purToDelete.itemType) {
+            const current = Number(item.currentStock) || 0;
+            const qty = Number(purToDelete.quantity) || 0;
             return {
               ...item,
-              currentStock: Math.max(0, (item.currentStock || 0) - purToDelete.quantity)
+              currentStock: Math.max(0, current - qty)
             };
           }
           return item;
@@ -1306,7 +1360,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateStampConfig = (id: string, updates: Partial<StampItemConfig>) => {
     setStampConfigs(prev =>
-      prev.map(item => (item.id === id ? { ...item, ...updates } : item))
+      prev.map(item => {
+        if (item.id === id) {
+          const updated = { ...item, ...updates };
+          if (updates.defaultBuyPrice !== undefined) updated.defaultBuyPrice = Number(updates.defaultBuyPrice) || 0;
+          if (updates.defaultSalePrice !== undefined) updated.defaultSalePrice = Number(updates.defaultSalePrice) || 0;
+          if (updates.currentStock !== undefined) updated.currentStock = Math.max(0, Number(updates.currentStock) || 0);
+          return updated;
+        }
+        return item;
+      })
     );
     logActivity('Stamp Config Updated', `Updated settings/pricing for stamp item ${id}`);
   };

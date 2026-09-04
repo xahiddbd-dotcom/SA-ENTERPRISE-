@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { DataProvider } from './context/DataContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -426,12 +427,14 @@ const MainLayout: React.FC = () => {
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <DataProvider>
-        <AuthProvider>
-          <MainLayout />
-        </AuthProvider>
-      </DataProvider>
-    </LanguageProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <DataProvider>
+          <AuthProvider>
+            <MainLayout />
+          </AuthProvider>
+        </DataProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }

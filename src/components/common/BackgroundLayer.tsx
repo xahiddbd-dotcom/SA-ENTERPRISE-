@@ -1,5 +1,6 @@
 import React from 'react';
 import { useData } from '../../context/DataContext';
+import { useTheme } from '../../context/ThemeContext';
 import { BackgroundPatternType, BackgroundWallpaperPreset, BackgroundOverlayTint } from '../../types';
 
 export const WALLPAPER_PRESETS: Record<Exclude<BackgroundWallpaperPreset, 'none' | 'custom'>, { name: string; nameBn: string; url: string; category: string }> = {
@@ -83,13 +84,14 @@ export const TINT_PRESETS: Record<BackgroundOverlayTint, { name: string; bgClass
 
 export const BackgroundLayer: React.FC = () => {
   const { settings } = useData();
+  const { isDark } = useTheme();
 
   const backgroundType = settings.backgroundType || 'combo';
   const texturePattern = settings.texturePattern || 'grid';
-  const textureOpacity = (settings.textureOpacity ?? 15) / 100;
+  const textureOpacity = (settings.textureOpacity ?? (isDark ? 15 : 25)) / 100;
   const wallpaperPreset = settings.wallpaperPreset || 'dark_modern_geometric';
   const customWallpaperUrl = settings.customWallpaperUrl || '';
-  const wallpaperOpacity = (settings.wallpaperOpacity ?? 25) / 100;
+  const wallpaperOpacity = (settings.wallpaperOpacity ?? (isDark ? 25 : 12)) / 100;
   const wallpaperBlur = settings.wallpaperBlur ?? 3;
   const wallpaperFixed = settings.wallpaperFixed !== false;
   const tint = settings.backgroundOverlayTint || 'dark';
@@ -105,13 +107,19 @@ export const BackgroundLayer: React.FC = () => {
   const shouldRenderWallpaper = (backgroundType === 'wallpaper' || backgroundType === 'combo') && activeWallpaperUrl && wallpaperPreset !== 'none';
   const shouldRenderTexture = (backgroundType === 'texture' || backgroundType === 'combo') && texturePattern !== 'none';
 
+  // Stroke and fill colors based on theme so patterns are visible in both light & dark
+  const strokeColor = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(15,23,42,0.12)';
+  const strokeEmerald = isDark ? 'rgba(16,185,129,0.35)' : 'rgba(16,185,129,0.3)';
+  const fillDot = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(15,23,42,0.14)';
+  const fillEmerald = isDark ? 'rgba(16,185,129,0.5)' : 'rgba(16,185,129,0.4)';
+
   return (
     <div
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 -z-50 overflow-hidden select-none"
     >
-      {/* BASE COLOR TINT */}
-      <div className="absolute inset-0 bg-neutral-950" />
+      {/* BASE CANVAS COLOR */}
+      <div className={`absolute inset-0 transition-colors duration-300 ${isDark ? 'bg-neutral-950' : 'bg-slate-100'}`} />
 
       {/* 1. WALLPAPER LAYER */}
       {shouldRenderWallpaper && (
@@ -130,11 +138,23 @@ export const BackgroundLayer: React.FC = () => {
       {/* 2. OVERLAY TINT FOR LEGIBILITY */}
       <div
         className={`absolute inset-0 transition-colors duration-500 ${
-          TINT_PRESETS[tint]?.bgClass || 'bg-neutral-950/85'
+          isDark
+            ? (TINT_PRESETS[tint]?.bgClass || 'bg-neutral-950/85')
+            : 'bg-white/75 backdrop-blur-[0.5px]'
         }`}
       />
 
-      {/* 3. SVG TEXTURE & GEOMETRIC PATTERN LAYER */}
+      {/* 3. LIGHT MODE AMBIENT GEOMETRIC SHAPES & ORBS (Behind text and cards) */}
+      {!isDark && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-32 -left-32 w-[550px] h-[550px] rounded-full bg-emerald-300/20 blur-[120px]" />
+          <div className="absolute top-1/4 -right-32 w-[600px] h-[600px] rounded-full bg-teal-200/25 blur-[140px]" />
+          <div className="absolute top-2/3 left-10 w-[500px] h-[500px] rounded-full bg-indigo-200/15 blur-[130px]" />
+          <div className="absolute -bottom-32 right-1/4 w-[650px] h-[650px] rounded-full bg-emerald-200/20 blur-[150px]" />
+        </div>
+      )}
+
+      {/* 4. SVG TEXTURE & GEOMETRIC PATTERN LAYER */}
       {shouldRenderTexture && (
         <div
           className="absolute inset-0 transition-opacity duration-500"
@@ -144,8 +164,8 @@ export const BackgroundLayer: React.FC = () => {
             <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="bg-grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.75" />
-                  <path d="M 200 0 L 0 0 0 200" fill="none" stroke="rgba(16,185,129,0.3)" strokeWidth="1" />
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke={strokeColor} strokeWidth="0.8" />
+                  <path d="M 200 0 L 0 0 0 200" fill="none" stroke={strokeEmerald} strokeWidth="1.2" />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#bg-grid-pattern)" />
@@ -156,8 +176,8 @@ export const BackgroundLayer: React.FC = () => {
             <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="bg-dots-pattern" width="24" height="24" patternUnits="userSpaceOnUse">
-                  <circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.5)" />
-                  <circle cx="14" cy="14" r="0.75" fill="rgba(16,185,129,0.4)" />
+                  <circle cx="2" cy="2" r="1.2" fill={fillDot} />
+                  <circle cx="14" cy="14" r="0.9" fill={fillEmerald} />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#bg-dots-pattern)" />
@@ -168,12 +188,12 @@ export const BackgroundLayer: React.FC = () => {
             <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="bg-circuit-pattern" width="100" height="100" patternUnits="userSpaceOnUse">
-                  <path d="M10 10 h30 v20 h20 v30 h-15 v15 h-35 z" fill="none" stroke="rgba(16,185,129,0.4)" strokeWidth="0.8" />
-                  <path d="M60 10 h30 v40 h-20 v20 h20" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" />
-                  <circle cx="10" cy="10" r="2.5" fill="rgba(16,185,129,0.6)" />
-                  <circle cx="40" cy="30" r="2" fill="rgba(255,255,255,0.5)" />
-                  <circle cx="60" cy="60" r="2.5" fill="rgba(16,185,129,0.6)" />
-                  <circle cx="90" cy="50" r="2" fill="rgba(255,255,255,0.5)" />
+                  <path d="M10 10 h30 v20 h20 v30 h-15 v15 h-35 z" fill="none" stroke={strokeEmerald} strokeWidth="0.9" />
+                  <path d="M60 10 h30 v40 h-20 v20 h20" fill="none" stroke={strokeColor} strokeWidth="0.9" />
+                  <circle cx="10" cy="10" r="2.5" fill={fillEmerald} />
+                  <circle cx="40" cy="30" r="2" fill={fillDot} />
+                  <circle cx="60" cy="60" r="2.5" fill={fillEmerald} />
+                  <circle cx="90" cy="50" r="2" fill={fillDot} />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#bg-circuit-pattern)" />
@@ -187,8 +207,8 @@ export const BackgroundLayer: React.FC = () => {
                   <path
                     d="M28,0 L56,16 L56,48 L28,64 L0,48 L0,16 Z M28,48 L56,64 L56,96 L28,112 L0,96 L0,64 Z"
                     fill="none"
-                    stroke="rgba(255,255,255,0.35)"
-                    strokeWidth="0.7"
+                    stroke={strokeColor}
+                    strokeWidth="0.8"
                   />
                 </pattern>
               </defs>
@@ -200,8 +220,8 @@ export const BackgroundLayer: React.FC = () => {
             <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="bg-stripes-pattern" width="30" height="30" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                  <line x1="0" y1="0" x2="0" y2="30" stroke="rgba(255,255,255,0.35)" strokeWidth="1" />
-                  <line x1="15" y1="0" x2="15" y2="30" stroke="rgba(16,185,129,0.25)" strokeWidth="1.5" />
+                  <line x1="0" y1="0" x2="0" y2="30" stroke={strokeColor} strokeWidth="1" />
+                  <line x1="15" y1="0" x2="15" y2="30" stroke={strokeEmerald} strokeWidth="1.5" />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#bg-stripes-pattern)" />
@@ -228,8 +248,14 @@ export const BackgroundLayer: React.FC = () => {
         </div>
       )}
 
-      {/* 4. SOFT RADIAL VIGNETTE FOR SIGHTLINE FOCUS */}
-      <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/60 pointer-events-none" />
+      {/* 5. SOFT RADIAL VIGNETTE FOR SIGHTLINE FOCUS */}
+      <div
+        className={`absolute inset-0 pointer-events-none ${
+          isDark
+            ? 'bg-radial from-transparent via-black/20 to-black/60'
+            : 'bg-radial from-transparent via-slate-900/5 to-slate-900/15'
+        }`}
+      />
     </div>
   );
 };
