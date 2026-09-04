@@ -29,12 +29,14 @@ export const StampPrintableReportModal: React.FC<StampPrintableReportModalProps>
   isOpen,
   onClose,
   sales = [],
-  settings = {},
+  settings: rawSettings = {},
   stats: incomingStats,
   totalStockPurchasesCost = 0,
   dateFilter = 'all'
 }) => {
   if (!isOpen) return null;
+
+  const settings = rawSettings as Partial<WebsiteSettings>;
 
   // Fallback stats computation if not passed
   const stats = incomingStats || {

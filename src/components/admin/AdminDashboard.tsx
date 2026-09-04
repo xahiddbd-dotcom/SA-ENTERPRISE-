@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
@@ -473,6 +473,170 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
       o.customerPhone.includes(orderSearch);
   });
 
+  const navigationMenuItems = useMemo(() => [
+    {
+      id: 'overview' as AdminMenuKey,
+      labelBn: 'ড্যাশবোর্ড ওভারভিউ',
+      labelEn: 'Dashboard Overview',
+      icon: LayoutDashboard,
+      categoryBn: 'প্রধান ড্যাশবোর্ড',
+      descBn: 'সার্ভিস, পেপার স্টক, গ্রাহক আবেদন ও ক্যাশ কাউন্টারের লাইভ পরিসংখ্যান'
+    },
+    {
+      id: 'ledger' as AdminMenuKey,
+      labelBn: 'দৈনিক হিসাব খাতা',
+      labelEn: 'Daily Shop Ledger',
+      icon: BookOpen,
+      badge: 'Special',
+      badgeColor: 'bg-amber-500 text-black font-bold',
+      categoryBn: 'ক্যাশ খাতা',
+      descBn: 'দোকানের ক্যাশ ড্রয়ার, বিক্রি ও খরচের পূর্ণাঙ্গ খতিয়ান'
+    },
+    {
+      id: 'stamps' as AdminMenuKey,
+      labelBn: 'স্ট্যাম্প ও কার্টিজ রেজিস্টার',
+      labelEn: 'Stamp Register',
+      icon: FileText,
+      badge: '৫০৳/১০০৳',
+      badgeColor: 'bg-amber-400 text-black font-bold',
+      categoryBn: 'সরকারি রেজিস্টার',
+      descBn: '৫০৳/১০০৳ স্ট্যাম্প, কার্টিজ পেপার সরকারি স্টক ও লাভ খাতা'
+    },
+    {
+      id: 'analytics' as AdminMenuKey,
+      labelBn: 'আয়-ব্যয় ও পারফরম্যান্স',
+      labelEn: 'Revenue & Analytics',
+      icon: PieChart,
+      badge: 'Live',
+      badgeColor: 'bg-emerald-950 text-emerald-300 border border-emerald-500/40',
+      categoryBn: 'রিপোর্ট',
+      descBn: 'দৈনিক, সাপ্তাহিক ও মাসিক লাভ-লোকসান চার্ট ও ট্রেন্ড'
+    },
+    {
+      id: 'cashmemo' as AdminMenuKey,
+      labelBn: 'ডিজিটাল ক্যাশ মেমো',
+      labelEn: 'Digital Cash Memo',
+      icon: Receipt,
+      badge: '3.5x5',
+      badgeColor: 'bg-teal-950 text-teal-300 border border-teal-500/40',
+      categoryBn: 'ইনভয়েস',
+      descBn: 'সাইফুল এন্টারপ্রাইজ প্রিন্টেবল ভাউচার ও রসিদ তৈরি'
+    },
+    {
+      id: 'services' as AdminMenuKey,
+      labelBn: 'অনলাইন সেবা CMS',
+      labelEn: 'Services Manager',
+      icon: Layers,
+      badge: services.length,
+      categoryBn: 'সার্ভিস',
+      descBn: 'সরকারি ও প্রতিরক্ষা আবেদন এবং কলেজ ভর্তি সেবার মূল্য তালিকা'
+    },
+    {
+      id: 'products' as AdminMenuKey,
+      labelBn: 'কাগজ ও স্টক',
+      labelEn: 'Paper & Stock',
+      icon: Package,
+      badge: lowStockCount > 0 ? `${lowStockCount} Low` : `${products.length}`,
+      badgeColor: lowStockCount > 0 ? 'bg-rose-950 text-rose-300 border border-rose-500/40' : undefined,
+      categoryBn: 'ইনভেন্টরি',
+      descBn: 'কাগজ, কার্টিজ, টোনার ও স্টেশনারি রি-অর্ডার ইনভেন্টরি'
+    },
+    {
+      id: 'applications' as AdminMenuKey,
+      labelBn: 'গ্রাহক আবেদনসমূহ',
+      labelEn: 'Online Applications',
+      icon: FileCheck,
+      badge: pendingAppsCount > 0 ? `${pendingAppsCount} New` : `${applications.length}`,
+      badgeColor: pendingAppsCount > 0 ? 'bg-amber-950 text-amber-300 border border-amber-500/40' : undefined,
+      categoryBn: 'আবেদন',
+      descBn: 'গ্রাহকদের জমা দেওয়া পুলিশ ক্লিয়ারেন্স, ভর্তি ও চাকরির ফর্ম'
+    },
+    {
+      id: 'orders' as AdminMenuKey,
+      labelBn: 'দোকান অর্ডার',
+      labelEn: 'E-Commerce Orders',
+      icon: ShoppingBag,
+      badge: orders.length,
+      categoryBn: 'অর্ডার',
+      descBn: 'অনলাইন ও অফলাইন প্রিন্টিং কাজের অর্ডার ট্র্যাকিং'
+    },
+    {
+      id: 'pos' as AdminMenuKey,
+      labelBn: 'পস ক্যাশিয়ার কাউন্টার',
+      labelEn: 'POS Cashier Terminal',
+      icon: Calculator,
+      categoryBn: 'কাউন্টার',
+      descBn: 'ক্যাশ কাউন্টারে দ্রুত বারকোড ও ক্যাশ মেমো বিলিং'
+    },
+    {
+      id: 'finance' as AdminMenuKey,
+      labelBn: 'হিসাব ও ব্যয় খাতা',
+      labelEn: 'Finance & Accounts',
+      icon: DollarSign,
+      categoryBn: 'হিসাব',
+      descBn: 'দোকান ভাড়া, বিদ্যুৎ বিল, নাস্তা ও দৈনন্দিন খরচের খাতা'
+    },
+    {
+      id: 'customers' as AdminMenuKey,
+      labelBn: 'কাস্টমার একাউন্টস',
+      labelEn: 'Customer Database',
+      icon: UserCheck,
+      badge: customers.length,
+      categoryBn: 'গ্রাহক',
+      descBn: 'নিয়মিত গ্রাহকদের নাম, ফোন নম্বর ও বাকি খাতা'
+    },
+    {
+      id: 'staff' as AdminMenuKey,
+      labelBn: 'স্টাফ ও অপারেটর',
+      labelEn: 'Staff & Roles',
+      icon: Users,
+      badge: staff.length,
+      categoryBn: 'টিম',
+      descBn: 'দোকানের কম্পিউটার অপারেটরদের অ্যাক্সেস ও রোল'
+    },
+    {
+      id: 'hero_slides' as AdminMenuKey,
+      labelBn: 'হিরো ব্যাকগ্রাউন্ড ছবি',
+      labelEn: 'Hero Photo Carousel',
+      icon: ImageIcon,
+      badge: heroSlides.length,
+      categoryBn: 'ডিজাইন',
+      descBn: 'ওয়েবসাইটের প্রধান হিরো সেকশনের ফটো স্লাইডার'
+    },
+    {
+      id: 'background_settings' as AdminMenuKey,
+      labelBn: 'ব্যাকগ্রাউন্ড ও ওয়ালপেপার',
+      labelEn: 'Background & Wallpaper',
+      icon: Palette,
+      categoryBn: 'ডিজাইন',
+      descBn: 'সাইটের থিম, ব্যাকগ্রাউন্ড প্যাটার্ন ও ওয়ালপেপার'
+    },
+    {
+      id: 'seo_meta' as AdminMenuKey,
+      labelBn: 'এসইও ও মেটা ট্যাগ',
+      labelEn: 'Dynamic SEO & Meta',
+      icon: Globe,
+      categoryBn: 'মার্কেটিং',
+      descBn: 'গুগল সার্চ ও সোশ্যাল মিডিয়া মেটা ট্যাগ সেটিংস'
+    },
+    {
+      id: 'settings' as AdminMenuKey,
+      labelBn: 'ব্যবসায়িক সেটিংস',
+      labelEn: 'Business Settings',
+      icon: Settings,
+      categoryBn: 'কনফিগ',
+      descBn: 'দোকানের নাম, ঠিকানা, মোবাইল ও সামাজিক যোগাযোগ লিঙ্ক'
+    },
+    {
+      id: 'backup' as AdminMenuKey,
+      labelBn: 'ডাটাবেজ ব্যাকআপ',
+      labelEn: 'Database Backup',
+      icon: Database,
+      categoryBn: 'সিস্টেম',
+      descBn: 'সম্পূর্ণ দোকানের তথ্য JSON ব্যাকআপ ডাউনলোড ও রিস্টোর'
+    }
+  ], [services.length, lowStockCount, products.length, pendingAppsCount, applications.length, orders.length, customers.length, staff.length, heroSlides.length]);
+
   return (
     <div className={`min-h-screen ${currentThemeConfig.mainBg} ${currentThemeConfig.textPrimary} flex flex-col font-sans selection:bg-emerald-500 selection:text-neutral-950 transition-colors duration-200`}>
       {/* Top Standalone Admin Master Bar */}
@@ -502,7 +666,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
           {/* Center Quick Shortcuts */}
           <div className="hidden md:flex items-center gap-2">
             <button
-              onClick={() => setActiveMenu('pos')}
+              onClick={() => navigateToMenu('pos')}
               className={`px-3 py-1.5 rounded-xl ${currentThemeConfig.badgeBg} border ${currentThemeConfig.borderColor} text-xs font-bold flex items-center gap-1.5 shadow-md transition-all active:scale-95`}
             >
               <Calculator className="w-3.5 h-3.5" />
@@ -510,7 +674,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
             </button>
 
             <button
-              onClick={() => setActiveMenu('applications')}
+              onClick={() => navigateToMenu('applications')}
               className="relative px-3 py-1.5 rounded-xl bg-neutral-800/80 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
             >
               <FileCheck className="w-3.5 h-3.5 text-amber-400" />
@@ -523,7 +687,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
             </button>
 
             <button
-              onClick={() => setActiveMenu('products')}
+              onClick={() => navigateToMenu('products')}
               className="relative px-3 py-1.5 rounded-xl bg-neutral-800/80 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
             >
               <Package className="w-3.5 h-3.5 text-teal-400" />
@@ -536,7 +700,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
             </button>
 
             <button
-              onClick={() => setActiveMenu('finance')}
+              onClick={() => navigateToMenu('finance')}
               className="px-3 py-1.5 rounded-xl bg-neutral-800/80 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
             >
               <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
@@ -623,49 +787,53 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
 
             {/* Navigation Menu */}
             <nav className="space-y-1 text-xs font-semibold">
-              {[
-                { id: 'overview', label: language === 'bn' ? 'ড্যাশবোর্ড ওভারভিউ' : 'Dashboard Overview', icon: LayoutDashboard },
-                { id: 'ledger', label: language === 'bn' ? 'দৈনিক হিসাব খাতা' : 'Daily Shop Ledger', icon: BookOpen, badge: 'Special', badgeColor: 'bg-amber-500 text-black font-bold' },
-                { id: 'stamps', label: language === 'bn' ? 'স্ট্যাম্প ও কার্টিজ রেজিস্টার' : 'Stamp & Cartridge Register', icon: FileText, badge: '৫০৳/১০০৳', badgeColor: 'bg-amber-400 text-black font-bold' },
-                { id: 'analytics', label: language === 'bn' ? 'আয়-ব্যয় ও পারফরম্যান্স' : 'Revenue & Analytics', icon: PieChart, badge: 'Live', badgeColor: 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' },
-                { id: 'cashmemo', label: language === 'bn' ? 'ডিজিটাল ক্যাশ মেমো' : 'Digital Cash Memo', icon: Receipt, badge: '3.5x5', badgeColor: 'bg-teal-950 text-teal-300 border border-teal-500/40' },
-                { id: 'services', label: language === 'bn' ? 'অনলাইন সেবা CMS' : 'Services Manager', icon: Layers, badge: services.length },
-                { id: 'products', label: language === 'bn' ? 'কাগজ ও স্টক' : 'Paper & Stock', icon: Package, badge: lowStockCount > 0 ? `${lowStockCount} Low` : `${products.length}`, badgeColor: lowStockCount > 0 ? 'bg-rose-950 text-rose-300 border border-rose-500/40' : undefined },
-                { id: 'applications', label: language === 'bn' ? 'গ্রাহক আবেদনসমূহ' : 'Online Applications', icon: FileCheck, badge: pendingAppsCount > 0 ? `${pendingAppsCount} New` : `${applications.length}`, badgeColor: pendingAppsCount > 0 ? 'bg-amber-950 text-amber-300 border border-amber-500/40' : undefined },
-                { id: 'orders', label: language === 'bn' ? 'দোকান অর্ডার' : 'E-Commerce Orders', icon: ShoppingBag, badge: orders.length },
-                { id: 'pos', label: language === 'bn' ? 'পস ক্যাশিয়ার কাউন্টার' : 'POS Cashier Terminal', icon: Calculator },
-                { id: 'finance', label: language === 'bn' ? 'হিসাব ও ব্যয় খাতা' : 'Finance & Accounts', icon: DollarSign },
-                { id: 'customers', label: language === 'bn' ? 'কাস্টমার একাউন্টস' : 'Customer Database', icon: UserCheck, badge: customers.length },
-                { id: 'staff', label: language === 'bn' ? 'স্টাফ ও অপারেটর' : 'Staff & Roles', icon: Users, badge: staff.length },
-                { id: 'hero_slides', label: language === 'bn' ? 'হিরো ব্যাকগ্রাউন্ড ছবি' : 'Hero Photo Carousel', icon: ImageIcon, badge: heroSlides.length },
-                { id: 'background_settings', label: language === 'bn' ? 'ব্যাকগ্রাউন্ড ও ওয়ালপেপার' : 'Background & Wallpaper', icon: Palette },
-                { id: 'seo_meta', label: language === 'bn' ? 'এসইও ও মেটা ট্যাগ' : 'Dynamic SEO & Meta', icon: Globe },
-                { id: 'settings', label: language === 'bn' ? 'ব্যবসায়িক সেটিংস' : 'Business Settings', icon: Settings },
-                { id: 'backup', label: language === 'bn' ? 'ডাটাবেজ ব্যাকআপ' : 'Database Backup', icon: Database }
-              ].map(item => {
+              {navigationMenuItems.map(item => {
                 const Icon = item.icon;
                 const isActive = activeMenu === item.id;
+                const isCopied = copiedLinkSection === item.id;
                 return (
-                  <button
-                    key={item.id}
-                    id={`admin-nav-${item.id}`}
-                    onClick={() => setActiveMenu(item.id as any)}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all ${
-                      isActive
-                        ? currentThemeConfig.activeSidebarItem
-                        : currentThemeConfig.inactiveSidebarItem
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Icon className="w-4 h-4" />
-                      <span>{item.label}</span>
-                    </div>
-                    {item.badge && (
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${item.badgeColor || 'bg-neutral-800 text-neutral-300'}`}>
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
+                  <div key={item.id} className="group relative flex items-center">
+                    <button
+                      id={`admin-nav-${item.id}`}
+                      onClick={() => navigateToMenu(item.id)}
+                      className={`w-full flex items-center justify-between pl-3 pr-2 py-2 rounded-xl transition-all ${
+                        isActive
+                          ? currentThemeConfig.activeSidebarItem
+                          : currentThemeConfig.inactiveSidebarItem
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0 pr-1">
+                        <Icon className="w-4 h-4 shrink-0" />
+                        <span className="truncate">{language === 'bn' ? item.labelBn : item.labelEn}</span>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {item.badge !== undefined && item.badge !== null && item.badge !== '' && (
+                          <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${item.badgeColor || 'bg-neutral-800 text-neutral-300'}`}>
+                            {item.badge}
+                          </span>
+                        )}
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={(e) => handleCopySectionLink(e, item.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              handleCopySectionLink(e as any, item.id);
+                            }
+                          }}
+                          className="p-1 rounded-lg text-neutral-400 hover:text-amber-400 hover:bg-neutral-800/80 transition-colors"
+                          title={`${language === 'bn' ? 'সরাসরি লিঙ্ক কপি করুন' : 'Copy direct link'}: /admin?section=${item.id}`}
+                        >
+                          {isCopied ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-400 animate-in zoom-in" />
+                          ) : (
+                            <Link2 className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 transition-opacity" />
+                          )}
+                        </span>
+                      </div>
+                    </button>
+                  </div>
                 );
               })}
             </nav>
@@ -685,6 +853,44 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
 
         {/* Main Content Workspace */}
         <main className="flex-1 p-4 sm:p-8 overflow-y-auto max-w-7xl">
+          {/* Active Section Direct Link Info Bar */}
+          <div className="mb-6 px-4 py-3 rounded-2xl bg-neutral-900/90 border border-neutral-800 flex flex-wrap items-center justify-between gap-3 text-xs shadow-lg">
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
+              <div className="flex items-center gap-1.5 text-neutral-400 font-medium">
+                <Link2 className="w-4 h-4 text-amber-400 shrink-0" />
+                <span className="font-semibold text-neutral-300">
+                  {language === 'bn' ? 'বর্তমান সেকশনের সরাসরি লিঙ্ক:' : 'Direct Section URL:'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 bg-neutral-950 px-3 py-1 rounded-xl border border-neutral-800">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                <code className="text-emerald-400 font-mono font-bold text-[11px] sm:text-xs select-all">
+                  {typeof window !== 'undefined' ? `${window.location.origin}/admin?section=${activeMenu}` : `/admin?section=${activeMenu}`}
+                </code>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={(e) => handleCopySectionLink(e, activeMenu)}
+                className="px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-1.5 border border-neutral-700 transition-all active:scale-95 shadow-sm"
+                title={language === 'bn' ? 'বর্তমান সেকশনের সরাসরি লিঙ্ক কপি করুন' : 'Copy Direct Link'}
+              >
+                {copiedLinkSection === activeMenu ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400 animate-in zoom-in" />
+                    <span className="text-emerald-400 font-bold">{language === 'bn' ? 'লিঙ্ক কপি হয়েছে!' : 'Link Copied!'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{language === 'bn' ? 'এই সেকশনের লিঙ্ক কপি' : 'Copy Link'}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
           {/* VIEW 1: OVERVIEW */}
           {activeMenu === 'overview' && (
             <div className="space-y-6 animate-in fade-in duration-200">
@@ -702,7 +908,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                 <div className="flex flex-wrap items-center gap-2">
                   {/* Special Ledger Button */}
                   <button
-                    onClick={() => setActiveMenu('ledger')}
+                    onClick={() => navigateToMenu('ledger')}
                     className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500/30 to-emerald-500/30 hover:brightness-110 border border-amber-500/50 text-amber-300 font-bold text-xs flex items-center gap-2 transition-all shadow-md"
                   >
                     <BookOpen className="w-4 h-4 text-amber-400 animate-pulse" />
@@ -710,35 +916,35 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                   </button>
                   {/* Special Stamp & Cartridge Register Button */}
                   <button
-                    onClick={() => setActiveMenu('stamps')}
+                    onClick={() => navigateToMenu('stamps')}
                     className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-950/70 to-neutral-900 hover:bg-neutral-800 border border-amber-500/40 text-amber-300 font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-amber-950"
                   >
                     <FileText className="w-4 h-4 text-amber-400" />
                     <span>{language === 'bn' ? 'স্ট্যাম্প ও কার্টিজ রেজিস্টার' : 'Stamp Register'}</span>
                   </button>
                   <button
-                    onClick={() => setActiveMenu('cashmemo')}
+                    onClick={() => navigateToMenu('cashmemo')}
                     className="px-3.5 py-2 rounded-xl bg-teal-950 hover:bg-teal-900 border border-teal-500/40 text-teal-300 font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-teal-950"
                   >
                     <Receipt className="w-4 h-4 text-teal-400" />
                     <span>{language === 'bn' ? 'ক্যাশ মেমো' : 'Cash Memo'}</span>
                   </button>
                   <button
-                    onClick={() => setActiveMenu('analytics')}
+                    onClick={() => navigateToMenu('analytics')}
                     className="px-3.5 py-2 rounded-xl bg-emerald-950 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-emerald-950"
                   >
                     <PieChart className="w-4 h-4 text-emerald-400" />
                     <span>{language === 'bn' ? 'আয়-ব্যয় অ্যানালিটিক্স' : 'Analytics & Trends'}</span>
                   </button>
                   <button
-                    onClick={() => setActiveMenu('backup')}
+                    onClick={() => navigateToMenu('backup')}
                     className="px-3.5 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 font-bold text-xs flex items-center gap-2 transition-all"
                   >
                     <Database className="w-4 h-4 text-emerald-400" />
                     <span>{language === 'bn' ? 'ডাটাবেজ ব্যাকআপ' : 'Backup DB'}</span>
                   </button>
                   <button
-                    onClick={() => setActiveMenu('pos')}
+                    onClick={() => navigateToMenu('pos')}
                     className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:brightness-110 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950"
                   >
                     <Calculator className="w-4 h-4" />
@@ -764,7 +970,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                     </div>
                   </div>
                   <button
-                    onClick={() => { setActiveMenu('products'); setProductLowStockOnly(true); }}
+                    onClick={() => { navigateToMenu('products'); setProductLowStockOnly(true); }}
                     className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shrink-0"
                   >
                     {language === 'bn' ? 'স্টক দেখুন' : 'View Stock'}
@@ -837,7 +1043,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                       <FileCheck className="w-4 h-4 text-emerald-400" />
                       <span>{language === 'bn' ? 'সাম্প্রতিক আবেদনসমূহ' : 'Recent Customer Applications'}</span>
                     </h3>
-                    <button onClick={() => setActiveMenu('applications')} className="text-xs text-emerald-400 hover:underline">
+                    <button onClick={() => navigateToMenu('applications')} className="text-xs text-emerald-400 hover:underline">
                       {language === 'bn' ? 'সব দেখুন →' : 'View All →'}
                     </button>
                   </div>
@@ -868,7 +1074,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                       <Printer className="w-4 h-4 text-teal-400" />
                       <span>{language === 'bn' ? 'সাম্প্রতিক POS ক্যাশ রসিদ' : 'Recent POS Counter Invoices'}</span>
                     </h3>
-                    <button onClick={() => setActiveMenu('pos')} className="text-xs text-teal-400 hover:underline">
+                    <button onClick={() => navigateToMenu('pos')} className="text-xs text-teal-400 hover:underline">
                       {language === 'bn' ? 'নতুন বিক্রয় →' : 'New Sale →'}
                     </button>
                   </div>
@@ -888,6 +1094,112 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+
+              {/* Direct Links Grid for All Admin Options */}
+              <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-5 sm:p-7 space-y-5 shadow-xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-neutral-800">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                      <Link2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-base sm:text-lg font-extrabold text-white">
+                        {language === 'bn' ? 'অ্যাডমিন প্যানেল সকল সেকশনের সরাসরি লিঙ্ক' : 'Direct Navigation Links for All Sections'}
+                      </h3>
+                      <p className="text-xs text-neutral-400">
+                        {language === 'bn'
+                          ? 'যেকোনো অপশনে সরাসরি প্রবেশ করতে নিচের লিঙ্ক কপি করুন অথবা সরাসরি ক্লিক করে ভিজিট করুন।'
+                          : 'Use dedicated URLs to access or share any dashboard tool directly.'}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-mono text-neutral-400 px-3 py-1 rounded-xl bg-neutral-950 border border-neutral-800 self-start sm:self-auto">
+                    {navigationMenuItems.length}টি সেকশন লিঙ্ক উপলব্ধ
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                  {navigationMenuItems.map(navItem => {
+                    const ItemIcon = navItem.icon;
+                    const isCopied = copiedLinkSection === navItem.id;
+                    const pathUrl = `/admin?section=${navItem.id}`;
+                    return (
+                      <div
+                        key={navItem.id}
+                        className={`p-4 rounded-2xl border transition-all duration-200 flex flex-col justify-between gap-3 ${
+                          activeMenu === navItem.id
+                            ? 'bg-neutral-950 border-amber-500/50 shadow-md ring-1 ring-amber-500/20'
+                            : 'bg-neutral-950/70 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-950'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-2.5">
+                              <div className="p-2 rounded-xl bg-neutral-900 border border-neutral-800 text-amber-400 shrink-0">
+                                <ItemIcon className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <h4 className="text-xs font-bold text-white">
+                                  {language === 'bn' ? navItem.labelBn : navItem.labelEn}
+                                </h4>
+                                <span className="text-[10px] text-neutral-500 font-mono">
+                                  {navItem.categoryBn}
+                                </span>
+                              </div>
+                            </div>
+                            {navItem.badge !== undefined && navItem.badge !== null && navItem.badge !== '' && (
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${navItem.badgeColor || 'bg-neutral-800 text-neutral-300'}`}>
+                                {navItem.badge}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-neutral-400 line-clamp-2 leading-relaxed">
+                            {navItem.descBn}
+                          </p>
+                        </div>
+
+                        <div className="pt-2 border-t border-neutral-900 flex flex-col gap-2">
+                          <div className="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800/80 text-[11px] font-mono text-neutral-300 overflow-hidden">
+                            <span className="truncate text-emerald-400 font-semibold">{pathUrl}</span>
+                            <span className="text-[10px] text-neutral-500 uppercase shrink-0 ml-1">Direct Link</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              type="button"
+                              onClick={() => navigateToMenu(navItem.id)}
+                              className="px-2.5 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5 text-teal-400" />
+                              <span>{language === 'bn' ? 'সরাসরি যান' : 'Open'}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => handleCopySectionLink(e, navItem.id)}
+                              className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all ${
+                                isCopied
+                                  ? 'bg-emerald-950 border-emerald-500/50 text-emerald-300'
+                                  : 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-300'
+                              }`}
+                            >
+                              {isCopied ? (
+                                <>
+                                  <Check className="w-3.5 h-3.5 text-emerald-400 animate-in zoom-in" />
+                                  <span>কপি হয়েছে</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3.5 h-3.5 text-amber-400" />
+                                  <span>লিঙ্ক কপি</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>

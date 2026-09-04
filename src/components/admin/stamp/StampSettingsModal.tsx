@@ -16,9 +16,9 @@ export const StampSettingsModal: React.FC<StampSettingsModalProps> = ({
   isOpen,
   onClose,
   stampConfigs = [],
-  updateStampConfig = () => {},
-  addStampConfig = () => ({} as any),
-  deleteStampConfig = () => {}
+  updateStampConfig = (_id: string, _updates: Partial<StampItemConfig>) => {},
+  addStampConfig = (_configData: Omit<StampItemConfig, 'id'>) => ({} as any),
+  deleteStampConfig = (_id: string) => {}
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newItem, setNewItem] = useState({

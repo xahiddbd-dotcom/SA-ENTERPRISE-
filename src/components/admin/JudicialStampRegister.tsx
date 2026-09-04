@@ -218,6 +218,23 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
     return stampPurchases.reduce((sum, p) => sum + (p.totalCost || 0), 0);
   }, [stampPurchases]);
 
+  // Dynamic price references for core stamps and cartridge paper
+  const stamp50Config = stampConfigs.find(c => c.id === 'stamp_50');
+  const stamp100Config = stampConfigs.find(c => c.id === 'stamp_100');
+  const cartConfig = stampConfigs.find(c => c.id === 'cartridge_paper');
+
+  const stamp50SalePrice = stamp50Config?.defaultSalePrice ?? 70;
+  const stamp50BuyPrice = stamp50Config?.defaultBuyPrice ?? 55;
+  const stamp50Profit = stamp50SalePrice - stamp50BuyPrice;
+
+  const stamp100SalePrice = stamp100Config?.defaultSalePrice ?? 120;
+  const stamp100BuyPrice = stamp100Config?.defaultBuyPrice ?? 105;
+  const stamp100Profit = stamp100SalePrice - stamp100BuyPrice;
+
+  const cartSalePrice = cartConfig?.defaultSalePrice ?? 10;
+  const cartBuyPrice = cartConfig?.defaultBuyPrice ?? 5;
+  const cartProfit = cartSalePrice - cartBuyPrice;
+
   // Handle Item selection in sale form
   const handleItemSelect = (typeId: string) => {
     const config = stampConfigs.find(c => c.id === typeId);
@@ -586,42 +603,57 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
 
             {/* Quick Price Badge Indicator */}
             <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
-              <div className="px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-neutral-800 flex items-center gap-1.5 text-neutral-300">
+              <button
+                type="button"
+                onClick={() => setIsSettingsOpen(true)}
+                className="px-2.5 py-1 rounded-lg bg-neutral-950/80 hover:bg-neutral-900 border border-neutral-800 hover:border-emerald-500/40 flex items-center gap-1.5 text-neutral-300 transition-all text-left"
+                title="ক্লিক করে ৫০৳ স্ট্যাম্প রেট পরিবর্তন করুন"
+              >
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
                 <span className="font-semibold text-white">৫০ টাকার স্ট্যাম্প:</span>
                 {customerPrivacyMode ? (
-                  <span className="font-mono font-bold text-emerald-400">বিক্রয় ৭০৳</span>
+                  <span className="font-mono font-bold text-emerald-400">বিক্রয় ৳{stamp50SalePrice}</span>
                 ) : (
                   <>
-                    <span>ক্রয় ৫৫৳ | বিক্রয় ৭০৳</span>
-                    <span className="text-emerald-400 font-bold">(লাভ ১৫৳)</span>
+                    <span>ক্রয় ৳{stamp50BuyPrice} | বিক্রয় ৳{stamp50SalePrice}</span>
+                    <span className="text-emerald-400 font-bold">(লাভ ৳{stamp50Profit})</span>
                   </>
                 )}
-              </div>
-              <div className="px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-neutral-800 flex items-center gap-1.5 text-neutral-300">
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsSettingsOpen(true)}
+                className="px-2.5 py-1 rounded-lg bg-neutral-950/80 hover:bg-neutral-900 border border-neutral-800 hover:border-cyan-500/40 flex items-center gap-1.5 text-neutral-300 transition-all text-left"
+                title="ক্লিক করে ১০০৳ স্ট্যাম্প রেট পরিবর্তন করুন"
+              >
                 <span className="w-2 h-2 rounded-full bg-cyan-500" />
                 <span className="font-semibold text-white">১০০ টাকার স্ট্যাম্প:</span>
                 {customerPrivacyMode ? (
-                  <span className="font-mono font-bold text-cyan-300">বিক্রয় ১২০৳</span>
+                  <span className="font-mono font-bold text-cyan-300">বিক্রয় ৳{stamp100SalePrice}</span>
                 ) : (
                   <>
-                    <span>ক্রয় ১০৫৳ | বিক্রয় ১২০৳</span>
-                    <span className="text-emerald-400 font-bold">(লাভ ১৫৳)</span>
+                    <span>ক্রয় ৳{stamp100BuyPrice} | বিক্রয় ৳{stamp100SalePrice}</span>
+                    <span className="text-emerald-400 font-bold">(লাভ ৳{stamp100Profit})</span>
                   </>
                 )}
-              </div>
-              <div className="px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-neutral-800 flex items-center gap-1.5 text-neutral-300">
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsSettingsOpen(true)}
+                className="px-2.5 py-1 rounded-lg bg-neutral-950/80 hover:bg-neutral-900 border border-neutral-800 hover:border-amber-500/40 flex items-center gap-1.5 text-neutral-300 transition-all text-left"
+                title="ক্লিক করে কার্টিজ পেপার রেট পরিবর্তন করুন"
+              >
                 <span className="w-2 h-2 rounded-full bg-amber-500" />
                 <span className="font-semibold text-white">কার্টিজ পেপার:</span>
                 {customerPrivacyMode ? (
-                  <span className="font-mono font-bold text-amber-300">বিক্রয় ১০৳</span>
+                  <span className="font-mono font-bold text-amber-300">বিক্রয় ৳{cartSalePrice}</span>
                 ) : (
                   <>
-                    <span>ক্রয় ৫৳ | বিক্রয় ১০৳</span>
-                    <span className="text-emerald-400 font-bold">(লাভ ৫৳)</span>
+                    <span>ক্রয় ৳{cartBuyPrice} | বিক্রয় ৳{cartSalePrice}</span>
+                    <span className="text-emerald-400 font-bold">(লাভ ৳{cartProfit})</span>
                   </>
                 )}
-              </div>
+              </button>
             </div>
           </div>
 
@@ -725,9 +757,9 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
           >
             <div className="text-[10px] text-neutral-400 font-medium">+১ টি ৫০ টাকার স্ট্যাম্প</div>
             <div className="text-xs font-bold text-white flex items-center justify-between mt-0.5">
-              <span>বিক্রি: ৭০৳</span>
+              <span>বিক্রি: ৳{stamp50SalePrice}</span>
               {!customerPrivacyMode && (
-                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+১৫৳ লাভ</span>
+                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+৳{stamp50Profit} লাভ</span>
               )}
             </div>
           </button>
@@ -738,9 +770,9 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
           >
             <div className="text-[10px] text-neutral-400 font-medium">+২ টি ৫০ টাকার স্ট্যাম্প</div>
             <div className="text-xs font-bold text-white flex items-center justify-between mt-0.5">
-              <span>বিক্রি: ১৪০৳</span>
+              <span>বিক্রি: ৳{stamp50SalePrice * 2}</span>
               {!customerPrivacyMode && (
-                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+৩০৳ লাভ</span>
+                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+৳{stamp50Profit * 2} লাভ</span>
               )}
             </div>
           </button>
@@ -751,9 +783,9 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
           >
             <div className="text-[10px] text-neutral-400 font-medium">+১ টি ১০০ টাকার স্ট্যাম্প</div>
             <div className="text-xs font-bold text-white flex items-center justify-between mt-0.5">
-              <span>বিক্রি: ১২০৳</span>
+              <span>বিক্রি: ৳{stamp100SalePrice}</span>
               {!customerPrivacyMode && (
-                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+১৫৳ লাভ</span>
+                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+৳{stamp100Profit} লাভ</span>
               )}
             </div>
           </button>
@@ -764,9 +796,9 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
           >
             <div className="text-[10px] text-neutral-400 font-medium">+৩ টি ১০০ টাকার (৩০০৳ চুক্তি)</div>
             <div className="text-xs font-bold text-white flex items-center justify-between mt-0.5">
-              <span>বিক্রি: ৩৬০৳</span>
+              <span>বিক্রি: ৳{stamp100SalePrice * 3}</span>
               {!customerPrivacyMode && (
-                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+৪৫৳ লাভ</span>
+                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+৳{stamp100Profit * 3} লাভ</span>
               )}
             </div>
           </button>
@@ -777,9 +809,9 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
           >
             <div className="text-[10px] text-neutral-400 font-medium">+২ টি কার্টিজ পেপার</div>
             <div className="text-xs font-bold text-white flex items-center justify-between mt-0.5">
-              <span>বিক্রি: ২০৳</span>
+              <span>বিক্রি: ৳{cartSalePrice * 2}</span>
               {!customerPrivacyMode && (
-                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+১০৳ লাভ</span>
+                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+৳{cartProfit * 2} লাভ</span>
               )}
             </div>
           </button>
@@ -790,9 +822,9 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
           >
             <div className="text-[10px] text-neutral-400 font-medium">+৫ টি কার্টিজ পেপার</div>
             <div className="text-xs font-bold text-white flex items-center justify-between mt-0.5">
-              <span>বিক্রি: ৫০৳</span>
+              <span>বিক্রি: ৳{cartSalePrice * 5}</span>
               {!customerPrivacyMode && (
-                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+২৫৳ লাভ</span>
+                <span className="text-[10px] text-emerald-400 font-semibold group-hover:scale-105">+৳{cartProfit * 5} লাভ</span>
               )}
             </div>
           </button>
@@ -1314,14 +1346,69 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
                     <div>
                       <div className="text-[10px] text-neutral-400">ক্রয় মূল্য</div>
                       <div className="text-sm font-bold text-red-400">৳{item.defaultBuyPrice}</div>
+                      <div className="flex items-center justify-center gap-1 mt-1">
+                        <button
+                          type="button"
+                          onClick={() => updateStampConfig(item.id, { defaultBuyPrice: Math.max(0, item.defaultBuyPrice - 5) })}
+                          className="px-1.5 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-red-300 text-[10px] font-bold"
+                          title="ক্রয় মূল্য ৫ টাকা কমান"
+                        >
+                          -৫
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateStampConfig(item.id, { defaultBuyPrice: item.defaultBuyPrice + 5 })}
+                          className="px-1.5 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-[10px] font-bold"
+                          title="ক্রয় মূল্য ৫ টাকা বাড়ান"
+                        >
+                          +৫
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <div className="text-[10px] text-neutral-400">বিক্রয় মূল্য</div>
                       <div className="text-sm font-bold text-white">৳{item.defaultSalePrice}</div>
+                      <div className="flex items-center justify-center gap-1 mt-1">
+                        <button
+                          type="button"
+                          onClick={() => updateStampConfig(item.id, { defaultSalePrice: Math.max(0, item.defaultSalePrice - 5) })}
+                          className="px-1.5 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-rose-400 text-[10px] font-bold"
+                          title="বিক্রয় মূল্য ৫ টাকা কমান"
+                        >
+                          -৫
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateStampConfig(item.id, { defaultSalePrice: Math.max(0, item.defaultSalePrice - 1) })}
+                          className="px-1 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-[10px] font-bold"
+                          title="বিক্রয় মূল্য ১ টাকা কমান"
+                        >
+                          -১
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateStampConfig(item.id, { defaultSalePrice: item.defaultSalePrice + 1 })}
+                          className="px-1 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-[10px] font-bold"
+                          title="বিক্রয় মূল্য ১ টাকা বাড়ান"
+                        >
+                          +১
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateStampConfig(item.id, { defaultSalePrice: item.defaultSalePrice + 5 })}
+                          className="px-1.5 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-emerald-400 text-[10px] font-bold"
+                          title="বিক্রয় মূল্য ৫ টাকা বাড়ান"
+                        >
+                          +৫
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <div className="text-[10px] text-emerald-400 font-semibold">নিট লাভ</div>
                       <div className="text-sm font-bold text-emerald-400">+৳{unitProfit}</div>
+                      <div className="text-[10px] text-neutral-500 mt-1 font-sans">
+                        স্বয়ংক্রিয় হিসাব
+                      </div>
                     </div>
                   </div>
 
@@ -1513,22 +1600,59 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
               {/* Row 2: Rates & Live Calculator (Customer Privacy Aware) */}
               {customerPrivacyMode ? (
                 <div className="bg-neutral-950 p-3.5 rounded-xl border border-neutral-800 space-y-2">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-neutral-400 font-semibold mb-1">
-                        একক বিক্রয় রেট (৳)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={saleForm.salePricePerUnit}
-                        onChange={e => setSaleForm(p => ({ ...p, salePricePerUnit: parseFloat(e.target.value) || 0 }))}
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-white font-bold font-mono focus:outline-none focus:border-emerald-500"
-                        required
-                      />
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-neutral-400 font-semibold text-xs">
+                          একক বিক্রয় রেট (৳)
+                        </label>
+                        <span className="text-[10px] text-emerald-400 font-bold">বাড়ান / কমান</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setSaleForm(p => ({ ...p, salePricePerUnit: Math.max(0, p.salePricePerUnit - 5) }))}
+                          className="px-2 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-rose-400 font-bold text-xs"
+                          title="৫ টাকা কমান"
+                        >
+                          -৫
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSaleForm(p => ({ ...p, salePricePerUnit: Math.max(0, p.salePricePerUnit - 1) }))}
+                          className="px-1.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold text-xs"
+                          title="১ টাকা কমান"
+                        >
+                          -১
+                        </button>
+                        <input
+                          type="number"
+                          min="0"
+                          value={saleForm.salePricePerUnit}
+                          onChange={e => setSaleForm(p => ({ ...p, salePricePerUnit: parseFloat(e.target.value) || 0 }))}
+                          className="flex-1 min-w-[60px] px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-white font-bold font-mono text-center focus:outline-none focus:border-emerald-500"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setSaleForm(p => ({ ...p, salePricePerUnit: p.salePricePerUnit + 1 }))}
+                          className="px-1.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold text-xs"
+                          title="১ টাকা বাড়ান"
+                        >
+                          +১
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSaleForm(p => ({ ...p, salePricePerUnit: p.salePricePerUnit + 5 }))}
+                          className="px-2 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-emerald-400 font-bold text-xs"
+                          title="৫ টাকা বাড়ান"
+                        >
+                          +৫
+                        </button>
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-neutral-400 font-semibold mb-1">
+                      <label className="block text-neutral-400 font-semibold mb-1 text-xs">
                         সর্বমোট প্রদেয় বিক্রয় মূল্য
                       </label>
                       <div className="py-1 text-lg font-extrabold text-emerald-400 font-mono">
@@ -1561,37 +1685,90 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
                   </details>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-neutral-950 p-3.5 rounded-xl border border-neutral-800">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-neutral-950 p-3.5 rounded-xl border border-neutral-800">
                   <div>
-                    <label className="block text-neutral-400 font-semibold mb-1">
+                    <label className="block text-neutral-400 font-semibold mb-1 text-xs">
                       একক ক্রয় রেট (৳)
                     </label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={saleForm.buyPricePerUnit}
-                      onChange={e => setSaleForm(p => ({ ...p, buyPricePerUnit: parseFloat(e.target.value) || 0 }))}
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-red-300 font-bold font-mono focus:outline-none focus:border-emerald-500"
-                      required
-                    />
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setSaleForm(p => ({ ...p, buyPricePerUnit: Math.max(0, p.buyPricePerUnit - 5) }))}
+                        className="px-1.5 py-1.5 rounded bg-neutral-800 hover:bg-neutral-700 text-red-300 font-bold text-xs"
+                      >
+                        -৫
+                      </button>
+                      <input
+                        type="number"
+                        min="0"
+                        value={saleForm.buyPricePerUnit}
+                        onChange={e => setSaleForm(p => ({ ...p, buyPricePerUnit: parseFloat(e.target.value) || 0 }))}
+                        className="w-full px-2 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-red-300 font-bold font-mono text-center focus:outline-none focus:border-emerald-500"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setSaleForm(p => ({ ...p, buyPricePerUnit: p.buyPricePerUnit + 5 }))}
+                        className="px-1.5 py-1.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold text-xs"
+                      >
+                        +৫
+                      </button>
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-neutral-400 font-semibold mb-1">
-                      একক বিক্রয় রেট (৳)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={saleForm.salePricePerUnit}
-                      onChange={e => setSaleForm(p => ({ ...p, salePricePerUnit: parseFloat(e.target.value) || 0 }))}
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-white font-bold font-mono focus:outline-none focus:border-emerald-500"
-                      required
-                    />
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-neutral-400 font-semibold text-xs">
+                        একক বিক্রয় রেট (৳)
+                      </label>
+                      <span className="text-[10px] text-emerald-400 font-bold">বাড়ান / কমান</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setSaleForm(p => ({ ...p, salePricePerUnit: Math.max(0, p.salePricePerUnit - 5) }))}
+                        className="px-1.5 py-1.5 rounded bg-neutral-800 hover:bg-neutral-700 text-rose-400 font-bold text-xs"
+                        title="৫ টাকা কমান"
+                      >
+                        -৫
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSaleForm(p => ({ ...p, salePricePerUnit: Math.max(0, p.salePricePerUnit - 1) }))}
+                        className="px-1 py-1.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold text-xs"
+                        title="১ টাকা কমান"
+                      >
+                        -১
+                      </button>
+                      <input
+                        type="number"
+                        min="0"
+                        value={saleForm.salePricePerUnit}
+                        onChange={e => setSaleForm(p => ({ ...p, salePricePerUnit: parseFloat(e.target.value) || 0 }))}
+                        className="w-full px-2 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 text-white font-bold font-mono text-center focus:outline-none focus:border-emerald-500"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setSaleForm(p => ({ ...p, salePricePerUnit: p.salePricePerUnit + 1 }))}
+                        className="px-1 py-1.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold text-xs"
+                        title="১ টাকা বাড়ান"
+                      >
+                        +১
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSaleForm(p => ({ ...p, salePricePerUnit: p.salePricePerUnit + 5 }))}
+                        className="px-1.5 py-1.5 rounded bg-neutral-800 hover:bg-neutral-700 text-emerald-400 font-bold text-xs"
+                        title="৫ টাকা বাড়ান"
+                      >
+                        +৫
+                      </button>
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-neutral-400 font-semibold mb-1">
+                    <label className="block text-neutral-400 font-semibold mb-1 text-xs">
                       মোট বিক্রয় মূল্য
                     </label>
                     <div className="py-2 text-sm font-extrabold text-white font-mono">
@@ -1600,7 +1777,7 @@ export const JudicialStampRegister: React.FC<JudicialStampRegisterProps> = ({ la
                   </div>
 
                   <div>
-                    <label className="block text-emerald-400 font-semibold mb-1">
+                    <label className="block text-emerald-400 font-semibold mb-1 text-xs">
                       মোট নিট লাভ / মুনাফা
                     </label>
                     <div className="py-2 text-sm font-extrabold text-emerald-400 font-mono">
