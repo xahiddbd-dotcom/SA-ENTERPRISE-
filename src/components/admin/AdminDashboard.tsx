@@ -1074,172 +1074,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
               {/* Operator 60% Owner Profit & 40% Worker Share Widget with Photo Buttons */}
               <OperatorProfitShareWidget onNavigateToLedger={() => navigateToMenu('ledger')} />
 
-              {/* Recent Applications & Invoices Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Applications Feed */}
-                <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4">
-                  <div className="flex items-center justify-between pb-2 border-b border-neutral-800">
-                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                      <FileCheck className="w-4 h-4 text-emerald-400" />
-                      <span>{language === 'bn' ? 'সাম্প্রতিক আবেদনসমূহ' : 'Recent Customer Applications'}</span>
-                    </h3>
-                    <button onClick={() => navigateToMenu('applications')} className="text-xs text-emerald-400 hover:underline">
-                      {language === 'bn' ? 'সব দেখুন →' : 'View All →'}
-                    </button>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {applications.slice(0, 4).map(app => (
-                      <div key={app.id} className="p-3 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-between text-xs">
-                        <div>
-                          <span className="font-mono font-bold text-emerald-400">{app.applicationNumber}</span>
-                          <p className="text-white font-semibold mt-0.5">{app.serviceName}</p>
-                          <p className="text-neutral-400 text-[11px]">{app.applicantName} • {app.applicantPhone}</p>
-                        </div>
-                        <div className="text-right space-y-1">
-                          <span className="px-2 py-0.5 rounded bg-neutral-800 text-[10px] font-bold text-neutral-300 uppercase">
-                            {app.status}
-                          </span>
-                          <span className="block font-mono text-emerald-400 font-bold">৳{app.amount}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+              {/* Recent Invoices Feed */}
+              <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-neutral-800">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Printer className="w-4 h-4 text-teal-400" />
+                    <span>{language === 'bn' ? 'সাম্প্রতিক POS কাউন্টার ক্যাশ রসিদ' : 'Recent POS Counter Invoices'}</span>
+                  </h3>
+                  <button onClick={() => navigateToMenu('pos')} className="text-xs text-teal-400 hover:underline">
+                    {language === 'bn' ? 'নতুন বিক্রয় →' : 'New Sale →'}
+                  </button>
                 </div>
 
-                {/* Recent Invoices Feed */}
-                <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4">
-                  <div className="flex items-center justify-between pb-2 border-b border-neutral-800">
-                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                      <Printer className="w-4 h-4 text-teal-400" />
-                      <span>{language === 'bn' ? 'সাম্প্রতিক POS ক্যাশ রসিদ' : 'Recent POS Counter Invoices'}</span>
-                    </h3>
-                    <button onClick={() => navigateToMenu('pos')} className="text-xs text-teal-400 hover:underline">
-                      {language === 'bn' ? 'নতুন বিক্রয় →' : 'New Sale →'}
-                    </button>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {invoices.slice(0, 4).map(inv => (
-                      <div key={inv.id} className="p-3 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-between text-xs">
-                        <div>
-                          <span className="font-mono font-bold text-teal-400">{inv.invoiceNumber}</span>
-                          <p className="text-white font-semibold mt-0.5">{inv.customerName}</p>
-                          <p className="text-neutral-400 text-[11px]">{inv.items.length} items • {inv.paymentMethod.toUpperCase()}</p>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-sm font-mono font-extrabold text-white">৳{inv.total}</span>
-                          <span className="block text-[10px] text-emerald-400 font-bold uppercase">{inv.paymentStatus}</span>
-                        </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {invoices.slice(0, 4).map(inv => (
+                    <div key={inv.id} className="p-3 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-between text-xs">
+                      <div>
+                        <span className="font-mono font-bold text-teal-400">{inv.invoiceNumber}</span>
+                        <p className="text-white font-semibold mt-0.5">{inv.customerName}</p>
+                        <p className="text-neutral-400 text-[11px]">{inv.items.length} items • {inv.paymentMethod.toUpperCase()}</p>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Direct Links Grid for All Admin Options */}
-              <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-5 sm:p-7 space-y-5 shadow-xl">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-neutral-800">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                      <Link2 className="w-5 h-5" />
+                      <div className="text-right">
+                        <span className="text-sm font-mono font-extrabold text-white">৳{inv.total}</span>
+                        <span className="block text-[10px] text-emerald-400 font-bold uppercase">{inv.paymentStatus}</span>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-base sm:text-lg font-extrabold text-white">
-                        {language === 'bn' ? 'অ্যাডমিন প্যানেল সকল সেকশনের সরাসরি লিঙ্ক' : 'Direct Navigation Links for All Sections'}
-                      </h3>
-                      <p className="text-xs text-neutral-400">
-                        {language === 'bn'
-                          ? 'যেকোনো অপশনে সরাসরি প্রবেশ করতে নিচের লিঙ্ক কপি করুন অথবা সরাসরি ক্লিক করে ভিজিট করুন।'
-                          : 'Use dedicated URLs to access or share any dashboard tool directly.'}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-[11px] font-mono text-neutral-400 px-3 py-1 rounded-xl bg-neutral-950 border border-neutral-800 self-start sm:self-auto">
-                    {navigationMenuItems.length}টি সেকশন লিঙ্ক উপলব্ধ
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                  {navigationMenuItems.map(navItem => {
-                    const ItemIcon = navItem.icon;
-                    const isCopied = copiedLinkSection === navItem.id;
-                    const pathUrl = `/admin?section=${navItem.id}`;
-                    return (
-                      <div
-                        key={navItem.id}
-                        className={`p-4 rounded-2xl border transition-all duration-200 flex flex-col justify-between gap-3 ${
-                          activeMenu === navItem.id
-                            ? 'bg-neutral-950 border-amber-500/50 shadow-md ring-1 ring-amber-500/20'
-                            : 'bg-neutral-950/70 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-950'
-                        }`}
-                      >
-                        <div>
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <div className="flex items-center gap-2.5">
-                              <div className="p-2 rounded-xl bg-neutral-900 border border-neutral-800 text-amber-400 shrink-0">
-                                <ItemIcon className="w-4 h-4" />
-                              </div>
-                              <div>
-                                <h4 className="text-xs font-bold text-white">
-                                  {language === 'bn' ? navItem.labelBn : navItem.labelEn}
-                                </h4>
-                                <span className="text-[10px] text-neutral-500 font-mono">
-                                  {navItem.categoryBn}
-                                </span>
-                              </div>
-                            </div>
-                            {navItem.badge !== undefined && navItem.badge !== null && navItem.badge !== '' && (
-                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${navItem.badgeColor || 'bg-neutral-800 text-neutral-300'}`}>
-                                {navItem.badge}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[11px] text-neutral-400 line-clamp-2 leading-relaxed">
-                            {navItem.descBn}
-                          </p>
-                        </div>
-
-                        <div className="pt-2 border-t border-neutral-900 flex flex-col gap-2">
-                          <div className="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800/80 text-[11px] font-mono text-neutral-300 overflow-hidden">
-                            <span className="truncate text-emerald-400 font-semibold">{pathUrl}</span>
-                            <span className="text-[10px] text-neutral-500 uppercase shrink-0 ml-1">Direct Link</span>
-                          </div>
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              type="button"
-                              onClick={() => navigateToMenu(navItem.id)}
-                              className="px-2.5 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
-                            >
-                              <ExternalLink className="w-3.5 h-3.5 text-teal-400" />
-                              <span>{language === 'bn' ? 'সরাসরি যান' : 'Open'}</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={(e) => handleCopySectionLink(e, navItem.id)}
-                              className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all ${
-                                isCopied
-                                  ? 'bg-emerald-950 border-emerald-500/50 text-emerald-300'
-                                  : 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-300'
-                              }`}
-                            >
-                              {isCopied ? (
-                                <>
-                                  <Check className="w-3.5 h-3.5 text-emerald-400 animate-in zoom-in" />
-                                  <span>কপি হয়েছে</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-3.5 h-3.5 text-amber-400" />
-                                  <span>লিঙ্ক কপি</span>
-                                </>
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  ))}
                 </div>
               </div>
             </div>

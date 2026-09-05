@@ -70,9 +70,9 @@ export const OperatorProfitShareWidget: React.FC<OperatorProfitShareWidgetProps>
     };
   }, [dateLedgers]);
 
-  // All eligible operators/staff
+  // All eligible operators/staff (All shop service operators and staff)
   const activeOperators = useMemo(() => {
-    return staff.filter(s => s.role === 'staff' || s.role === 'operator' || s.role === 'admin' || s.role === 'super_admin');
+    return staff.filter(s => s.role !== 'customer');
   }, [staff]);
 
   return (
@@ -287,15 +287,23 @@ export const OperatorProfitShareWidget: React.FC<OperatorProfitShareWidgetProps>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-1">
                         <h4 className="font-bold text-white text-xs sm:text-sm truncate group-hover:text-emerald-300 transition-colors">
-                          {operator.name}
+                          {language === 'bn' && operator.nameBn ? operator.nameBn : operator.name}
                         </h4>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-300 shrink-0">
-                          {opShift ? 'এন্ট্রি আছে' : 'এন্ট্রি নেই'}
+                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full shrink-0 font-bold ${
+                          opShift ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-neutral-800 text-neutral-400'
+                        }`}>
+                          {opShift ? (language === 'bn' ? 'হিসাব সম্পন্ন' : 'Settled') : (language === 'bn' ? 'শিফট বাকি' : 'Pending')}
                         </span>
                       </div>
-                      <p className="text-[11px] text-neutral-400 truncate">
-                        {operator.designation || operator.role}
+                      <p className="text-[11px] text-emerald-400/90 truncate font-medium">
+                        {operator.designationBn || operator.designation || operator.role}
                       </p>
+                      {operator.shift && (
+                        <p className="text-[10px] text-neutral-400 truncate mt-0.5 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-teal-400 inline-block" />
+                          <span>{operator.shift}</span>
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -322,8 +330,8 @@ export const OperatorProfitShareWidget: React.FC<OperatorProfitShareWidgetProps>
                   <span className="text-amber-300 font-mono font-semibold">
                     {language === 'bn' ? 'ক্যাশ জমা: ' : 'Cash: '}৳{cashInHand.toLocaleString()}
                   </span>
-                  <span className="text-emerald-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5 font-bold">
-                    <span>{language === 'bn' ? 'হিসাব দেখুন' : 'View'}</span>
+                  <span className="text-emerald-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 font-bold">
+                    <span>{opShift ? (language === 'bn' ? 'হিসাব পরিবর্তন' : 'Edit') : (language === 'bn' ? 'হিসাব করুন' : 'Settle')}</span>
                     <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>

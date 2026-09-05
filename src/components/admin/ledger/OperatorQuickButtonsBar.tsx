@@ -32,7 +32,7 @@ export const OperatorQuickButtonsBar: React.FC<OperatorQuickButtonsBarProps> = (
   const { staff, operatorLedgers, syncOperatorProfitToShopLedger } = useData();
 
   // Filter staff who are operators/staff (or include all working staff)
-  const operatorStaff = staff.filter(s => s.role === 'staff' || s.role === 'admin');
+  const operatorStaff = staff.filter(s => s.role !== 'customer');
 
   // Compute stats for selected date
   const dateOperatorLedgers = operatorLedgers.filter(l => l.date === selectedDate);
@@ -192,11 +192,16 @@ export const OperatorQuickButtonsBar: React.FC<OperatorQuickButtonsBarProps> = (
 
                   <div className="min-w-0">
                     <h4 className="font-bold text-sm text-white truncate group-hover:text-emerald-300 transition-colors">
-                      {worker.name}
+                      {language === 'bn' && worker.nameBn ? worker.nameBn : worker.name}
                     </h4>
-                    <p className="text-[11px] text-neutral-400 truncate">
-                      {worker.designation || (worker.role === 'admin' ? 'মালিক ও সুপারভাইজার' : 'কম্পিউটার অপারেটর')}
+                    <p className="text-[11px] text-emerald-400/90 truncate font-medium">
+                      {worker.designationBn || worker.designation || (worker.role === 'admin' ? 'মালিক ও সুপারভাইজার' : 'কম্পিউটার অপারেটর')}
                     </p>
+                    {worker.shift && (
+                      <p className="text-[10px] text-neutral-400 truncate">
+                        {worker.shift}
+                      </p>
+                    )}
                     {worker.phone && (
                       <p className="text-[10px] text-neutral-500 font-mono">
                         {worker.phone}
