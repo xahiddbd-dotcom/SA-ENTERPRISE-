@@ -8,8 +8,11 @@ import {
   OperatorDailyLedger,
   CustomLedgerCategory,
   DailyCashReconciliation,
-  CashNoteCount
+  CashNoteCount,
+  User as UserType
 } from '../../types';
+import { OperatorQuickButtonsBar } from './ledger/OperatorQuickButtonsBar';
+import { OperatorProfitShareModal } from './ledger/OperatorProfitShareModal';
 import {
   BookOpen,
   Plus,
@@ -73,7 +76,8 @@ export const DailyShopLedger: React.FC<DailyShopLedgerProps> = ({ onNavigate, is
     addCustomCategory,
     deleteCustomCategory,
     staff,
-    settings
+    settings,
+    syncOperatorProfitToShopLedger
   } = useData();
 
   // Selected Date Filter (Default: Today's date YYYY-MM-DD)
@@ -83,6 +87,10 @@ export const DailyShopLedger: React.FC<DailyShopLedgerProps> = ({ onNavigate, is
 
   // Sub-tabs: 'journal' | 'calculator' | 'operators' | 'customize' | 'reports'
   const [activeLedgerTab, setActiveLedgerTab] = useState<'journal' | 'calculator' | 'operators' | 'customize'>('journal');
+
+  // Operator 60/40 Split Modal State
+  const [selectedOperatorForModal, setSelectedOperatorForModal] = useState<UserType | null>(null);
+  const [isOperatorModalOpen, setIsOperatorModalOpen] = useState<boolean>(false);
 
   // Search & category filter inside journal
   const [searchQuery, setSearchQuery] = useState('');
@@ -633,6 +641,20 @@ export const DailyShopLedger: React.FC<DailyShopLedgerProps> = ({ onNavigate, is
               <Settings className="w-4 h-4" />
               <span>{language === 'bn' ? 'কাস্টমাইজেশন' : 'Customize'}</span>
             </button>
+
+            {/* 5. Operators 60/40 Split & Photo Buttons */}
+            <button
+              id="ledger-operators-tab-btn"
+              onClick={() => setActiveLedgerTab('operators')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-bold transition-all ${
+                activeLedgerTab === 'operators'
+                  ? 'bg-teal-500 text-black border-teal-400 shadow-lg shadow-teal-950/40'
+                  : 'bg-gradient-to-r from-teal-950/80 to-emerald-950/80 hover:from-teal-900 hover:to-emerald-900 text-teal-200 border-teal-500/40 shadow-md'
+              }`}
+            >
+              <Coins className="w-4 h-4 text-amber-400" />
+              <span>{language === 'bn' ? 'কর্মীদের হিসাব ও ৬০/৪০ বন্টন' : 'Operator 60/40 Split'}</span>
+            </button>
           </div>
         </div>
 
@@ -695,9 +717,34 @@ export const DailyShopLedger: React.FC<DailyShopLedgerProps> = ({ onNavigate, is
           <div className="text-neutral-400 text-xs flex items-center gap-2">
             <span>
               {language === 'bn' ? 'বর্তমান নির্বাচিত তারিখ:' : 'Active Date:'}{' '}
-              <strong className="text-emerald-400">{selectedDate}</strong>
+              <strong className="text-emerald-400 font-mono">{selectedDate}</strong>
             </span>
           </div>
+        </div>
+
+        {/* Operator Quick Buttons Bar (ছবিসহ প্রতিটি কর্মীর বাটন ও হিসাব) */}
+        <div className="mt-4 pt-4 border-t border-neutral-800/80">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+            <span className="text-xs font-bold text-neutral-300 flex items-center gap-2">
+              <User className="w-4 h-4 text-emerald-400" />
+              <span>{language === 'bn' ? 'প্রতিটি কর্মীর বাটন (ছবিতে ক্লিক করে হিসাব ও ৬০/৪০ বন্টন করুন):' : 'Operator Photo Buttons (Click photo to view 60/40 accounts):'}</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveLedgerTab('operators')}
+              className="text-[11px] text-teal-400 hover:underline font-semibold flex items-center gap-1"
+            >
+              <span>{language === 'bn' ? 'সকল কর্মীর বিস্তারিত লেজার ও সামারি দেখুন →' : 'View Full Operators Ledger →'}</span>
+            </button>
+          </div>
+          <OperatorQuickButtonsBar
+            selectedDate={selectedDate}
+            onSelectOperator={(op) => {
+              setSelectedOperatorForModal(op);
+              setIsOperatorModalOpen(true);
+            }}
+            compact={true}
+          />
         </div>
       </div>
 
@@ -1356,221 +1403,266 @@ export const DailyShopLedger: React.FC<DailyShopLedgerProps> = ({ onNavigate, is
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 3: OPERATOR SHIFT & SHARE SETTLEMENT                                  */}
+      {/* TAB 3: OPERATOR SHIFT & SHARE SETTLEMENT (কর্মীদের হিসাব ও ৬০/৪০ বন্টন)   */}
       {/* ========================================================================= */}
       {activeLedgerTab === 'operators' && (
-        <div className="space-y-6">
-          {/* Operator Shift Input Card */}
-          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 space-y-6 shadow-2xl">
-            <div className="border-b border-neutral-800 pb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <User className="w-5 h-5 text-teal-400" />
-                <span>{language === 'bn' ? 'অপারেটর শিফট সমাপ্তি ও কমিশন খাতা' : 'Operator Shift & Share Settlement'}</span>
-              </h3>
-              <p className="text-xs text-neutral-400">
-                {language === 'bn'
-                  ? 'কম্পিউটার ও ফটোকপি অপারেটরদের প্রতিদিনের কাজের হিসাব, দোকান শেয়ার (যেমন ৬০%) ও অপারেটর কমিশন (যেমন ৪০%) রেকর্ড।'
-                  : 'Track operator gross service turnover, deduction % (Shop share vs Operator bonus), paper reams used, and print counters.'}
-              </p>
-            </div>
+        <div className="space-y-6 animate-in fade-in duration-200">
+          {/* Operator Photo Buttons Section */}
+          <OperatorQuickButtonsBar
+            selectedDate={selectedDate}
+            onSelectOperator={(op) => {
+              setSelectedOperatorForModal(op);
+              setIsOperatorModalOpen(true);
+            }}
+          />
 
-            <form onSubmit={handleSaveOperatorShift} className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          {/* 60% Owner & 40% Worker Executive Summary Banner */}
+          {(() => {
+            const dateLedgers = operatorLedgers.filter(l => selectedDate ? l.date === selectedDate : true);
+            const totalGross = dateLedgers.reduce((acc, l) => acc + (l.grossServiceSales || 0), 0);
+            const totalExpenses = dateLedgers.reduce((acc, l) => acc + (l.operatorExpenses || 0), 0);
+            const totalNet = Math.max(0, totalGross - totalExpenses);
+            const totalOwner60 = dateLedgers.reduce(
+              (acc, l) => acc + (l.ownerShareAmount || Math.round((((l.grossServiceSales || 0) - (l.operatorExpenses || 0)) * (l.ownerSharePercentage || 60)) / 100)),
+              0
+            );
+            const totalWorker40 = dateLedgers.reduce(
+              (acc, l) => acc + (l.workerShareAmount || Math.round((((l.grossServiceSales || 0) - (l.operatorExpenses || 0)) * (l.workerSharePercentage || 40)) / 100)),
+              0
+            );
+            const totalCashInHand = dateLedgers.reduce((acc, l) => acc + (l.cashDepositedToOwner ?? l.grossServiceSales ?? 0), 0);
+
+            return (
+              <div className="p-5 rounded-3xl bg-neutral-900 border-2 border-emerald-500/40 shadow-2xl space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-800 pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-emerald-950">
+                      60/40
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-base text-white">
+                        {language === 'bn' ? `তারিখের সারাংশ: ${selectedDate}` : `Summary for ${selectedDate}`}
+                      </h4>
+                      <p className="text-xs text-neutral-400">
+                        {language === 'bn'
+                          ? 'কর্মীভিত্তিক আয়-ব্যয়, ক্যাশ জমা এবং দোকানে ৬০% মুনাফা অন্তর্ভুক্তি'
+                          : 'Operator service turnover, net collection, and 60% owner profit integration'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedOperatorForModal(staff[0] || null);
+                      setIsOperatorModalOpen(true);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-950 transition-all hover:scale-105 active:scale-95"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>{language === 'bn' ? 'নতুন কর্মীর হিসাব যুক্ত করুন' : 'Add Operator Shift'}</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+                  <div className="p-3 bg-neutral-950 rounded-xl border border-neutral-800">
+                    <span className="text-[11px] text-neutral-400 block">{language === 'bn' ? 'মোট কাজ (Gross):' : 'Gross Turnover:'}</span>
+                    <div className="text-lg font-black text-white font-mono mt-1">৳{totalGross.toLocaleString()}</div>
+                  </div>
+
+                  <div className="p-3 bg-neutral-950 rounded-xl border border-rose-900/30">
+                    <span className="text-[11px] text-rose-400 block">{language === 'bn' ? 'কর্মীদের খরচ (Exp):' : 'Expenses:'}</span>
+                    <div className="text-lg font-black text-rose-300 font-mono mt-1">-৳{totalExpenses.toLocaleString()}</div>
+                  </div>
+
+                  <div className="p-3 bg-neutral-950 rounded-xl border border-teal-900/30">
+                    <span className="text-[11px] text-teal-400 block">{language === 'bn' ? 'নিট সেবা আয় (Net):' : 'Net Turnover:'}</span>
+                    <div className="text-lg font-black text-teal-300 font-mono mt-1">৳{totalNet.toLocaleString()}</div>
+                  </div>
+
+                  <div className="p-3 bg-emerald-950/40 rounded-xl border border-emerald-500/40">
+                    <span className="text-[11px] text-emerald-400 font-bold block">{language === 'bn' ? 'মালিকের ৬০% লাভ:' : 'Owner 60%:'}</span>
+                    <div className="text-lg font-black text-emerald-300 font-mono mt-1">৳{totalOwner60.toLocaleString()}</div>
+                    <span className="text-[9px] text-emerald-400/80 block mt-0.5">দোকানের খাতায় যুক্ত ✅</span>
+                  </div>
+
+                  <div className="p-3 bg-indigo-950/40 rounded-xl border border-indigo-500/40">
+                    <span className="text-[11px] text-indigo-400 font-bold block">{language === 'bn' ? 'কর্মীদের ৪০% কমিশন:' : 'Worker 40%:'}</span>
+                    <div className="text-lg font-black text-indigo-300 font-mono mt-1">৳{totalWorker40.toLocaleString()}</div>
+                    <span className="text-[9px] text-indigo-400/80 block mt-0.5">কর্মীদের পারিশ্রমিক</span>
+                  </div>
+
+                  <div className="p-3 bg-amber-950/40 rounded-xl border border-amber-500/40">
+                    <span className="text-[11px] text-amber-400 font-bold block">{language === 'bn' ? 'মোট ক্যাশে জমা:' : 'Cash Deposited:'}</span>
+                    <div className="text-lg font-black text-amber-300 font-mono mt-1">৳{totalCashInHand.toLocaleString()}</div>
+                    <span className="text-[9px] text-amber-400/80 block mt-0.5">কাউন্টারে নগদ</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Past Operator Shift Records with Avatars, 60/40 format, and sync actions */}
+          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="p-4 sm:p-5 border-b border-neutral-800 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <label className="block text-neutral-300 font-semibold mb-1">{language === 'bn' ? 'অপারেটর নাম:' : 'Operator Name:'}</label>
-                <select
-                  id="op-shift-user-select"
-                  value={operatorForm.operatorId}
-                  onChange={e => {
-                    const sel = staff.find(s => s.id === e.target.value);
-                    setOperatorForm(prev => ({
-                      ...prev,
-                      operatorId: e.target.value,
-                      operatorName: sel?.name || 'Operator'
-                    }));
-                  }}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-white focus:outline-none focus:border-teal-400"
-                >
-                  {staff.map(st => (
-                    <option key={st.id} value={st.id}>
-                      {st.name} ({st.role.replace('_', ' ')})
-                    </option>
-                  ))}
-                  <option value="usr_operator">Tanvir Ahmed (Senior Operator)</option>
-                  <option value="usr_admin">Saiful Islam (Founder & Lead)</option>
-                </select>
+                <h4 className="font-extrabold text-white text-base flex items-center gap-2">
+                  <User className="w-4 h-4 text-emerald-400" />
+                  <span>{language === 'bn' ? 'কর্মীদের দৈনিক হিসাব ও ৬০/৪০ বন্টন তালিকা' : 'Operator Daily Shift & 60/40 Register'}</span>
+                </h4>
+                <p className="text-xs text-neutral-400 mt-0.5">
+                  {language === 'bn'
+                    ? 'প্রতিটি এন্ট্রির পাশে ছবিসহ কর্মীর তথ্য, আয়, ব্যয়, ৬০% মালিক ও ৪০% কর্মী মুনাফা এবং সিঙ্ক স্ট্যাটাস।'
+                    : 'Individual shift records with avatars, turnover, expenses, 60/40 split and ledger synchronization.'}
+                </p>
               </div>
 
-              <div>
-                <label className="block text-neutral-300 font-semibold mb-1">{language === 'bn' ? 'শিফট নির্বাচন:' : 'Shift:'}</label>
-                <select
-                  id="op-shift-select"
-                  value={operatorForm.shift}
-                  onChange={e => setOperatorForm(prev => ({ ...prev, shift: e.target.value as any }))}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-white focus:outline-none focus:border-teal-400"
-                >
-                  <option value="morning">{language === 'bn' ? 'সকাল শিফট (Morning Shift)' : 'Morning'}</option>
-                  <option value="evening">{language === 'bn' ? 'বিকাল/সন্ধ্যা শিফট (Evening Shift)' : 'Evening'}</option>
-                  <option value="full_day">{language === 'bn' ? 'পূর্ণ দিবস (Full Day)' : 'Full Day'}</option>
-                  <option value="night">{language === 'bn' ? 'রাত্রিকালীন (Night Shift)' : 'Night'}</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-neutral-300 font-semibold mb-1">{language === 'bn' ? 'দোকান শেয়ার % (Deduction %):' : 'Shop Share %:'}</label>
-                <input
-                  id="op-shift-deduction-input"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={operatorForm.deductionPct}
-                  onChange={e => setOperatorForm(prev => ({ ...prev, deductionPct: Number(e.target.value) }))}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-white font-mono focus:outline-none focus:border-teal-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-neutral-300 font-semibold mb-1">{language === 'bn' ? 'মোট সেবা বিক্রয় (Gross Turnover):' : 'Gross Turnover (BDT):'}</label>
-                <input
-                  id="op-shift-gross-input"
-                  type="number"
-                  placeholder="0"
-                  value={operatorForm.grossSales === 0 ? '' : operatorForm.grossSales}
-                  onChange={e => setOperatorForm(prev => ({ ...prev, grossSales: Number(e.target.value) }))}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-white font-mono font-bold focus:outline-none focus:border-teal-400"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-neutral-300 font-semibold mb-1">{language === 'bn' ? 'কাউন্টার নগদ ক্যাশ জমা:' : 'Cash in Hand (BDT):'}</label>
-                <input
-                  id="op-shift-cash-input"
-                  type="number"
-                  placeholder="0"
-                  value={operatorForm.cashInHand === 0 ? '' : operatorForm.cashInHand}
-                  onChange={e => setOperatorForm(prev => ({ ...prev, cashInHand: Number(e.target.value) }))}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-white font-mono focus:outline-none focus:border-teal-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-neutral-300 font-semibold mb-1">{language === 'bn' ? 'ডিজিটাল পেমেন্ট (bKash/Nagad):' : 'Digital (bKash/Nagad):'}</label>
-                <input
-                  id="op-shift-digital-input"
-                  type="number"
-                  placeholder="0"
-                  value={operatorForm.digitalSales === 0 ? '' : operatorForm.digitalSales}
-                  onChange={e => setOperatorForm(prev => ({ ...prev, digitalSales: Number(e.target.value) }))}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-white font-mono focus:outline-none focus:border-teal-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-neutral-300 font-semibold mb-1">{language === 'bn' ? 'প্রিন্ট পেপার কপি সংখ্যা:' : 'Printed Pages Count:'}</label>
-                <input
-                  id="op-shift-pages-input"
-                  type="number"
-                  placeholder="0"
-                  value={operatorForm.pagesPrinted === 0 ? '' : operatorForm.pagesPrinted}
-                  onChange={e => setOperatorForm(prev => ({ ...prev, pagesPrinted: Number(e.target.value) }))}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-white font-mono focus:outline-none focus:border-teal-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-neutral-300 font-semibold mb-1">{language === 'bn' ? 'ব্যবহৃত পেপার রিম সংখ্যা:' : 'Paper Reams Used:'}</label>
-                <input
-                  id="op-shift-reams-input"
-                  type="number"
-                  placeholder="0"
-                  value={operatorForm.paperReams === 0 ? '' : operatorForm.paperReams}
-                  onChange={e => setOperatorForm(prev => ({ ...prev, paperReams: Number(e.target.value) }))}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-white font-mono focus:outline-none focus:border-teal-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-neutral-300 font-semibold mb-1">{language === 'bn' ? 'মন্তব্য বা শিফট নোট:' : 'Shift Notes:'}</label>
-                <input
-                  id="op-shift-notes-input"
-                  type="text"
-                  placeholder={language === 'bn' ? 'উদা: ফটোকপি রোলার পরিষ্কার করা হয়েছে' : 'Notes'}
-                  value={operatorForm.notes}
-                  onChange={e => setOperatorForm(prev => ({ ...prev, notes: e.target.value }))}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-white focus:outline-none focus:border-teal-400"
-                />
-              </div>
-
-              <div className="md:col-span-3 pt-2">
-                <button
-                  id="save-op-shift-btn"
-                  type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-teal-950 transition-all hover:scale-105"
-                >
-                  {language === 'bn' ? 'অপারেটর শিফট লেজার সেভ করুন' : 'Save Operator Shift Ledger'}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* Past Operator Shift Records */}
-          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-xl">
-            <div className="p-4 border-b border-neutral-800 flex items-center justify-between">
-              <h4 className="font-bold text-white text-sm">
-                {language === 'bn' ? 'অপারেটর শিফট লেজার হিস্টোরি' : 'Operator Daily Shift History'}
-              </h4>
+              <span className="px-3 py-1 rounded-full bg-neutral-800 border border-neutral-700 text-xs font-mono font-bold text-neutral-300">
+                মোট রেকর্ড: {operatorLedgers.length}টি
+              </span>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="bg-neutral-950/80 border-b border-neutral-800 text-neutral-400">
-                    <th className="py-3 px-4">তারিখ ও শিফট</th>
-                    <th className="py-3 px-4">অপারেটর</th>
-                    <th className="py-3 px-4 text-right">মোট সেবা আয়</th>
-                    <th className="py-3 px-4 text-right">দোকান শেয়ার (%)</th>
-                    <th className="py-3 px-4 text-right">অপারেটর কমিশন</th>
-                    <th className="py-3 px-4 text-center">কাগজ / কপি</th>
-                    <th className="py-3 px-4">যাচাইকারী</th>
-                    <th className="py-3 px-4 text-center">অ্যাকশন</th>
+                  <tr className="bg-neutral-950/90 border-b border-neutral-800 text-neutral-400">
+                    <th className="py-3.5 px-4">তারিখ ও শিফট</th>
+                    <th className="py-3.5 px-4">কর্মী / অপারেটর</th>
+                    <th className="py-3.5 px-4 text-right">মোট কাজ</th>
+                    <th className="py-3.5 px-4 text-right">খরচ</th>
+                    <th className="py-3.5 px-4 text-right">নিট আয়</th>
+                    <th className="py-3.5 px-4 text-right bg-emerald-950/20 text-emerald-400 font-bold">মালিক ৬০%</th>
+                    <th className="py-3.5 px-4 text-right bg-indigo-950/20 text-indigo-400 font-bold">কর্মী ৪০%</th>
+                    <th className="py-3.5 px-4 text-right">ক্যাশে জমা</th>
+                    <th className="py-3.5 px-4 text-center">দোকান সিঙ্ক</th>
+                    <th className="py-3.5 px-4 text-center">অ্যাকশন</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-800/60 font-mono">
-                  {operatorLedgers.map(odl => (
-                    <tr key={odl.id} className="hover:bg-neutral-800/40">
-                      <td className="py-3 px-4 font-sans">
-                        <div className="font-bold text-white">{odl.date}</div>
-                        <div className="text-[11px] text-teal-400 capitalize">{odl.shift.replace('_', ' ')}</div>
-                      </td>
-                      <td className="py-3 px-4 font-sans">
-                        <div className="font-semibold text-white">{odl.operatorName}</div>
-                        <div className="text-[11px] text-neutral-400">{odl.counterNo}</div>
-                      </td>
-                      <td className="py-3 px-4 text-right font-bold text-emerald-400">
-                        ৳{odl.grossServiceSales.toLocaleString()}
-                      </td>
-                      <td className="py-3 px-4 text-right text-neutral-300">
-                        ৳{odl.deductionAmount.toLocaleString()} ({odl.deductionPercentage}%)
-                      </td>
-                      <td className="py-3 px-4 text-right font-bold text-indigo-400">
-                        ৳{odl.netAfterDeduction.toLocaleString()}
-                      </td>
-                      <td className="py-3 px-4 text-center text-neutral-300 font-sans">
-                        {odl.pagesPrintedCount || 0} পৃ. / {odl.paperReamsUsed || 0} রিম
-                      </td>
-                      <td className="py-3 px-4 text-neutral-400 font-sans">
-                        {odl.verifiedBy || 'Admin'}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <button
-                          onClick={() => deleteOperatorLedger(odl.id)}
-                          className="p-1.5 rounded-lg bg-neutral-800 hover:bg-rose-950 text-neutral-400 hover:text-rose-400"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                  {operatorLedgers.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} className="py-8 text-center text-neutral-500 font-sans">
+                        {language === 'bn' ? 'এখনও কোন কর্মীর শিফট হিসাব যোগ করা হয়নি।' : 'No operator shift records found yet.'}
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    operatorLedgers.map(odl => {
+                      const net = odl.netServiceIncome ?? Math.max(0, (odl.grossServiceSales || 0) - (odl.operatorExpenses || 0));
+                      const ownerPct = odl.ownerSharePercentage ?? odl.deductionPercentage ?? 60;
+                      const workerPct = odl.workerSharePercentage ?? (100 - ownerPct);
+                      const ownerAmt = odl.ownerShareAmount ?? odl.deductionAmount ?? Math.round((net * ownerPct) / 100);
+                      const workerAmt = odl.workerShareAmount ?? odl.netAfterDeduction ?? Math.max(0, net - ownerAmt);
+                      const cashInHand = odl.cashDepositedToOwner ?? odl.grossServiceSales ?? 0;
+                      const matchedStaff = staff.find(s => s.id === odl.operatorId);
+                      const avatar = odl.operatorAvatar || matchedStaff?.avatar;
+
+                      return (
+                        <tr key={odl.id} className="hover:bg-neutral-800/40 transition-colors">
+                          <td className="py-3 px-4 font-sans">
+                            <div className="font-bold text-white">{odl.date}</div>
+                            <div className="text-[10px] text-teal-400 capitalize">
+                              {odl.shift === 'full_day' ? 'পূর্ণ দিবস' : odl.shift === 'morning' ? 'সকাল' : odl.shift === 'evening' ? 'বিকাল' : odl.shift}
+                            </div>
+                          </td>
+
+                          <td className="py-3 px-4 font-sans">
+                            <div className="flex items-center gap-2.5">
+                              {avatar ? (
+                                <img
+                                  src={avatar}
+                                  alt={odl.operatorName}
+                                  referrerPolicy="no-referrer"
+                                  className="w-9 h-9 rounded-xl object-cover border border-emerald-500/40 shrink-0"
+                                />
+                              ) : (
+                                <div className="w-9 h-9 rounded-xl bg-emerald-950 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-xs shrink-0">
+                                  {odl.operatorName.charAt(0)}
+                                </div>
+                              )}
+                              <div className="min-w-0">
+                                <div className="font-bold text-white truncate">{odl.operatorName}</div>
+                                <div className="text-[10px] text-neutral-400 truncate">{odl.operatorDesignation || odl.counterNo}</div>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="py-3 px-4 text-right font-bold text-white">
+                            ৳{odl.grossServiceSales.toLocaleString()}
+                          </td>
+
+                          <td className="py-3 px-4 text-right text-rose-400">
+                            {odl.operatorExpenses && odl.operatorExpenses > 0 ? `-৳${odl.operatorExpenses.toLocaleString()}` : '৳০'}
+                          </td>
+
+                          <td className="py-3 px-4 text-right font-bold text-teal-300">
+                            ৳{net.toLocaleString()}
+                          </td>
+
+                          <td className="py-3 px-4 text-right font-black text-emerald-400 bg-emerald-950/20">
+                            ৳{ownerAmt.toLocaleString()}
+                            <div className="text-[9px] text-emerald-300 font-sans font-normal">({ownerPct}%)</div>
+                          </td>
+
+                          <td className="py-3 px-4 text-right font-black text-indigo-300 bg-indigo-950/20">
+                            ৳{workerAmt.toLocaleString()}
+                            <div className="text-[9px] text-indigo-400 font-sans font-normal">({workerPct}%)</div>
+                          </td>
+
+                          <td className="py-3 px-4 text-right font-bold text-amber-300">
+                            ৳{cashInHand.toLocaleString()}
+                          </td>
+
+                          <td className="py-3 px-4 text-center font-sans">
+                            {odl.syncedToShopLedger ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                                <CheckCircle2 className="w-3 h-3" />
+                                <span>দোকানে সিঙ্ক</span>
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => syncOperatorProfitToShopLedger(odl)}
+                                className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-black text-[10px] font-bold border border-amber-500/40 transition-all"
+                                title="দোকানের দৈনিক হিসাবে ৬০% মুনাফা যোগ করুন"
+                              >
+                                সিঙ্ক করুন +
+                              </button>
+                            )}
+                          </td>
+
+                          <td className="py-3 px-4 text-center">
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                onClick={() => {
+                                  const targetOp = staff.find(s => s.id === odl.operatorId) || {
+                                    id: odl.operatorId,
+                                    name: odl.operatorName,
+                                    role: 'staff' as const,
+                                    avatar: odl.operatorAvatar,
+                                    phone: odl.operatorPhone || '',
+                                    designation: odl.operatorDesignation
+                                  };
+                                  setSelectedOperatorForModal(targetOp as any);
+                                  setIsOperatorModalOpen(true);
+                                }}
+                                className="p-1.5 rounded-lg bg-neutral-800 hover:bg-emerald-950 text-neutral-300 hover:text-emerald-400 transition-colors"
+                                title="হিসাব সম্পাদনা বা বিস্তারিত দেখুন"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+
+                              <button
+                                onClick={() => deleteOperatorLedger(odl.id)}
+                                className="p-1.5 rounded-lg bg-neutral-800 hover:bg-rose-950 text-neutral-400 hover:text-rose-400 transition-colors"
+                                title="মুছে ফেলুন"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
@@ -2248,6 +2340,19 @@ export const DailyShopLedger: React.FC<DailyShopLedgerProps> = ({ onNavigate, is
             </div>
           </div>
         </div>
+      )}
+
+      {/* Operator Profit Share & 60/40 Settlement Modal */}
+      {isOperatorModalOpen && (
+        <OperatorProfitShareModal
+          isOpen={isOperatorModalOpen}
+          onClose={() => {
+            setIsOperatorModalOpen(false);
+            setSelectedOperatorForModal(null);
+          }}
+          operator={selectedOperatorForModal}
+          initialDate={selectedDate}
+        />
       )}
     </div>
   );

@@ -14,6 +14,7 @@ import { AdminAnalyticsDashboard } from './AdminAnalyticsDashboard';
 import { BackgroundSettingsManager } from './BackgroundSettingsManager';
 import { DailyShopLedger } from './DailyShopLedger';
 import { JudicialStampRegister } from './JudicialStampRegister';
+import { OperatorProfitShareWidget } from './dashboard/OperatorProfitShareWidget';
 import { ADMIN_THEMES, AdminThemeKey } from './AdminTheme';
 import { AdminThemeSwitcher } from './AdminThemeSwitcher';
 import {
@@ -1069,6 +1070,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                   </p>
                 </div>
               </div>
+
+              {/* Operator 60% Owner Profit & 40% Worker Share Widget with Photo Buttons */}
+              <OperatorProfitShareWidget onNavigateToLedger={() => navigateToMenu('ledger')} />
 
               {/* Recent Applications & Invoices Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

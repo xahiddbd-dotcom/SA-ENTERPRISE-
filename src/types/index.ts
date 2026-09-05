@@ -509,6 +509,7 @@ export interface DailyCounterSale {
   counterNo?: string;
   voucherNo?: string;
   notes?: string;
+  createdAt?: string;
 }
 
 export interface StoreExpenseRecord {
@@ -523,6 +524,8 @@ export interface StoreExpenseRecord {
   paidBy?: string;
   paidTo?: string;
   note?: string;
+  notes?: string;
+  createdAt?: string;
 }
 
 export interface OperatorDailyLedger {
@@ -530,20 +533,32 @@ export interface OperatorDailyLedger {
   date: string; // YYYY-MM-DD
   operatorId: string;
   operatorName: string;
+  operatorAvatar?: string;
+  operatorDesignation?: string;
   operatorPhone?: string;
   counterNo: string;
   shift: 'morning' | 'evening' | 'full_day' | 'night';
-  grossServiceSales: number; // সারাদিনের মোট সেবা ইনকাম
-  counterCashInHand: number; // ক্যাশ ড্রয়ারে ক্যাশ
+  grossServiceSales: number; // সারাদিনের মোট সেবা ইনকাম / কাজ (Gross Sales)
+  operatorExpenses?: number; // কর্মীর কাজের খরচ বা ব্যয় (যেমন পেপার, কালি, নাস্তা ইত্যাদি)
+  netServiceIncome?: number; // খরচ বাদ দিয়ে নিট সেবা আয়
+  ownerSharePercentage?: number; // ডিফল্ট ৬০% মালিকের অংশ
+  ownerShareAmount?: number; // মালিকের ৬০% মুনাফার পরিমাণ
+  workerSharePercentage?: number; // ডিফল্ট ৪০% কর্মীর অংশ
+  workerShareAmount?: number; // কর্মীর ৪০% পারিশ্রমিক/কমিশন
+  cashDepositedToOwner?: number; // কর্মীর মালিকের ক্যাশে জমা দেওয়া নগদ টাকা
+  counterCashInHand: number; // ক্যাশ ড্রয়ারে ক্যাশ / কর্মীর কাছে ক্যাশ
   digitalCollection: number; // বিকাশ/নগদে আদায়
   deductionPercentage: number; // default 60% (সেটিংস অনুযায়ী অ্যাডজাস্টেবল)
   deductionAmount: number; // 60% বাদ দিলে কত হয়
   netAfterDeduction: number; // মোট থেকে 60% বাদ দিলে অবশিষ্ট বা শেয়ার
+  syncedToShopLedger?: boolean; // মালিকের ৬০% মুনাফা দৈনিক দোকানের হিসাব খাতায় যুক্ত হয়েছে কিনা
+  shopLedgerSaleId?: string; // DailyCounterSale id
   pagesPrintedCount?: number;
   paperReamsUsed?: number;
   status: 'settled' | 'pending' | 'verified';
   verifiedBy?: string;
   notes?: string;
+  createdAt?: string;
 }
 
 export interface CashNoteCount {

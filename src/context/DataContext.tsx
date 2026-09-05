@@ -161,9 +161,10 @@ interface DataContextType {
   deleteStoreExpense: (id: string) => void;
 
   operatorLedgers: OperatorDailyLedger[];
-  saveOperatorLedger: (ledger: Omit<OperatorDailyLedger, 'id'>) => OperatorDailyLedger;
-  updateOperatorLedger: (id: string, updates: Partial<OperatorDailyLedger>) => void;
+  saveOperatorLedger: (ledger: Omit<OperatorDailyLedger, 'id'>, syncToLedger?: boolean) => OperatorDailyLedger;
+  updateOperatorLedger: (id: string, updates: Partial<OperatorDailyLedger>, syncToLedger?: boolean) => void;
   deleteOperatorLedger: (id: string) => void;
+  syncOperatorProfitToShopLedger: (operatorLedgerId: string) => void;
 
   cashReconciliations: DailyCashReconciliation[];
   saveCashReconciliation: (rec: Omit<DailyCashReconciliation, 'id'>) => DailyCashReconciliation;
@@ -250,7 +251,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [staff, setStaff] = useState<User[]>(() => {
     const saved = localStorage.getItem('se_staff');
-    return saved ? JSON.parse(saved) : initialStaff;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length >= initialStaff.length) {
+          return parsed;
+        }
+        // Merge missing staff from initialStaff so operators with photos are always available
+        const existingIds = new Set(parsed.map((u: User) => u.id));
+        const missing = initialStaff.filter(u => !existingIds.has(u.id));
+        return [...parsed, ...missing];
+      } catch (e) {
+        console.error('Failed to parse staff', e);
+      }
+    }
+    return initialStaff;
   });
 
   const [customers, setCustomers] = useState<User[]>(() => {
@@ -339,7 +354,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Daily Shop Accounts Ledger States (দৈনিক দোকানের হিসাব খাতা)
   const [dailyCounterSales, setDailyCounterSales] = useState<DailyCounterSale[]>(() => {
     const saved = localStorage.getItem('se_daily_counter_sales');
-    return saved ? JSON.parse(saved) : initialDailyCounterSales;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return initialDailyCounterSales;
   });
 
   const [storeExpenses, setStoreExpenses] = useState<StoreExpenseRecord[]>(() => {
@@ -349,7 +370,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [operatorLedgers, setOperatorLedgers] = useState<OperatorDailyLedger[]>(() => {
     const saved = localStorage.getItem('se_operator_ledgers');
-    return saved ? JSON.parse(saved) : initialOperatorDailyLedgers;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return initialOperatorDailyLedgers;
   });
 
   const [cashReconciliations, setCashReconciliations] = useState<DailyCashReconciliation[]>(() => {
@@ -359,7 +386,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [ledgerSettings, setLedgerSettings] = useState<StoreLedgerSettings>(() => {
     const saved = localStorage.getItem('se_ledger_settings');
-    return saved ? JSON.parse(saved) : initialStoreLedgerSettings;
+    if (saved) {
+      try {
+        const parsed: StoreLedgerSettings = JSON.parse(saved);
+        if (parsed.customCategories) {
+          const hasOpCat = parsed.customCategories.some(c => c.id === 'cat_inc_operator_share');
+          if (!hasOpCat) {
+            parsed.customCategories = [
+              { id: 'cat_inc_operator_share', name: 'Operator 60% Owner Share', nameBn: 'কর্মী হিসাব থেকে ৬০% মালিক মুনাফা', type: 'income', color: 'emerald', isCustom: false },
+              ...parsed.customCategories
+            ];
+          }
+          return parsed;
+        }
+      } catch (e) {}
+    }
+    return initialStoreLedgerSettings;
   });
 
   // Judicial Stamp & Cartridge States
@@ -1102,12 +1144,95 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logActivity('Store Expense Deleted', `Deleted store expense record ${id}`);
   };
 
-  // Operator Shift Daily Ledgers (অপারেটর শিফট ও কমিশন লেজার)
-  const saveOperatorLedger = (ledgerData: Omit<OperatorDailyLedger, 'id'>) => {
+  // Helper to sync or update owner's 60% profit to daily counter sales (দোকানের দৈনিক হিসাব খাতায় ৬০% মুনাফা যুক্তকরণ)
+  const syncOwnerShareToDailySales = (
+    ledger: OperatorDailyLedger,
+    ownerAmount: number,
+    existingSaleId?: string
+  ): string => {
+    const shiftLabel = ledger.shift === 'morning' ? 'সকাল' : ledger.shift === 'evening' ? 'বিকাল' : ledger.shift === 'night' ? 'রাত' : 'পূর্ণ দিবস';
+    const title = `মালিকের ৬০% অংশ (${ledger.operatorName} - ${shiftLabel})`;
+    const notes = `মোট কাজ: ৳${ledger.grossServiceSales}, খরচ: ৳${ledger.operatorExpenses || 0}, নিট: ৳${ledger.netServiceIncome || (ledger.grossServiceSales - (ledger.operatorExpenses || 0))} (মালিক ৬০%: ৳${ownerAmount}, কর্মী ৪০%: ৳${ledger.workerShareAmount || 0}) • ক্যাশে জমা: ৳${ledger.cashDepositedToOwner ?? 0}`;
+
+    let resolvedSaleId = existingSaleId;
+
+    setDailyCounterSales(prev => {
+      const idx = prev.findIndex(s => 
+        (resolvedSaleId && s.id === resolvedSaleId) ||
+        (s.category === 'cat_inc_operator_share' && s.date === ledger.date && s.operatorId === ledger.operatorId)
+      );
+
+      if (idx >= 0) {
+        resolvedSaleId = prev[idx].id;
+        const updated = [...prev];
+        updated[idx] = {
+          ...updated[idx],
+          amount: ownerAmount,
+          title,
+          notes,
+          paymentMethod: 'cash'
+        };
+        return updated;
+      } else {
+        const newSaleId = `dcs_op_${Date.now()}`;
+        resolvedSaleId = newSaleId;
+        const newSale: DailyCounterSale = {
+          id: newSaleId,
+          voucherNo: `VCH-${new Date(ledger.date).getFullYear() || 2026}-${String(Math.floor(Math.random() * 9000 + 1000))}`,
+          date: ledger.date,
+          title,
+          category: 'cat_inc_operator_share',
+          amount: ownerAmount,
+          paymentMethod: 'cash',
+          operatorId: ledger.operatorId,
+          operatorName: ledger.operatorName,
+          notes,
+          createdAt: new Date().toISOString()
+        };
+        return [newSale, ...prev];
+      }
+    });
+
+    return resolvedSaleId || `dcs_op_${Date.now()}`;
+  };
+
+  // Operator Shift Daily Ledgers (অপারেটর শিফট ও ৬০/৪০ কমিশন লেজার)
+  const saveOperatorLedger = (ledgerData: Omit<OperatorDailyLedger, 'id'>, syncToLedger = true) => {
+    const gross = Number(ledgerData.grossServiceSales || 0);
+    const exp = Number(ledgerData.operatorExpenses || 0);
+    const net = Math.max(0, gross - exp);
+    const ownerPct = ledgerData.ownerSharePercentage ?? (ledgerSettings.defaultDeductionPercentage || 60);
+    const workerPct = ledgerData.workerSharePercentage ?? (100 - ownerPct);
+    const ownerAmount = Math.round((net * ownerPct) / 100);
+    const workerAmount = Math.max(0, net - ownerAmount);
+    const cashDeposited = Number(ledgerData.cashDepositedToOwner ?? gross);
+
+    let linkedSaleId = ledgerData.shopLedgerSaleId;
+    const shouldSync = syncToLedger && (ledgerData.syncedToShopLedger !== false);
+
     const newLedger: OperatorDailyLedger = {
       ...ledgerData,
-      id: `odl_${Date.now()}`
+      id: `odl_${Date.now()}`,
+      grossServiceSales: gross,
+      operatorExpenses: exp,
+      netServiceIncome: net,
+      ownerSharePercentage: ownerPct,
+      ownerShareAmount: ownerAmount,
+      workerSharePercentage: workerPct,
+      workerShareAmount: workerAmount,
+      cashDepositedToOwner: cashDeposited,
+      deductionPercentage: ownerPct,
+      deductionAmount: ownerAmount,
+      netAfterDeduction: workerAmount,
+      syncedToShopLedger: shouldSync,
+      createdAt: ledgerData.createdAt || new Date().toISOString()
     };
+
+    if (shouldSync) {
+      linkedSaleId = syncOwnerShareToDailySales(newLedger, ownerAmount, linkedSaleId);
+      newLedger.shopLedgerSaleId = linkedSaleId;
+    }
+
     setOperatorLedgers(prev => {
       const existingIdx = prev.findIndex(l => l.date === newLedger.date && l.operatorId === newLedger.operatorId && l.shift === newLedger.shift);
       if (existingIdx >= 0) {
@@ -1117,16 +1242,78 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return [newLedger, ...prev];
     });
-    logActivity('Operator Ledger Saved', `Recorded shift ledger for operator ${newLedger.operatorName} (৳${newLedger.grossServiceSales})`);
+
+    logActivity('Operator Ledger Saved', `Recorded 60/40 ledger for ${newLedger.operatorName} (Gross ৳${gross}, Owner 60%: ৳${ownerAmount}, Cash: ৳${cashDeposited})`);
     return newLedger;
   };
 
-  const updateOperatorLedger = (id: string, updates: Partial<OperatorDailyLedger>) => {
-    setOperatorLedgers(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
+  const updateOperatorLedger = (id: string, updates: Partial<OperatorDailyLedger>, syncToLedger = true) => {
+    setOperatorLedgers(prev => {
+      return prev.map(l => {
+        if (l.id !== id) return l;
+        const gross = updates.grossServiceSales !== undefined ? Number(updates.grossServiceSales) : l.grossServiceSales;
+        const exp = updates.operatorExpenses !== undefined ? Number(updates.operatorExpenses) : (l.operatorExpenses || 0);
+        const net = Math.max(0, gross - exp);
+        const ownerPct = updates.ownerSharePercentage ?? l.ownerSharePercentage ?? 60;
+        const workerPct = updates.workerSharePercentage ?? l.workerSharePercentage ?? (100 - ownerPct);
+        const ownerAmount = Math.round((net * ownerPct) / 100);
+        const workerAmount = Math.max(0, net - ownerAmount);
+        const cashDeposited = updates.cashDepositedToOwner !== undefined ? Number(updates.cashDepositedToOwner) : (l.cashDepositedToOwner ?? gross);
+
+        const merged: OperatorDailyLedger = {
+          ...l,
+          ...updates,
+          grossServiceSales: gross,
+          operatorExpenses: exp,
+          netServiceIncome: net,
+          ownerSharePercentage: ownerPct,
+          ownerShareAmount: ownerAmount,
+          workerSharePercentage: workerPct,
+          workerShareAmount: workerAmount,
+          cashDepositedToOwner: cashDeposited,
+          deductionPercentage: ownerPct,
+          deductionAmount: ownerAmount,
+          netAfterDeduction: workerAmount
+        };
+
+        if (syncToLedger && merged.syncedToShopLedger !== false) {
+          const linkedSaleId = syncOwnerShareToDailySales(merged, ownerAmount, merged.shopLedgerSaleId);
+          merged.shopLedgerSaleId = linkedSaleId;
+          merged.syncedToShopLedger = true;
+        }
+
+        return merged;
+      });
+    });
+    logActivity('Operator Ledger Updated', `Updated shift ledger ${id}`);
   };
 
   const deleteOperatorLedger = (id: string) => {
-    setOperatorLedgers(prev => prev.filter(l => l.id !== id));
+    setOperatorLedgers(prev => {
+      const target = prev.find(l => l.id === id);
+      if (target?.shopLedgerSaleId) {
+        // Remove linked sale from daily counter sales as well
+        setDailyCounterSales(sPrev => sPrev.filter(s => s.id !== target.shopLedgerSaleId));
+      }
+      return prev.filter(l => l.id !== id);
+    });
+    logActivity('Operator Ledger Deleted', `Deleted operator shift ledger record ${id}`);
+  };
+
+  const syncOperatorProfitToShopLedger = (operatorLedgerId: string) => {
+    setOperatorLedgers(prev => {
+      return prev.map(l => {
+        if (l.id !== operatorLedgerId) return l;
+        const ownerAmount = l.ownerShareAmount || Math.round(((l.grossServiceSales - (l.operatorExpenses || 0)) * (l.ownerSharePercentage || 60)) / 100);
+        const saleId = syncOwnerShareToDailySales(l, ownerAmount, l.shopLedgerSaleId);
+        return {
+          ...l,
+          syncedToShopLedger: true,
+          shopLedgerSaleId: saleId
+        };
+      });
+    });
+    logActivity('Operator Share Synced to Ledger', `Manually synced 60% profit of operator ledger ${operatorLedgerId} to daily shop accounts`);
   };
 
   // Daily Cash Reconciliations (ক্যাশ ড্রয়ার হিসাব মিলকরণ)
@@ -1649,6 +1836,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         saveOperatorLedger,
         updateOperatorLedger,
         deleteOperatorLedger,
+        syncOperatorProfitToShopLedger,
         cashReconciliations,
         saveCashReconciliation,
         deleteCashReconciliation,
