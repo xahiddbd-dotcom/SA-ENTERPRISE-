@@ -67,7 +67,25 @@ export const initialSettings: WebsiteSettings = {
   wallpaperOpacity: 25,
   wallpaperBlur: 3,
   wallpaperFixed: true,
-  backgroundOverlayTint: 'dark'
+  backgroundOverlayTint: 'dark',
+
+  // Dahua DH-IPC-H5AS 5MP Indoor Pan & Tilt WiFi Camera
+  cctvCamera: {
+    model: 'Dahua DH-IPC-H5AS 5MP Indoor Pan & Tilt WiFi Camera',
+    locationName: 'Saiful Enterprise - Indira Road Counter & Workstation',
+    locationNameBn: 'সাইফুল এন্টারপ্রাইজ - ইন্দিরা রোড প্রধান কাউন্টার ও সেবা কেন্দ্র',
+    streamUrl: '',
+    webrtcUrl: '',
+    rtspUrl: 'rtsp://admin:saiful9696@192.168.1.108:554/cam/realmonitor?channel=1&subtype=0',
+    p2pCloudId: '9L05B77PAC82491',
+    ipAddress: '192.168.1.108',
+    port: 554,
+    enabled: true,
+    allowPublicLiveView: true,
+    ptzSupported: true,
+    resolution: '5MP 3K QHD (2880 × 1620)',
+    fps: 25
+  }
 };
 
 export const initialCategories: ServiceCategory[] = [

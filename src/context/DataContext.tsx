@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
   Service,
   ServiceCategory,
@@ -192,6 +192,10 @@ interface DataContextType {
   resetAllData: () => void;
   exportDatabaseJSON: () => string;
   importDatabaseJSON: (jsonStr: string) => boolean;
+
+  // Server Disk Persistence Sync (সার্ভার ডাটাবেজ সংরক্ষণ)
+  isServerSyncing: boolean;
+  syncFullDatabaseToServer: () => Promise<boolean>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -369,10 +373,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Daily Shop Accounts Ledger States (দৈনিক দোকানের হিসাব খাতা)
   const [dailyCounterSales, setDailyCounterSales] = useState<DailyCounterSale[]>(() => {
     const saved = localStorage.getItem('se_daily_counter_sales');
-    if (saved) {
+    if (saved !== null) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       } catch (e) {}
     }
     return initialDailyCounterSales;
@@ -380,15 +384,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [storeExpenses, setStoreExpenses] = useState<StoreExpenseRecord[]>(() => {
     const saved = localStorage.getItem('se_store_expenses');
-    return saved ? JSON.parse(saved) : initialStoreExpenses;
+    if (saved !== null) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {}
+    }
+    return initialStoreExpenses;
   });
 
   const [operatorLedgers, setOperatorLedgers] = useState<OperatorDailyLedger[]>(() => {
     const saved = localStorage.getItem('se_operator_ledgers');
-    if (saved) {
+    if (saved !== null) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       } catch (e) {}
     }
     return initialOperatorDailyLedgers;
@@ -447,31 +457,233 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : initialStampPurchases;
   });
 
-  // Sync to local storage
-  useEffect(() => { localStorage.setItem('se_settings', JSON.stringify(settings)); }, [settings]);
-  useEffect(() => { localStorage.setItem('se_categories', JSON.stringify(categories)); }, [categories]);
-  useEffect(() => { localStorage.setItem('se_services', JSON.stringify(services)); }, [services]);
-  useEffect(() => { localStorage.setItem('se_gsm_options', JSON.stringify(gsmOptions)); }, [gsmOptions]);
-  useEffect(() => { localStorage.setItem('se_products', JSON.stringify(products)); }, [products]);
-  useEffect(() => { localStorage.setItem('se_staff', JSON.stringify(staff)); }, [staff]);
-  useEffect(() => { localStorage.setItem('se_customers', JSON.stringify(customers)); }, [customers]);
-  useEffect(() => { localStorage.setItem('se_orders', JSON.stringify(orders)); }, [orders]);
-  useEffect(() => { localStorage.setItem('se_applications', JSON.stringify(applications)); }, [applications]);
-  useEffect(() => { localStorage.setItem('se_expenses', JSON.stringify(expenses)); }, [expenses]);
-  useEffect(() => { localStorage.setItem('se_pos_sales', JSON.stringify(posSales)); }, [posSales]);
-  useEffect(() => { localStorage.setItem('se_cart', JSON.stringify(cart)); }, [cart]);
-  useEffect(() => { localStorage.setItem('se_notifications', JSON.stringify(notifications)); }, [notifications]);
-  useEffect(() => { localStorage.setItem('se_activity_logs', JSON.stringify(activityLogs)); }, [activityLogs]);
-  useEffect(() => { localStorage.setItem('se_hero_slides', JSON.stringify(heroSlides)); }, [heroSlides]);
-  useEffect(() => { localStorage.setItem('se_seo_settings', JSON.stringify(seoSettings)); }, [seoSettings]);
-  useEffect(() => { localStorage.setItem('se_daily_counter_sales', JSON.stringify(dailyCounterSales)); }, [dailyCounterSales]);
-  useEffect(() => { localStorage.setItem('se_store_expenses', JSON.stringify(storeExpenses)); }, [storeExpenses]);
-  useEffect(() => { localStorage.setItem('se_operator_ledgers', JSON.stringify(operatorLedgers)); }, [operatorLedgers]);
-  useEffect(() => { localStorage.setItem('se_cash_reconciliations', JSON.stringify(cashReconciliations)); }, [cashReconciliations]);
-  useEffect(() => { localStorage.setItem('se_ledger_settings', JSON.stringify(ledgerSettings)); }, [ledgerSettings]);
-  useEffect(() => { localStorage.setItem('se_stamp_configs', JSON.stringify(stampConfigs)); }, [stampConfigs]);
-  useEffect(() => { localStorage.setItem('se_stamp_sales', JSON.stringify(stampSales)); }, [stampSales]);
-  useEffect(() => { localStorage.setItem('se_stamp_purchases', JSON.stringify(stampPurchases)); }, [stampPurchases]);
+  // Server Synchronization Engine (সার্ভার ডাটাবেজ ব্যাকআপ ও সিঙ্ক)
+  const [isServerSyncing, setIsServerSyncing] = useState<boolean>(false);
+  const patchTimeoutRef = useRef<Record<string, any>>({});
+
+  const syncKeyToServer = (key: string, value: any) => {
+    if (patchTimeoutRef.current[key]) {
+      clearTimeout(patchTimeoutRef.current[key]);
+    }
+    patchTimeoutRef.current[key] = setTimeout(() => {
+      fetch('/api/database/patch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [key]: value })
+      }).catch(err => console.warn(`Auto-sync error for ${key}:`, err));
+    }, 400);
+  };
+
+  const syncFullDatabaseToServer = async (): Promise<boolean> => {
+    try {
+      setIsServerSyncing(true);
+      const fullDb = {
+        settings,
+        categories,
+        services,
+        products,
+        gsmOptions,
+        staff,
+        customers,
+        orders,
+        applications,
+        expenses,
+        posSales,
+        cart,
+        notifications,
+        activityLogs,
+        heroSlides,
+        seoSettings,
+        dailyCounterSales,
+        storeExpenses,
+        operatorLedgers,
+        cashReconciliations,
+        ledgerSettings,
+        stampConfigs,
+        stampSales,
+        stampPurchases,
+        lastSyncedAt: new Date().toISOString()
+      };
+      const res = await fetch('/api/database', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(fullDb)
+      });
+      setIsServerSyncing(false);
+      return res.ok;
+    } catch (e) {
+      console.error('Failed to sync full database to server:', e);
+      setIsServerSyncing(false);
+      return false;
+    }
+  };
+
+  // Initial load from Server Disk Database
+  useEffect(() => {
+    let active = true;
+    setIsServerSyncing(true);
+    fetch('/api/database')
+      .then(res => (res.ok ? res.json() : null))
+      .then(result => {
+        if (!active || !result) {
+          setIsServerSyncing(false);
+          return;
+        }
+        if (result.initialized && result.data) {
+          const d = result.data;
+          if (d.settings) setSettings(d.settings);
+          if (d.categories) setCategories(d.categories);
+          if (d.services) setServices(d.services);
+          if (d.products) setProducts(d.products);
+          if (d.staff) setStaff(d.staff);
+          if (d.customers) setCustomers(d.customers);
+          if (d.orders) setOrders(d.orders);
+          if (d.applications) setApplications(d.applications);
+          if (d.expenses) setExpenses(d.expenses);
+          if (d.posSales) setPOSSales(d.posSales);
+          if (d.heroSlides) setHeroSlides(d.heroSlides);
+          if (d.seoSettings) setSeoSettings(d.seoSettings);
+          if (d.dailyCounterSales) setDailyCounterSales(d.dailyCounterSales);
+          if (d.storeExpenses) setStoreExpenses(d.storeExpenses);
+          if (d.operatorLedgers) setOperatorLedgers(d.operatorLedgers);
+          if (d.cashReconciliations) setCashReconciliations(d.cashReconciliations);
+          if (d.ledgerSettings) setLedgerSettings(d.ledgerSettings);
+          if (d.stampConfigs) setStampConfigs(d.stampConfigs);
+          if (d.stampSales) setStampSales(d.stampSales);
+          if (d.stampPurchases) setStampPurchases(d.stampPurchases);
+        } else {
+          // Initialize server disk database on first launch
+          syncFullDatabaseToServer();
+        }
+        setIsServerSyncing(false);
+      })
+      .catch(err => {
+        console.warn('Fallback to local browser storage:', err);
+        setIsServerSyncing(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Sync to local storage AND server disk
+  useEffect(() => {
+    localStorage.setItem('se_settings', JSON.stringify(settings));
+    syncKeyToServer('settings', settings);
+  }, [settings]);
+
+  useEffect(() => {
+    localStorage.setItem('se_categories', JSON.stringify(categories));
+    syncKeyToServer('categories', categories);
+  }, [categories]);
+
+  useEffect(() => {
+    localStorage.setItem('se_services', JSON.stringify(services));
+    syncKeyToServer('services', services);
+  }, [services]);
+
+  useEffect(() => {
+    localStorage.setItem('se_gsm_options', JSON.stringify(gsmOptions));
+    syncKeyToServer('gsmOptions', gsmOptions);
+  }, [gsmOptions]);
+
+  useEffect(() => {
+    localStorage.setItem('se_products', JSON.stringify(products));
+    syncKeyToServer('products', products);
+  }, [products]);
+
+  useEffect(() => {
+    localStorage.setItem('se_staff', JSON.stringify(staff));
+    syncKeyToServer('staff', staff);
+  }, [staff]);
+
+  useEffect(() => {
+    localStorage.setItem('se_customers', JSON.stringify(customers));
+    syncKeyToServer('customers', customers);
+  }, [customers]);
+
+  useEffect(() => {
+    localStorage.setItem('se_orders', JSON.stringify(orders));
+    syncKeyToServer('orders', orders);
+  }, [orders]);
+
+  useEffect(() => {
+    localStorage.setItem('se_applications', JSON.stringify(applications));
+    syncKeyToServer('applications', applications);
+  }, [applications]);
+
+  useEffect(() => {
+    localStorage.setItem('se_expenses', JSON.stringify(expenses));
+    syncKeyToServer('expenses', expenses);
+  }, [expenses]);
+
+  useEffect(() => {
+    localStorage.setItem('se_pos_sales', JSON.stringify(posSales));
+    syncKeyToServer('posSales', posSales);
+  }, [posSales]);
+
+  useEffect(() => {
+    localStorage.setItem('se_cart', JSON.stringify(cart));
+  }, [cart]);
+
+  useEffect(() => {
+    localStorage.setItem('se_notifications', JSON.stringify(notifications));
+  }, [notifications]);
+
+  useEffect(() => {
+    localStorage.setItem('se_activity_logs', JSON.stringify(activityLogs));
+  }, [activityLogs]);
+
+  useEffect(() => {
+    localStorage.setItem('se_hero_slides', JSON.stringify(heroSlides));
+    syncKeyToServer('heroSlides', heroSlides);
+  }, [heroSlides]);
+
+  useEffect(() => {
+    localStorage.setItem('se_seo_settings', JSON.stringify(seoSettings));
+    syncKeyToServer('seoSettings', seoSettings);
+  }, [seoSettings]);
+
+  useEffect(() => {
+    localStorage.setItem('se_daily_counter_sales', JSON.stringify(dailyCounterSales));
+    syncKeyToServer('dailyCounterSales', dailyCounterSales);
+  }, [dailyCounterSales]);
+
+  useEffect(() => {
+    localStorage.setItem('se_store_expenses', JSON.stringify(storeExpenses));
+    syncKeyToServer('storeExpenses', storeExpenses);
+  }, [storeExpenses]);
+
+  useEffect(() => {
+    localStorage.setItem('se_operator_ledgers', JSON.stringify(operatorLedgers));
+    syncKeyToServer('operatorLedgers', operatorLedgers);
+  }, [operatorLedgers]);
+
+  useEffect(() => {
+    localStorage.setItem('se_cash_reconciliations', JSON.stringify(cashReconciliations));
+    syncKeyToServer('cashReconciliations', cashReconciliations);
+  }, [cashReconciliations]);
+
+  useEffect(() => {
+    localStorage.setItem('se_ledger_settings', JSON.stringify(ledgerSettings));
+    syncKeyToServer('ledgerSettings', ledgerSettings);
+  }, [ledgerSettings]);
+
+  useEffect(() => {
+    localStorage.setItem('se_stamp_configs', JSON.stringify(stampConfigs));
+    syncKeyToServer('stampConfigs', stampConfigs);
+  }, [stampConfigs]);
+
+  useEffect(() => {
+    localStorage.setItem('se_stamp_sales', JSON.stringify(stampSales));
+    syncKeyToServer('stampSales', stampSales);
+  }, [stampSales]);
+
+  useEffect(() => {
+    localStorage.setItem('se_stamp_purchases', JSON.stringify(stampPurchases));
+    syncKeyToServer('stampPurchases', stampPurchases);
+  }, [stampPurchases]);
 
   const updateSettings = (newSettings: Partial<WebsiteSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
@@ -1634,6 +1846,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setStampConfigs(initialStampConfigs);
     setStampSales(initialStampSales);
     setStampPurchases(initialStampPurchases);
+
+    // Reset on server disk as well
+    fetch('/api/database/reset', { method: 'POST' }).catch(e => console.error('Server reset error:', e));
   };
 
   const exportDatabaseJSON = () => {
@@ -1878,7 +2093,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logActivity,
         resetAllData,
         exportDatabaseJSON,
-        importDatabaseJSON
+        importDatabaseJSON,
+        isServerSyncing,
+        syncFullDatabaseToServer
       }}
     >
       {children}

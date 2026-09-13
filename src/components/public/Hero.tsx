@@ -16,15 +16,17 @@ import {
   MapPin,
   Clock,
   Store,
-  Award
+  Award,
+  Video
 } from 'lucide-react';
 
 interface HeroProps {
   setActiveTab: (tab: string) => void;
   openServiceModal?: (serviceId: string) => void;
+  onOpenLiveCamera?: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
+export const Hero: React.FC<HeroProps> = ({ setActiveTab, onOpenLiveCamera }) => {
   const { language, t } = useLanguage();
   const { settings, heroSlides } = useData();
   const { isDark } = useTheme();
@@ -84,6 +86,28 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
               {language === 'bn' ? '১৫+ বছরের নির্ভরযোগ্য সেবা' : '15+ Years of Service'}
             </span>
           </div>
+
+          {/* Dahua DH-IPC-H5AS 5MP Live CCTV Badge Button */}
+          {onOpenLiveCamera && (
+            <button
+              onClick={onOpenLiveCamera}
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md transition-all shadow-sm hover:scale-105 cursor-pointer ${
+                isDark
+                  ? 'bg-rose-950/80 border border-rose-500/40 text-rose-300 hover:bg-rose-900/90 shadow-xl'
+                  : 'bg-rose-50 border border-rose-200 text-rose-800 hover:bg-rose-100'
+              }`}
+              title="Watch Dahua 5MP CCTV Live Stream"
+            >
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500" />
+              </span>
+              <Video className="w-3.5 h-3.5 text-rose-400" />
+              <span className="font-bold">
+                {language === 'bn' ? 'দোকান সিসিটিভি সরাসরি সম্প্রচার (Dahua 5MP)' : 'Shop CCTV Live (Dahua 5MP)'}
+              </span>
+            </button>
+          )}
         </div>
 
         {/* Main Headline Container with Card Shape behind text */}

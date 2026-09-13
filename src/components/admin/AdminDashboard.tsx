@@ -63,6 +63,7 @@ import {
   History,
   Palette,
   Sparkles,
+  Video,
   Camera,
   Image as ImageIcon,
   Link2,
@@ -308,6 +309,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
     const updated = [item, ...expenses];
     setExpenses(updated);
     localStorage.setItem('se_admin_expenses', JSON.stringify(updated));
+    fetch('/api/database/patch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminExpenses: updated })
+    }).catch(() => {});
     setNewExpense({
       category: 'paper_purchase',
       title: '',
@@ -322,6 +328,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
     const updated = expenses.filter(e => e.id !== id);
     setExpenses(updated);
     localStorage.setItem('se_admin_expenses', JSON.stringify(updated));
+    fetch('/api/database/patch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminExpenses: updated })
+    }).catch(() => {});
   };
 
   // Quick statistics
@@ -2078,6 +2089,154 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                       value={settingsForm.noticeBn}
                       onChange={e => setSettingsForm({ ...settingsForm, noticeBn: e.target.value })}
                       className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Dahua DH-IPC-H5AS 5MP Indoor Pan & Tilt WiFi Camera Settings */}
+                <div className="pt-4 border-t border-neutral-800 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        <Video className="w-4 h-4 text-rose-400" />
+                        <span>Dahua DH-IPC-H5AS 5MP Live Stream Access Settings</span>
+                      </h4>
+                      <p className="text-xs text-neutral-400">
+                        দোকানের ইনডোর প্যান অ্যান্ড টিল্ট ৫ মেগাপিক্সেল ক্যামেরার সরাসরি সম্প্রচার ও অ্যাক্সেস কনফিগারেশন
+                      </p>
+                    </div>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={settingsForm.cctvCamera?.enabled ?? true}
+                        onChange={e =>
+                          setSettingsForm({
+                            ...settingsForm,
+                            cctvCamera: {
+                              ...(settingsForm.cctvCamera || {}),
+                              model: settingsForm.cctvCamera?.model || 'Dahua DH-IPC-H5AS 5MP Indoor Pan & Tilt WiFi Camera',
+                              locationName: settingsForm.cctvCamera?.locationName || 'Main Counter & Service Area',
+                              locationNameBn: settingsForm.cctvCamera?.locationNameBn || 'প্রধান কাউন্টার ও সেবা কেন্দ্র',
+                              enabled: e.target.checked
+                            }
+                          })
+                        }
+                        className="rounded bg-neutral-950 border-neutral-700 text-rose-600 focus:ring-rose-500 w-4 h-4"
+                      />
+                      <span className="text-xs font-semibold text-neutral-200">
+                        Enable Live CCTV Stream on Website
+                      </span>
+                    </label>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-neutral-300 mb-1">Camera Model</label>
+                      <input
+                        type="text"
+                        value={settingsForm.cctvCamera?.model || 'Dahua DH-IPC-H5AS 5MP Indoor Pan & Tilt WiFi Camera'}
+                        onChange={e =>
+                          setSettingsForm({
+                            ...settingsForm,
+                            cctvCamera: {
+                              ...(settingsForm.cctvCamera || { enabled: true }),
+                              model: e.target.value
+                            }
+                          })
+                        }
+                        className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-neutral-300 mb-1">Location Label (Bangla)</label>
+                      <input
+                        type="text"
+                        value={settingsForm.cctvCamera?.locationNameBn || 'প্রধান কাউন্টার ও সেবা কেন্দ্র'}
+                        onChange={e =>
+                          setSettingsForm({
+                            ...settingsForm,
+                            cctvCamera: {
+                              ...(settingsForm.cctvCamera || { enabled: true }),
+                              locationNameBn: e.target.value
+                            }
+                          })
+                        }
+                        className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-neutral-300 mb-1">P2P Cloud SN / Device ID</label>
+                      <input
+                        type="text"
+                        value={settingsForm.cctvCamera?.p2pCloudId || '9L05B77PAC82491'}
+                        onChange={e =>
+                          setSettingsForm({
+                            ...settingsForm,
+                            cctvCamera: {
+                              ...(settingsForm.cctvCamera || { enabled: true }),
+                              p2pCloudId: e.target.value
+                            }
+                          })
+                        }
+                        placeholder="Dahua SN (e.g. 9L05B77PAC82491)"
+                        className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-neutral-300 mb-1">Local IP Address</label>
+                      <input
+                        type="text"
+                        value={settingsForm.cctvCamera?.ipAddress || '192.168.1.108'}
+                        onChange={e =>
+                          setSettingsForm({
+                            ...settingsForm,
+                            cctvCamera: {
+                              ...(settingsForm.cctvCamera || { enabled: true }),
+                              ipAddress: e.target.value
+                            }
+                          })
+                        }
+                        placeholder="192.168.1.108"
+                        className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-neutral-300 mb-1">RTSP Stream Port</label>
+                      <input
+                        type="number"
+                        value={settingsForm.cctvCamera?.port || 554}
+                        onChange={e =>
+                          setSettingsForm({
+                            ...settingsForm,
+                            cctvCamera: {
+                              ...(settingsForm.cctvCamera || { enabled: true }),
+                              port: Number(e.target.value)
+                            }
+                          })
+                        }
+                        className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-neutral-300 mb-1">RTSP Stream Link (Direct Network Feed)</label>
+                    <input
+                      type="text"
+                      value={settingsForm.cctvCamera?.rtspUrl || 'rtsp://admin:saiful9696@192.168.1.108:554/cam/realmonitor?channel=1&subtype=0'}
+                      onChange={e =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          cctvCamera: {
+                            ...(settingsForm.cctvCamera || { enabled: true }),
+                            rtspUrl: e.target.value
+                          }
+                        })
+                      }
+                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
                     />
                   </div>
                 </div>

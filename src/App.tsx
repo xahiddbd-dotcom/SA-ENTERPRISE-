@@ -28,6 +28,8 @@ import { DynamicSEO } from './components/common/DynamicSEO';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { BackgroundLayer } from './components/common/BackgroundLayer';
 import { PageProofHeader } from './components/common/PageProofHeader';
+import { DahuaLiveCameraWidget } from './components/public/DahuaLiveCameraWidget';
+import { DahuaLiveCameraModal } from './components/public/DahuaLiveCameraModal';
 import { parseCurrentRoute, updateBrowserUrl } from './utils/navigation';
 import { Shield, Lock } from 'lucide-react';
 
@@ -44,6 +46,7 @@ const MainLayout: React.FC = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register' | 'staff' | 'admin'>('login');
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
 
   // Sync browser back/forward history buttons & hash changes
   useEffect(() => {
@@ -187,7 +190,10 @@ const MainLayout: React.FC = () => {
         {/* PUBLIC HOME */}
         {activeTab === 'home' && (
           <>
-            <Hero setActiveTab={setActiveTab} />
+            <Hero
+              setActiveTab={setActiveTab}
+              onOpenLiveCamera={() => setIsCameraModalOpen(true)}
+            />
             {/* 30-35s Auto Product Slider */}
             <ProductSlider openCart={() => setIsCartOpen(true)} />
             <TejgaonSpecial
@@ -420,6 +426,15 @@ const MainLayout: React.FC = () => {
         onSelectService={() => setActiveTab('services')}
         onSelectApplication={appId => handleOpenTrackerWithId(appId)}
         onSelectProduct={() => setActiveTab('shop')}
+      />
+
+      {/* Floating Corner CCTV Broadcast Widget (Home Page / Site-wide Access) */}
+      <DahuaLiveCameraWidget onOpenLiveModal={() => setIsCameraModalOpen(true)} />
+
+      {/* Dahua DH-IPC-H5AS 5MP Live Streaming Modal */}
+      <DahuaLiveCameraModal
+        isOpen={isCameraModalOpen}
+        onClose={() => setIsCameraModalOpen(false)}
       />
     </div>
   );

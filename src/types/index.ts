@@ -469,6 +469,24 @@ export interface WebsiteSettings {
   wallpaperBlur?: number; // 0 to 20 px
   wallpaperFixed?: boolean;
   backgroundOverlayTint?: BackgroundOverlayTint;
+
+  // Dahua DH-IPC-H5AS 5MP Indoor Pan & Tilt WiFi Camera Config
+  cctvCamera?: {
+    model: string;
+    locationName: string;
+    locationNameBn: string;
+    streamUrl?: string;
+    webrtcUrl?: string;
+    rtspUrl?: string;
+    p2pCloudId?: string;
+    ipAddress?: string;
+    port?: number;
+    enabled?: boolean;
+    allowPublicLiveView?: boolean;
+    ptzSupported?: boolean;
+    resolution?: string;
+    fps?: number;
+  };
 }
 
 export type StoreExpenseCategory =
