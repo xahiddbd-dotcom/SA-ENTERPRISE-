@@ -12,6 +12,7 @@ import { SEOMetaManager } from './SEOMetaManager';
 import { CashMemo } from './CashMemo';
 import { AdminAnalyticsDashboard } from './AdminAnalyticsDashboard';
 import { BackgroundSettingsManager } from './BackgroundSettingsManager';
+import { EmployeeOfTheMonthManager } from './EmployeeOfTheMonthManager';
 import { DailyShopLedger } from './DailyShopLedger';
 import { JudicialStampRegister } from './JudicialStampRegister';
 import { OperatorProfitShareWidget } from './dashboard/OperatorProfitShareWidget';
@@ -94,6 +95,7 @@ export type AdminMenuKey =
   | 'finance'
   | 'customers'
   | 'staff'
+  | 'employee_of_month'
   | 'hero_slides'
   | 'seo_meta'
   | 'background_settings'
@@ -114,6 +116,7 @@ const VALID_ADMIN_MENUS: AdminMenuKey[] = [
   'finance',
   'customers',
   'staff',
+  'employee_of_month',
   'hero_slides',
   'seo_meta',
   'background_settings',
@@ -610,6 +613,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
       badge: staff.length,
       categoryBn: 'টিম',
       descBn: 'দোকানের কম্পিউটার অপারেটরদের অ্যাক্সেস ও রোল'
+    },
+    {
+      id: 'employee_of_month' as AdminMenuKey,
+      labelBn: 'মাসের সেরা কর্মী',
+      labelEn: 'Employee of Month',
+      icon: Award,
+      categoryBn: 'টিম',
+      descBn: 'মাসের সেরা কর্মীর ছবি, মন্তব্য ও থ্যানোস স্ন্যাপ নিয়ন্ত্রণ'
     },
     {
       id: 'hero_slides' as AdminMenuKey,
@@ -2128,6 +2139,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
           {activeMenu === 'background_settings' && (
             <div className="space-y-4 animate-in fade-in duration-200">
               <BackgroundSettingsManager />
+            </div>
+          )}
+
+          {/* VIEW: EMPLOYEE OF THE MONTH (মাসের সেরা কর্মী ও থ্যানোস স্ন্যাপ) */}
+          {activeMenu === 'employee_of_month' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              <EmployeeOfTheMonthManager />
             </div>
           )}
 

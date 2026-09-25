@@ -119,7 +119,27 @@ export const BackgroundLayer: React.FC = () => {
       className="pointer-events-none fixed inset-0 -z-50 overflow-hidden select-none"
     >
       {/* BASE CANVAS COLOR */}
-      <div className={`absolute inset-0 transition-colors duration-300 ${isDark ? 'bg-neutral-950' : 'bg-slate-100'}`} />
+      <div className={`absolute inset-0 transition-colors duration-300 ${isDark ? 'bg-neutral-950' : 'bg-slate-50'}`} />
+
+      {/* 0. LOOPING BACKGROUND VIDEO LAYER */}
+      {settings.videoBackground?.enabled && settings.videoBackground?.videoUrl && (
+        <div
+          className="absolute inset-0 overflow-hidden pointer-events-none transition-opacity duration-700"
+          style={{
+            opacity: (settings.videoBackground.opacity ?? 25) / 100,
+            filter: `blur(${settings.videoBackground.blur ?? 0}px)`
+          }}
+        >
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover scale-105"
+            src={settings.videoBackground.videoUrl}
+          />
+        </div>
+      )}
 
       {/* 1. WALLPAPER LAYER */}
       {shouldRenderWallpaper && (

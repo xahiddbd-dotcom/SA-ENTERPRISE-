@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
   html {
@@ -41,11 +42,11 @@
   background: #404040;
 }
 
-/* Light Mode System Configuration */
+/* Light / Day Mode System Configuration */
 html.light,
 [data-theme="light"] {
   color-scheme: light;
-  --color-neutral-950: #f1f5f9; /* Soft Slate-100 canvas */
+  --color-neutral-950: #f8fafc; /* Crisp Slate-50 canvas */
   --color-neutral-900: #ffffff; /* Crisp Solid Pure White card background */
   --color-neutral-800: #e2e8f0; /* Clear, visible Slate-200 card borders */
   --color-neutral-700: #cbd5e1; /* Slate-300 borders & dividers */
@@ -59,8 +60,20 @@ html.light,
 }
 
 html.light body {
-  background-color: #f1f5f9;
-  color: #0f172a;
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.light #main-header {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+html.light #main-footer {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #334155 !important;
 }
 
 html.light ::-webkit-scrollbar-track {
@@ -78,8 +91,8 @@ html.light ::-webkit-scrollbar-thumb:hover {
 /* Ensure all cards and panels in light mode have solid white background, defined shape, visible border and elevation */
 html.light .bg-neutral-900,
 html.light [class*="bg-neutral-900/"] {
-  background-color: #ffffff;
-  border-color: #e2e8f0;
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
 }
 
@@ -89,11 +102,11 @@ html.light [class*="bg-neutral-900/"]:hover {
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
 }
 
-/* Sub-containers inside cards (e.g. pills, inner tags, table headers) have a distinct soft slate shape behind text */
+/* Sub-containers inside cards */
 html.light .bg-neutral-950,
-html.light [class*="bg-neutral-950/"]:not(#main-header):not(#main-footer):not([class*="min-h-screen"]):not(#root):not(#main-header *) {
-  background-color: #f8fafc;
-  border-color: #e2e8f0;
+html.light [class*="bg-neutral-950/"] {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
 }
 
 /* Light mode borders */
@@ -105,6 +118,30 @@ html.light [class*="border-neutral-800/"] {
 html.light .border-neutral-700,
 html.light [class*="border-neutral-700/"] {
   border-color: #cbd5e1 !important;
+}
+
+/* Thanos Snap Disintegration & Reconstitution Effects */
+.thanos-snapped-body {
+  overflow: hidden !important;
+}
+
+.thanos-disintegrated {
+  filter: blur(5px) grayscale(75%) sepia(25%) contrast(1.2);
+  opacity: 0 !important;
+  transform: scale(0.97) translateY(-15px);
+  pointer-events: none !important;
+  transition: opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 1.8s cubic-bezier(0.4, 0, 0.2, 1),
+              filter 1.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.thanos-reconstituting {
+  filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.7));
+  opacity: 1 !important;
+  transform: scale(1) translateY(0);
+  transition: opacity 0.8s ease-out,
+              transform 0.8s ease-out,
+              filter 0.8s ease-out !important;
 }
 
 /* Ensure headings & titles that used text-white on neutral surfaces render in rich slate in light mode */
@@ -153,16 +190,94 @@ html.light .bg-radial {
   opacity: 0.15;
 }
 
+/* Simplified Print-Friendly CSS Layout for Receipts & Invoices */
 @media print {
-  body {
-    background: white !important;
-    color: black !important;
+  @page {
+    margin: 6mm;
+    size: auto;
   }
-  .no-print {
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Utility classes to hide interactive elements */
+  .no-print,
+  .no-print *,
+  button,
+  nav,
+  header,
+  footer,
+  aside {
     display: none !important;
   }
+
   .print-only {
     display: block !important;
+  }
+
+  /* Full isolation when printing an invoice receipt from DailyShopLedger */
+  body.printing-invoice-receipt * {
+    visibility: hidden !important;
+  }
+
+  body.printing-invoice-receipt #printable-receipt-slip,
+  body.printing-invoice-receipt #printable-receipt-slip * {
+    visibility: visible !important;
+  }
+
+  body.printing-invoice-receipt #printable-receipt-slip {
+    position: absolute !important;
+    left: 50% !important;
+    top: 0 !important;
+    transform: translateX(-50%) !important;
+    width: 80mm !important;
+    max-width: 320px !important;
+    margin: 0 auto !important;
+    padding: 10px 12px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: 'JetBrains Mono', 'Courier New', Courier, monospace, 'Hind Siliguri', sans-serif !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    border: 1px dashed #222222 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    z-index: 9999999 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Modal Backdrop removal during print */
+  .receipt-modal-backdrop {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    inset: auto !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Simplified Receipt Component Styles */
+  .receipt-printable-slip {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px dashed #000000 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .receipt-printable-slip * {
+    color: #000000 !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
   }
 }
 

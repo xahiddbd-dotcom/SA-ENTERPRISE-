@@ -22,6 +22,8 @@ import {
   ExternalLink
 } from 'lucide-react';
 
+import { EmployeeOfTheMonthCard } from './EmployeeOfTheMonthCard';
+
 export const TeamSection: React.FC = () => {
   const { language } = useLanguage();
   const { staff, updateStaffMember } = useData();
@@ -92,6 +94,11 @@ export const TeamSection: React.FC = () => {
               ? 'সাইফুল এন্টারপ্রাইজের প্রতিষ্ঠাতা ও অভিজ্ঞ অপারেটরদের সাথে সরাসরি ফোন, হোয়াটসঅ্যাপ ও সোশ্যাল মিডিয়ায় যুক্ত হোন।'
               : 'Direct hotline, WhatsApp chat, and professional profiles of Saiful Enterprise specialists.'}
           </p>
+        </div>
+
+        {/* Employee of the Month Highlight */}
+        <div className="mb-12">
+          <EmployeeOfTheMonthCard variant="featured" />
         </div>
 
         {/* Staff & Leadership Cards Grid */}

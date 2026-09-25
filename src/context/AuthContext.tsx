@@ -294,33 +294,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // Account does not exist
-    if (password) {
-      return {
-        success: false,
-        message: 'এই তথ্য দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি। অনুগ্রহ করে প্রথমে সাইন-আপ (Sign Up) করুন।'
-      };
-    }
-
-    // Phone OTP login auto-registration fallback
-    const newCustomerUser: User = {
-      id: `usr_cust_${clean.replace(/[^a-zA-Z0-9]/g, '') || Date.now()}`,
-      name: clean.includes('@') ? clean.split('@')[0] : `Customer (${clean})`,
-      nameBn: "সম্মানিত গ্রাহক",
-      email: clean.includes('@') ? clean : `${clean}@customer.bd`,
-      phone: clean.includes('@') ? "01700000000" : clean,
-      role: 'customer',
-      isActive: true,
-      isBlocked: false,
-      authProvider: clean.includes('@') ? 'email_password' : 'phone_otp',
-      isPhoneVerified: true,
-      registeredAt: new Date().toISOString(),
-      address: "Dhaka, Bangladesh",
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80"
+    return {
+      success: false,
+      message: 'এই তথ্য দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি। অনুগ্রহ করে সঠিক তথ্য দিন অথবা সাইন-আপ (Sign Up) করুন।'
     };
-
-    saveCustomerToStorage(newCustomerUser);
-    setCurrentUser(newCustomerUser);
-    return { success: true };
   };
 
   const loginWithGoogle = async (googleUser?: { name: string; email: string; avatar?: string }): Promise<{ success: boolean; message?: string }> => {

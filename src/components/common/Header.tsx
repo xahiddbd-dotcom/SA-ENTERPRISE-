@@ -359,18 +359,6 @@ export const Header: React.FC<HeaderProps> = ({
                       <span>{language === 'bn' ? 'শপিং কার্ট ও অর্ডার' : 'My Cart & Orders'}</span>
                     </button>
 
-                    {/* Special Ledger Link */}
-                    <button
-                      id="dropdown-daily-ledger-link"
-                      onClick={() => handleNavClick('ledger')}
-                      className={`w-full text-left px-4 py-2 text-xs sm:text-sm flex items-center gap-2 ${
-                        isDark ? 'text-amber-300 hover:bg-amber-950/30' : 'text-amber-800 hover:bg-amber-50'
-                      }`}
-                    >
-                      <BookOpen className="w-4 h-4 text-amber-500" />
-                      <span>{language === 'bn' ? 'দৈনিক দোকানের হিসাব খাতা' : 'Daily Shop Ledger'}</span>
-                    </button>
-
                     {isAdmin && (
                       <button
                         id="dropdown-admin-link"

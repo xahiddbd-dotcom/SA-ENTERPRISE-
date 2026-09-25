@@ -58,6 +58,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [otpCode, setOtpCode] = useState('');
   const [otpTimer, setOtpTimer] = useState(0);
   const [generatedOtp, setGeneratedOtp] = useState('4966');
+
+  // Interactive Social Auth Dialog State (Prevents auto profile logins)
+  const [socialModalType, setSocialModalType] = useState<'google' | 'facebook' | null>(null);
+  const [socialName, setSocialName] = useState('');
+  const [socialEmail, setSocialEmail] = useState('');
   
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -84,6 +89,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setOtpSent(false);
     setOtpCode('');
     setIsRobotVerified(false);
+    setSocialModalType(null);
+    setSocialName('');
+    setSocialEmail('');
   }, [initialMode, isOpen]);
 
   // Timer countdown for OTP
@@ -177,61 +185,66 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  // Google 1-Click Login / Signup
-  const handleGoogleAuth = async () => {
+  // Open Social Auth Dialog
+  const handleOpenSocialModal = (type: 'google' | 'facebook') => {
+    setSocialModalType(type);
+    setSocialName('');
+    setSocialEmail('');
     setErrorMsg(null);
-    setLoading(true);
-    try {
-      const res = await loginWithGoogle({
-        name: "Google Customer",
-        email: "sent9696@gmail.com",
-        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80"
-      });
+    setSuccessMsg(null);
+  };
 
-      if (res.success) {
-        setSuccessMsg(language === 'bn' ? 'Google দিয়ে সফলভাবে সাইন-ইন সম্পন্ন হয়েছে!' : 'Signed in with Google!');
-        setTimeout(() => {
-          onSuccess('home');
-          onClose();
-        }, 300);
+  // Confirm Social Login with genuine user provided name & email
+  const handleConfirmSocialAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!socialEmail || !socialEmail.includes('@')) {
+      setErrorMsg(language === 'bn' ? 'অনুগ্রহ করে সঠিক ইমেইল এড্রেস লিখুন।' : 'Please enter a valid email address.');
+      return;
+    }
+    setLoading(true);
+    setErrorMsg(null);
+    try {
+      if (socialModalType === 'google') {
+        const res = await loginWithGoogle({
+          name: socialName.trim() || 'Google User',
+          email: socialEmail.trim(),
+          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80'
+        });
+        if (res.success) {
+          setSocialModalType(null);
+          setSuccessMsg(language === 'bn' ? 'Google দিয়ে সফলভাবে সাইন-ইন সম্পন্ন হয়েছে!' : 'Signed in with Google!');
+          setTimeout(() => {
+            onSuccess('home');
+            onClose();
+          }, 300);
+        } else {
+          setErrorMsg(res.message || 'Google authentication failed');
+        }
       } else {
-        setErrorMsg(res.message || 'Google authentication failed');
+        const res = await loginWithFacebook({
+          name: socialName.trim() || 'Facebook User',
+          email: socialEmail.trim(),
+          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'
+        });
+        if (res.success) {
+          setSocialModalType(null);
+          setSuccessMsg(language === 'bn' ? 'Facebook দিয়ে সফলভাবে সাইন-ইন সম্পন্ন হয়েছে!' : 'Signed in with Facebook!');
+          setTimeout(() => {
+            onSuccess('home');
+            onClose();
+          }, 300);
+        } else {
+          setErrorMsg(res.message || 'Facebook authentication failed');
+        }
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Google Auth error');
+      setErrorMsg(err.message || 'Social authentication error');
     } finally {
       setLoading(false);
     }
   };
 
-  // Facebook 1-Click Login / Signup (Daraz / Amazon style)
-  const handleFacebookAuth = async () => {
-    setErrorMsg(null);
-    setLoading(true);
-    try {
-      const res = await loginWithFacebook({
-        name: "Facebook Customer",
-        email: "facebook.customer@saifulenterprise.com",
-        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
-      });
-
-      if (res.success) {
-        setSuccessMsg(language === 'bn' ? 'Facebook দিয়ে সফলভাবে সাইন-ইন সম্পন্ন হয়েছে!' : 'Signed in with Facebook!');
-        setTimeout(() => {
-          onSuccess('home');
-          onClose();
-        }, 300);
-      } else {
-        setErrorMsg(res.message || 'Facebook authentication failed');
-      }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Facebook Auth error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Standard Form Submit (for Admin or Email/Password)
+  // Standard Form Submit (for Admin or Customer Email/Password)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
@@ -271,6 +284,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             setErrorMsg(res.message || 'Registration failed');
           }
         } else {
+          if (!identifier.trim()) {
+            setErrorMsg(language === 'bn' ? 'অনুগ্রহ করে মোবাইল নম্বর বা ইমেইল লিখুন।' : 'Please enter your phone or email.');
+            setLoading(false);
+            return;
+          }
+          if (!password) {
+            setErrorMsg(language === 'bn' ? 'অনুগ্রহ করে পাসওয়ার্ড লিখুন।' : 'Please enter your password.');
+            setLoading(false);
+            return;
+          }
           const res = await loginCustomer(identifier, password);
           if (res.success) {
             onSuccess('home');
@@ -385,7 +408,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="button"
                   id="auth-google-btn"
-                  onClick={handleGoogleAuth}
+                  onClick={() => handleOpenSocialModal('google')}
                   disabled={loading}
                   className="py-2.5 px-3 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-700 text-white text-xs font-semibold flex items-center justify-center gap-2.5 transition-all hover:scale-[1.01] active:scale-[0.99] shadow-sm group"
                 >
@@ -414,7 +437,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="button"
                   id="auth-facebook-btn"
-                  onClick={handleFacebookAuth}
+                  onClick={() => handleOpenSocialModal('facebook')}
                   disabled={loading}
                   className="py-2.5 px-3 rounded-xl bg-[#1877F2]/15 hover:bg-[#1877F2]/25 border border-[#1877F2]/40 text-[#4599FF] text-xs font-semibold flex items-center justify-center gap-2.5 transition-all hover:scale-[1.01] active:scale-[0.99] shadow-sm"
                 >
@@ -424,6 +447,62 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <span className="truncate">Facebook দিয়ে লগইন</span>
                 </button>
               </div>
+
+              {/* Interactive Social Login Form Dialog */}
+              {socialModalType && (
+                <form onSubmit={handleConfirmSocialAuth} className="p-4 rounded-2xl bg-neutral-950 border border-emerald-500/50 space-y-3 animate-in fade-in">
+                  <div className="flex items-center justify-between pb-2 border-b border-neutral-800">
+                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <span>{socialModalType === 'google' ? 'Google' : 'Facebook'}</span>
+                      <span>{language === 'bn' ? 'অ্যাকাউন্ট ভেরিফিকেশন' : 'Account Sign-In'}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSocialModalType(null)}
+                      className="text-[11px] text-neutral-400 hover:text-white"
+                    >
+                      {language === 'bn' ? 'বাতিল' : 'Cancel'}
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-neutral-300 mb-1">
+                      {language === 'bn' ? 'আপনার নাম' : 'Your Full Name'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={socialName}
+                      onChange={e => setSocialName(e.target.value)}
+                      placeholder="e.g. Kamrul Hasan"
+                      className="w-full px-3 py-1.5 bg-neutral-900 border border-neutral-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-neutral-300 mb-1">
+                      {language === 'bn' ? 'আপনার ইমেইল (Google / Facebook Email)' : 'Account Email'}
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={socialEmail}
+                      onChange={e => setSocialEmail(e.target.value)}
+                      placeholder="user@gmail.com"
+                      className="w-full px-3 py-1.5 bg-neutral-900 border border-neutral-700 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
+                  >
+                    <span>{language === 'bn' ? 'নিশ্চিত করে লগইন করুন' : 'Confirm & Sign In'}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </form>
+              )}
 
               <div className="flex items-center gap-3 text-[11px] text-neutral-500">
                 <div className="flex-1 h-px bg-neutral-800" />
@@ -571,13 +650,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                           <Smartphone className="w-3.5 h-3.5" />
                           <span>{language === 'bn' ? '৪ ডিজিটের OTP কোড লিখুন:' : 'Enter 4-digit OTP code:'}</span>
                         </span>
-                        <button
-                          type="button"
-                          onClick={() => setOtpCode(generatedOtp)}
-                          className="font-mono font-bold bg-emerald-950/80 px-2 py-0.5 rounded text-emerald-400 border border-emerald-500/30 text-[11px] underline"
-                        >
-                          Code: {generatedOtp} (Auto-Fill)
-                        </button>
+                        <span className="font-mono font-bold bg-emerald-950/80 px-2.5 py-0.5 rounded text-emerald-400 border border-emerald-500/30 text-[11px]">
+                          SMS: {generatedOtp}
+                        </span>
                       </div>
                       <div className="flex gap-2">
                         <input

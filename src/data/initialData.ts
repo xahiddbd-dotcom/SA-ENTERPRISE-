@@ -99,6 +99,32 @@ export const initialSettings: WebsiteSettings = {
     announceNewOrders: true,
     announceAssistanceRequests: true,
     repeatUnattendedIntervalMinutes: 2
+  },
+
+  // Employee of the Month (মাসের সেরা কর্মী)
+  employeeOfTheMonth: {
+    enabled: true,
+    name: "Jahidul Islam",
+    nameBn: "জাহিদুল ইসলাম",
+    role: "Senior Graphic Designer & Master Computer Operator",
+    roleBn: "সিনিয়র গ্রাফিক ডিজাইনার ও মাস্টার কম্পিউটার অপারেটর",
+    photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+    comment: "Outstanding dedication to customer satisfaction, fast typing accuracy, and exemplary conduct during rush hours.",
+    commentBn: "গ্রাহক সেবায় অসাধারণ আন্তরিকতা, নির্ভুল ও দ্রুত কম্পিউটার টাইপিং এবং দৈনিক সর্বোচ্চ সেবার সফল নিষ্পত্তির জন্য এই মাসের সেরা কর্মী মনোনীত।",
+    month: "March 2026",
+    monthBn: "মার্চ ২০২৬",
+    joinedYear: "২০২২",
+    rating: 5
+  },
+
+  // Background Looping Video Settings
+  videoBackground: {
+    enabled: false,
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-996-large.mp4",
+    opacity: 30,
+    blur: 2,
+    playbackRate: 1,
+    preset: "digital_cyber"
   }
 };
 

@@ -25,8 +25,49 @@ import {
   Maximize2,
   Lock,
   Grid,
-  Check
+  Check,
+  Video,
+  Play,
+  Film
 } from 'lucide-react';
+
+export const VIDEO_PRESETS = [
+  {
+    id: 'cyber_data',
+    name: 'Cyber Screens & Binary Matrix',
+    nameBn: 'সাইবার স্ক্রিন ও বাইনারি ম্যাট্রিক্স',
+    url: 'https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-996-large.mp4',
+    desc: 'Futuristic glowing digital screens & neon matrix code'
+  },
+  {
+    id: 'network_mesh',
+    name: 'Abstract Network Mesh & Nodes',
+    nameBn: 'অ্যাবস্ট্রাক্ট টেক নেটওয়ার্ক ও ডাটা মেশ',
+    url: 'https://assets.mixkit.co/videos/preview/mixkit-network-mesh-loop-31868-large.mp4',
+    desc: 'Connecting geometric nodes & glowing digital neural lines'
+  },
+  {
+    id: 'fluid_flow',
+    name: 'Deep Blue Liquid Swirl',
+    nameBn: 'কসমিক ব্লু লিকুইড পার্টিকেল ফ্লো',
+    url: 'https://assets.mixkit.co/videos/preview/mixkit-blue-ink-flowing-in-water-43305-large.mp4',
+    desc: 'Ethereal smooth fluid motion in deep indigo & emerald'
+  },
+  {
+    id: 'tech_desk',
+    name: 'Tech Studio & Typing Desk',
+    nameBn: 'কম্পিউটার টাইপিং ও টেক ওয়ার্কস্পেস',
+    url: 'https://assets.mixkit.co/videos/preview/mixkit-typing-on-a-computer-keyboard-41372-large.mp4',
+    desc: 'Professional computer keyboard typing in studio lighting'
+  },
+  {
+    id: 'custom',
+    name: 'Custom MP4 / WebM Direct Link',
+    nameBn: 'কাস্টম ভিডিও লিংক (MP4 / WebM)',
+    url: '',
+    desc: 'Direct URL to your self-hosted loop video file'
+  }
+];
 
 interface BackgroundSettingsManagerProps {
   onSaved?: () => void;
@@ -63,6 +104,23 @@ export const BackgroundSettingsManager: React.FC<BackgroundSettingsManagerProps>
   );
   const [backgroundOverlayTint, setBackgroundOverlayTint] = useState<BackgroundOverlayTint>(
     settings.backgroundOverlayTint || 'dark'
+  );
+
+  // Background Looping Video State (Admin Control)
+  const [videoEnabled, setVideoEnabled] = useState<boolean>(
+    settings.videoBackground?.enabled ?? false
+  );
+  const [videoUrl, setVideoUrl] = useState<string>(
+    settings.videoBackground?.videoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-996-large.mp4'
+  );
+  const [videoOpacity, setVideoOpacity] = useState<number>(
+    settings.videoBackground?.opacity ?? 30
+  );
+  const [videoBlur, setVideoBlur] = useState<number>(
+    settings.videoBackground?.blur ?? 1
+  );
+  const [videoPreset, setVideoPreset] = useState<string>(
+    settings.videoBackground?.preset || 'cyber_data'
   );
 
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -107,7 +165,14 @@ export const BackgroundSettingsManager: React.FC<BackgroundSettingsManagerProps>
       wallpaperOpacity,
       wallpaperBlur,
       wallpaperFixed,
-      backgroundOverlayTint
+      backgroundOverlayTint,
+      videoBackground: {
+        enabled: videoEnabled,
+        videoUrl: videoUrl.trim(),
+        opacity: videoOpacity,
+        blur: videoBlur,
+        preset: videoPreset
+      }
     };
 
     updateSettings(updates);
@@ -126,6 +191,11 @@ export const BackgroundSettingsManager: React.FC<BackgroundSettingsManagerProps>
     setWallpaperBlur(3);
     setWallpaperFixed(true);
     setBackgroundOverlayTint('dark');
+    setVideoEnabled(false);
+    setVideoUrl('https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-996-large.mp4');
+    setVideoOpacity(30);
+    setVideoBlur(1);
+    setVideoPreset('cyber_data');
   };
 
   return (
@@ -709,6 +779,204 @@ export const BackgroundSettingsManager: React.FC<BackgroundSettingsManagerProps>
                 />
               </button>
             </div>
+          </div>
+
+          {/* 5. FULL SECTION BACKSIDE LOOPING VIDEO SYSTEM */}
+          <div className="space-y-4 pt-4 border-t border-neutral-800">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-neutral-900 border border-emerald-500/40 shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center shrink-0 shadow-inner">
+                  <Video className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <span>{language === 'bn' ? '৫. পুরো সেকশন ব্যাকগ্রাউন্ডে ভিডিও লুপ' : '5. Full Section Backside Video Loop'}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">
+                      {videoEnabled ? (language === 'bn' ? 'সক্রিয় (Active)' : 'Active') : (language === 'bn' ? 'বন্ধ (Disabled)' : 'Disabled')}
+                    </span>
+                  </h4>
+                  <p className="text-xs text-neutral-400">
+                    {language === 'bn'
+                      ? 'ওয়েবসাইটের ব্যাকগ্রাউন্ডে স্বয়ংক্রিয়ভাবে ভিডিও লুপ চলবে। অ্যাডমিন প্যানেল থেকে যেকোনো সময় যুক্ত বা বন্ধ করুন।'
+                      : 'Looping background video running behind all sections. Toggle on/off or change video URL anytime.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Master Video Toggle */}
+              <div className="flex items-center gap-2 self-end sm:self-center">
+                <span className="text-xs font-semibold text-neutral-300">
+                  {videoEnabled ? (language === 'bn' ? 'চালু' : 'Enabled') : (language === 'bn' ? 'বন্ধ' : 'Disabled')}
+                </span>
+                <button
+                  type="button"
+                  id="admin-video-bg-toggle"
+                  onClick={() => setVideoEnabled(!videoEnabled)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    videoEnabled ? 'bg-emerald-600 shadow-md shadow-emerald-950' : 'bg-neutral-800'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      videoEnabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {videoEnabled && (
+              <div className="space-y-4 p-4 rounded-2xl bg-neutral-950/70 border border-neutral-800 animate-in fade-in duration-300">
+                {/* Video Presets */}
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-neutral-300 flex items-center gap-1.5">
+                    <Film className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>{language === 'bn' ? 'ভিডিও প্রিসেট নির্বাচন করুন' : 'Select Video Preset'}</span>
+                  </label>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                    {VIDEO_PRESETS.map(vp => {
+                      const isSelected = videoPreset === vp.id;
+                      return (
+                        <button
+                          key={vp.id}
+                          type="button"
+                          onClick={() => {
+                            setVideoPreset(vp.id);
+                            if (vp.url) setVideoUrl(vp.url);
+                          }}
+                          className={`p-3 rounded-xl border text-left transition-all ${
+                            isSelected
+                              ? 'bg-emerald-950/70 border-emerald-500 text-white ring-1 ring-emerald-500/50 shadow-md'
+                              : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800/60'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-bold truncate">{language === 'bn' ? vp.nameBn : vp.name}</span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
+                          </div>
+                          <p className="text-[10px] text-neutral-400 line-clamp-2 leading-tight">
+                            {vp.desc}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Direct Video URL input */}
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-300 mb-1">
+                    {language === 'bn' ? 'সরাসরি ভিডিও ফাইল লিংক (MP4 / WebM Direct URL)' : 'Direct Video URL (MP4 / WebM)'}
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      value={videoUrl}
+                      onChange={e => {
+                        setVideoUrl(e.target.value);
+                        setVideoPreset('custom');
+                      }}
+                      placeholder="https://assets.mixkit.co/...mp4"
+                      className="flex-1 px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-xl text-xs text-neutral-100 font-mono focus:outline-none focus:border-emerald-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVideoUrl('https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-996-large.mp4');
+                        setVideoPreset('cyber_data');
+                      }}
+                      className="px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-semibold shrink-0"
+                    >
+                      Default
+                    </button>
+                  </div>
+                </div>
+
+                {/* Video Sliders & Live Preview Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                  <div className="space-y-3.5 bg-neutral-900/60 p-3.5 rounded-2xl border border-neutral-800">
+                    {/* Video Opacity */}
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-xs text-neutral-300 font-semibold">
+                        <span>{language === 'bn' ? 'ভিডিওর উজ্জ্বলতা ও স্বচ্ছতা (Opacity)' : 'Video Opacity'}</span>
+                        <span className="font-mono text-emerald-400">{videoOpacity}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="5"
+                        max="80"
+                        step="1"
+                        value={videoOpacity}
+                        onChange={e => setVideoOpacity(Number(e.target.value))}
+                        className="w-full accent-emerald-500 cursor-pointer"
+                      />
+                      <div className="flex justify-between text-[10px] text-neutral-500">
+                        <span>5% (অতি মৃদু)</span>
+                        <span>30% (প্রস্তাবিত)</span>
+                        <span>80% (উজ্জ্বল)</span>
+                      </div>
+                    </div>
+
+                    {/* Video Blur */}
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-xs text-neutral-300 font-semibold">
+                        <span>{language === 'bn' ? 'ভিডিও ব্লার বা সফটনেস (Blur)' : 'Video Blur Softness'}</span>
+                        <span className="font-mono text-emerald-400">{videoBlur}px</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="15"
+                        step="1"
+                        value={videoBlur}
+                        onChange={e => setVideoBlur(Number(e.target.value))}
+                        className="w-full accent-emerald-500 cursor-pointer"
+                      />
+                      <div className="flex justify-between text-[10px] text-neutral-500">
+                        <span>0px (ক্রিস্প ক্লিয়ার)</span>
+                        <span>2px (সফট ফোকাস)</span>
+                        <span>15px (অ্যাবস্ট্রাক্ট আলো)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Video Live Preview Player */}
+                  <div className="bg-neutral-900/80 p-3 rounded-2xl border border-neutral-800 flex flex-col justify-between">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-neutral-300 flex items-center gap-1.5">
+                        <Play className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>{language === 'bn' ? 'লাইভ প্রিভিউ (Live Preview)' : 'Live Preview'}</span>
+                      </span>
+                      <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/30">
+                        Autoplay Loop
+                      </span>
+                    </div>
+
+                    <div className="relative h-28 rounded-xl overflow-hidden bg-black border border-neutral-800">
+                      <video
+                        key={videoUrl}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        src={videoUrl}
+                        className="w-full h-full object-cover"
+                        style={{
+                          opacity: videoOpacity / 100,
+                          filter: `blur(${videoBlur}px)`
+                        }}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span className="text-[11px] font-bold text-white bg-black/60 px-3 py-1 rounded-full border border-white/20 backdrop-blur-xs">
+                          {language === 'bn' ? 'সেকশন কন্টেন্ট এর পেছনে চলবে' : 'Renders Behind All Sections'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* SUBMIT ACTIONS */}

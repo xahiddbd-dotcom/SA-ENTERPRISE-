@@ -22,11 +22,12 @@ import { GlobalSearchModal } from './components/public/GlobalSearchModal';
 import { StaffPortal } from './components/staff/StaffPortal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { AdminDirectLogin } from './components/admin/AdminDirectLogin';
-import { DailyShopLedger } from './components/admin/DailyShopLedger';
 import { POSCounter } from './components/pos/POSCounter';
 import { DynamicSEO } from './components/common/DynamicSEO';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { BackgroundLayer } from './components/common/BackgroundLayer';
+import { ThanosSnapEffect } from './components/common/ThanosSnapEffect';
+import { EmployeeOfTheMonthCard } from './components/public/EmployeeOfTheMonthCard';
 import { PageProofHeader } from './components/common/PageProofHeader';
 import { parseCurrentRoute, updateBrowserUrl } from './utils/navigation';
 import { Shield, Lock } from 'lucide-react';
@@ -38,7 +39,10 @@ const MainLayout: React.FC = () => {
   const { currentUser, isAuthenticated, isAdmin, isSuperAdmin, isStaffOrAdmin, logout } = useAuth();
 
   // Read initial route from URL parameters, path, or hash on initial page load
-  const [activeTab, setActiveTabState] = useState<string>(() => parseCurrentRoute().tab || 'home');
+  const [activeTab, setActiveTabState] = useState<string>(() => {
+    const parsed = parseCurrentRoute().tab || 'home';
+    return parsed === 'ledger' ? 'home' : parsed;
+  });
   const [selectedProductId, setSelectedProductId] = useState<string | null>(() => parseCurrentRoute().productId || null);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(() => parseCurrentRoute().serviceId || null);
   const [trackerInitialId, setTrackerInitialId] = useState<string>(() => parseCurrentRoute().trackerId || '');
@@ -52,7 +56,8 @@ const MainLayout: React.FC = () => {
   useEffect(() => {
     const handleLocationChange = () => {
       const route = parseCurrentRoute();
-      setActiveTabState(route.tab || 'home');
+      const targetTab = route.tab === 'ledger' ? 'home' : (route.tab || 'home');
+      setActiveTabState(targetTab);
       setSelectedProductId(route.productId || null);
       setSelectedServiceId(route.serviceId || null);
       if (route.trackerId) {
@@ -127,7 +132,7 @@ const MainLayout: React.FC = () => {
   // If Admin CMS is active and authenticated as Admin, render the dedicated standalone Full CMS workspace
   if (activeTab === 'admin' && isAuthenticated && (isSuperAdmin || isAdmin)) {
     return (
-      <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans">
+      <div className="min-h-screen bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-neutral-100 font-sans transition-colors duration-200">
         <AdminDashboard
           onExitToStore={() => setActiveTab('home')}
           initialSection={adminInitialSection}
@@ -159,9 +164,12 @@ const MainLayout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-neutral-950 relative">
+    <div className="min-h-screen bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-neutral-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-neutral-950 relative transition-colors duration-200">
       {/* Dynamic Background Pattern & Wallpaper System */}
       <BackgroundLayer />
+
+      {/* Thanos Snap Easter Egg Dissolution & Cosmic Audio System */}
+      <ThanosSnapEffect />
 
       {/* Dynamic SEO Meta Tag Manager */}
       <DynamicSEO
@@ -191,6 +199,10 @@ const MainLayout: React.FC = () => {
         {activeTab === 'home' && (
           <>
             <Hero setActiveTab={setActiveTab} />
+            {/* Employee of the Month Spotlight */}
+            <div className="container mx-auto px-4 max-w-7xl pt-4">
+              <EmployeeOfTheMonthCard variant="featured" />
+            </div>
             <TejgaonSpecial
               onSelectService={(serviceId) => {
                 setActiveTab('services');
@@ -310,48 +322,6 @@ const MainLayout: React.FC = () => {
             <ContactSection />
           </div>
         )}
-
-        {/* DAILY SHOP LEDGER (দৈনিক দোকানের হিসাব খাতা - Authorized Staff & Admin only) */}
-        {activeTab === 'ledger' && (
-          <div className="space-y-6">
-            <PageProofHeader
-              tab="ledger"
-              title="দৈনিক দোকানের হিসাব খাতা ও জুডিশিয়াল স্ট্যাম্প রেজিস্টার"
-              badge="হিসাব খাতা"
-              description="জুডিশিয়াল স্ট্যাম্প, কার্টিজ পেপার বিক্রয় রেজিস্টার ও ক্যাশ রিকনসিলিয়েশন"
-              onNavigateHome={() => setActiveTab('home')}
-            />
-            <div className="max-w-7xl mx-auto px-4 py-2">
-            {isAuthenticated && isStaffOrAdmin ? (
-              <DailyShopLedger onNavigate={setActiveTab} />
-            ) : (
-              <div className="text-center py-20 bg-neutral-900 border border-neutral-800 rounded-3xl max-w-md mx-auto p-8 space-y-4 shadow-2xl">
-                <div className="w-14 h-14 rounded-2xl bg-amber-950/60 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto">
-                  <Lock className="w-6 h-6" />
-                </div>
-                <h2 className="text-xl font-bold text-white">দৈনিক হিসাব খাতা প্রবেশাধিকার সংরক্ষিত</h2>
-                <p className="text-xs text-neutral-400">
-                  দোকানের আর্থিক হিসাব খাতা দেখতে স্টাফ অথবা অ্যাডমিন হিসেবে অনুমোদিত লগইন থাকতে হবে।
-                </p>
-                <div className="flex gap-2 pt-2">
-                  <button
-                    onClick={() => setActiveTab('home')}
-                    className="flex-1 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white font-semibold text-xs transition-colors"
-                  >
-                    হোমপেজে ফিরুন
-                  </button>
-                  <button
-                    onClick={() => handleOpenAuth('admin')}
-                    className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-950 transition-all"
-                  >
-                    লগইন করুন
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
         {/* POS COUNTER (Accessible directly or via portal) */}
         {activeTab === 'pos' && (

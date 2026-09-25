@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
@@ -330,8 +330,29 @@ export const DailyShopLedger: React.FC<DailyShopLedgerProps> = ({ onNavigate, is
     amount: number;
     voucherNo?: string;
     operatorName?: string;
+    status: 'completed' | 'pending' | 'cancelled';
     raw: DailyCounterSale | StoreExpenseRecord;
   }
+
+  // Print receipt cleanup listener
+  useEffect(() => {
+    const handleAfterPrint = () => {
+      document.body.classList.remove('printing-invoice-receipt');
+    };
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => {
+      window.removeEventListener('afterprint', handleAfterPrint);
+      document.body.classList.remove('printing-invoice-receipt');
+    };
+  }, []);
+
+  const handleTriggerPrintInvoice = (item: JournalEntry) => {
+    setSelectedVoucherForPrint({ type: item.type, data: item.raw });
+    document.body.classList.add('printing-invoice-receipt');
+    setTimeout(() => {
+      window.print();
+    }, 120);
+  };
 
   const combinedJournal: JournalEntry[] = useMemo(() => {
     const entries: JournalEntry[] = [];
@@ -342,7 +363,7 @@ export const DailyShopLedger: React.FC<DailyShopLedgerProps> = ({ onNavigate, is
           id: s.id,
           type: 'income',
           date: s.date,
-          time: s.time,
+          time: s.time || '',
           category: s.category,
           title: s.title,
           party: s.customerName || 'খুচরা কাস্টমার',
@@ -350,6 +371,7 @@ export const DailyShopLedger: React.FC<DailyShopLedgerProps> = ({ onNavigate, is
           amount: s.amount,
           voucherNo: s.voucherNo,
           operatorName: s.operatorName,
+          status: s.status || 'completed',
           raw: s
         });
       });
@@ -361,14 +383,15 @@ export const DailyShopLedger: React.FC<DailyShopLedgerProps> = ({ onNavigate, is
           id: e.id,
           type: 'expense',
           date: e.date,
-          time: e.time,
+          time: e.time || '',
           category: e.category,
           title: e.title,
           party: e.paidTo || 'দোকান বিল/ক্রয়',
-          paymentMethod: e.paymentMethod,
+          paymentMethod: e.paymentMethod || 'cash',
           amount: e.amount,
           voucherNo: e.voucherNo,
           operatorName: e.paidBy,
+          status: e.status || 'completed',
           raw: e
         });
       });
@@ -1004,13 +1027,14 @@ export const DailyShopLedger: React.FC<DailyShopLedgerProps> = ({ onNavigate, is
                     <th className="py-3.5 px-4">{language === 'bn' ? 'গ্রাহক / প্রাপক' : 'Party'}</th>
                     <th className="py-3.5 px-4">{language === 'bn' ? 'মাধ্যম' : 'Method'}</th>
                     <th className="py-3.5 px-4 text-right">{language === 'bn' ? 'পরিমাণ (টাকা)' : 'Amount (BDT)'}</th>
-                    <th className="py-3.5 px-4 text-center">{language === 'bn' ? 'অ্যাকশন' : 'Action'}</th>
+                    <th className="py-3.5 px-4 text-center">{language === 'bn' ? 'স্ট্যাটাস' : 'Status'}</th>
+                    <th className="py-3.5 px-4 text-center">{language === 'bn' ? 'অ্যাকশন ও ইনভয়েস' : 'Actions & Invoice'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-800/60">
                   {combinedJournal.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-12 text-center text-neutral-500">
+                      <td colSpan={9} className="py-12 text-center text-neutral-500">
                         <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-30" />
                         <p>{language === 'bn' ? 'নির্বাচিত দিনে কোনো লেনদেন রেকর্ড পাওয়া যায়নি।' : 'No journal records found for selected filter.'}</p>
                         <button
@@ -1096,15 +1120,36 @@ export const DailyShopLedger: React.FC<DailyShopLedgerProps> = ({ onNavigate, is
                             </span>
                           </td>
 
+                          {/* Status */}
+                          <td className="py-3 px-4 text-center">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                              <span>{language === 'bn' ? 'পরিশোধিত' : 'Completed'}</span>
+                            </span>
+                          </td>
+
                           {/* Actions */}
                           <td className="py-3 px-4 text-center">
                             <div className="flex items-center justify-center gap-1.5 opacity-80 group-hover:opacity-100">
-                              {/* Print Mini Voucher */}
+                              {/* 'Print Invoice' button for completed transactions */}
+                              {item.status === 'completed' && (
+                                <button
+                                  id={`print-invoice-btn-${item.id}`}
+                                  onClick={() => handleTriggerPrintInvoice(item)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 text-xs font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap cursor-pointer"
+                                  title={language === 'bn' ? 'সম্পন্ন লেনদেনের ইনভয়েস ক্যাশ রশিদ প্রিন্ট করুন' : 'Print Invoice Receipt'}
+                                >
+                                  <Printer className="w-3.5 h-3.5" />
+                                  <span>{language === 'bn' ? 'ইনভয়েস প্রিন্ট' : 'Print Invoice'}</span>
+                                </button>
+                              )}
+
+                              {/* Print Mini Voucher / Memo View */}
                               <button
                                 id={`voucher-view-${item.id}`}
                                 onClick={() => setSelectedVoucherForPrint({ type: item.type, data: item.raw })}
                                 className="p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-colors"
-                                title="ভাউচার মেমো প্রিন্ট করুন"
+                                title="ভাউচার মেমো প্রিভিউ"
                               >
                                 <Receipt className="w-3.5 h-3.5" />
                               </button>
@@ -1142,6 +1187,7 @@ export const DailyShopLedger: React.FC<DailyShopLedgerProps> = ({ onNavigate, is
                         <div className="text-emerald-400">+৳{metrics.totalIncome.toLocaleString()}</div>
                         <div className="text-rose-400 text-xs font-normal">-৳{metrics.totalExpense.toLocaleString()}</div>
                       </td>
+                      <td></td>
                       <td></td>
                     </tr>
                   </tfoot>
@@ -2281,61 +2327,205 @@ export const DailyShopLedger: React.FC<DailyShopLedgerProps> = ({ onNavigate, is
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 4: PRINT VOUCHER MEMO PREVIEW                                       */}
+      {/* MODAL 4: SIMPLIFIED, PRINT-FRIENDLY INVOICE RECEIPT MODAL                 */}
       {/* ========================================================================= */}
       {selectedVoucherForPrint && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white text-neutral-900 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl">
-            <div className="text-center border-b pb-3">
-              <h2 className="text-lg font-black">{settings.businessNameBn}</h2>
-              <p className="text-xs text-neutral-600">{settings.addressBn}</p>
-              <p className="text-xs font-mono text-neutral-600">ফোন: {settings.phonePrimary}</p>
-              <div className="mt-2 inline-block px-3 py-0.5 rounded-full bg-neutral-100 text-xs font-bold uppercase border">
-                {selectedVoucherForPrint.type === 'income' ? 'নগদ জমার ভাউচার (Income Receipt)' : 'দোকান খরচ ভাউচার (Expense Voucher)'}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in receipt-modal-backdrop overflow-y-auto">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl print:bg-transparent print:border-none print:shadow-none print:p-0 my-auto">
+            {/* Modal Top Header (Screen only, hidden on print) */}
+            <div className="no-print flex items-center justify-between border-b border-neutral-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                  <Printer className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-sm">
+                    {language === 'bn' ? 'ক্যাশ ইনভয়েস ও মেমো প্রিন্ট প্রিভিউ' : 'Cash Invoice & Receipt Preview'}
+                  </h3>
+                  <p className="text-[10px] text-neutral-400">
+                    {language === 'bn' ? 'প্রিন্ট অপটিমাইজড ক্যাশ রশিদ লেআউট' : 'Print-optimized simplified thermal layout'}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="text-xs space-y-1.5 font-mono">
-              <div className="flex justify-between">
-                <span className="text-neutral-500">ভাউচার নং:</span>
-                <span className="font-bold">{selectedVoucherForPrint.data.voucherNo || '-'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-500">তারিখ ও সময়:</span>
-                <span>{selectedVoucherForPrint.data.date} | {selectedVoucherForPrint.data.time}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-500">খাত / বিবরণ:</span>
-                <span className="font-bold max-w-[200px] text-right truncate">{selectedVoucherForPrint.data.title}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-500">পেমেন্ট মাধ্যম:</span>
-                <span className="capitalize">{selectedVoucherForPrint.data.paymentMethod}</span>
-              </div>
-              <div className="border-t pt-2 flex justify-between text-base font-black">
-                <span>মোট টাকা:</span>
-                <span>৳{selectedVoucherForPrint.data.amount.toLocaleString()}</span>
-              </div>
-            </div>
-
-            <div className="border-t pt-4 flex items-center justify-between text-neutral-400 text-[10px]">
-              <div>গ্রহীতার স্বাক্ষর</div>
-              <div>কর্তৃপক্ষের স্বাক্ষর</div>
-            </div>
-
-            <div className="pt-2 flex items-center justify-end gap-2">
               <button
-                onClick={() => setSelectedVoucherForPrint(null)}
-                className="px-4 py-2 rounded-xl bg-neutral-200 hover:bg-neutral-300 text-neutral-800 text-xs font-bold"
+                onClick={() => {
+                  setSelectedVoucherForPrint(null);
+                  document.body.classList.remove('printing-invoice-receipt');
+                }}
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+                title="বন্ধ করুন"
               >
-                বন্ধ করুন
+                <X className="w-4 h-4" />
               </button>
+            </div>
+
+            {/* Print-Friendly Receipt Slip (Target for print) */}
+            <div
+              id="printable-receipt-slip"
+              className="receipt-printable-slip bg-white text-neutral-950 rounded-2xl p-5 font-mono text-xs space-y-3 border border-neutral-300 shadow-inner mx-auto w-full max-w-[340px]"
+            >
+              {/* Shop Header */}
+              <div className="text-center pb-2.5 border-b-2 border-dashed border-neutral-400 space-y-0.5">
+                <div className="font-black text-sm uppercase tracking-wide text-black">
+                  {settings.businessName || 'SAIFUL ENTERPRISE'}
+                </div>
+                <div className="text-xs font-sans font-extrabold text-neutral-900">
+                  {settings.businessNameBn || 'সাইফুল এন্টারপ্রাইজ'}
+                </div>
+                <div className="text-[10px] text-neutral-700 font-sans leading-tight">
+                  {settings.addressBn || '২০/১ সাগর-সৈকত মার্কেট, ইন্দিরা রোড, ফার্মগেট, ঢাকা-১২১৫'}
+                </div>
+                <div className="text-[10px] font-mono text-neutral-700">
+                  ফোন: {settings.phonePrimary || '01540-004966'} {settings.phoneSecondary ? `| ${settings.phoneSecondary}` : ''}
+                </div>
+                <div className="pt-1.5 flex items-center justify-center gap-1.5">
+                  <span className="px-2 py-0.5 text-[9px] font-bold uppercase rounded border border-neutral-800 bg-neutral-100 text-neutral-900">
+                    {selectedVoucherForPrint.type === 'income' ? 'ক্যাশ ইনভয়েস (INVOICE)' : 'দোকান ব্যয় ভাউচার (EXPENSE)'}
+                  </span>
+                  <span className="px-2 py-0.5 text-[9px] font-bold uppercase rounded border border-emerald-700 bg-emerald-100 text-emerald-900">
+                    COMPLETED (পরিশোধিত)
+                  </span>
+                </div>
+              </div>
+
+              {/* Transaction Metadata */}
+              <div className="text-[11px] space-y-1 border-b border-dashed border-neutral-400 pb-2.5 text-neutral-800">
+                <div className="flex justify-between">
+                  <span className="text-neutral-600">ভাউচার / ইনভয়েস নং:</span>
+                  <span className="font-bold font-mono text-neutral-950">{selectedVoucherForPrint.data.voucherNo || '-'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-neutral-600">তারিখ ও সময়:</span>
+                  <span className="font-mono">{selectedVoucherForPrint.data.date} • {selectedVoucherForPrint.data.time || '10:00 AM'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-neutral-600">
+                    {selectedVoucherForPrint.type === 'income' ? 'গ্রাহক / কাস্টমার:' : 'প্রাপক:'}
+                  </span>
+                  <span className="font-bold truncate max-w-[170px] text-neutral-950">
+                    {selectedVoucherForPrint.type === 'income'
+                      ? (selectedVoucherForPrint.data as DailyCounterSale).customerName || 'কাউন্টার সেবা গ্রাহক'
+                      : (selectedVoucherForPrint.data as StoreExpenseRecord).paidTo || 'দোকান বিল'}
+                  </span>
+                </div>
+                {selectedVoucherForPrint.type === 'income' && (selectedVoucherForPrint.data as DailyCounterSale).customerPhone && (
+                  <div className="flex justify-between">
+                    <span className="text-neutral-600">মোবাইল নং:</span>
+                    <span className="font-mono">{(selectedVoucherForPrint.data as DailyCounterSale).customerPhone}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-neutral-600">
+                    {selectedVoucherForPrint.type === 'income' ? 'ক্যাশিয়ার / অপারেটর:' : 'অনুমোদনকারী:'}
+                  </span>
+                  <span className="text-neutral-800">
+                    {selectedVoucherForPrint.type === 'income'
+                      ? (selectedVoucherForPrint.data as DailyCounterSale).operatorName || 'কাউন্টার স্টাফ'
+                      : (selectedVoucherForPrint.data as StoreExpenseRecord).paidBy || 'সাইফুল ইসলাম'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Itemized Table */}
+              <div className="space-y-1.5 border-b border-dashed border-neutral-400 pb-2.5">
+                <div className="flex justify-between text-[10px] font-bold uppercase text-neutral-700 border-b border-neutral-300 pb-1">
+                  <span>বিবরণ / সেবা</span>
+                  <span>মাধ্যম</span>
+                  <span className="text-right">টাকা</span>
+                </div>
+                <div className="flex justify-between items-start text-[11px] pt-1">
+                  <div className="max-w-[170px]">
+                    <div className="font-bold text-neutral-950 leading-tight">
+                      {selectedVoucherForPrint.data.title}
+                    </div>
+                    <div className="text-[10px] text-neutral-600">
+                      খাত: {getCategoryInfo(selectedVoucherForPrint.data.category).nameBn || getCategoryInfo(selectedVoucherForPrint.data.category).name}
+                    </div>
+                  </div>
+                  <div className="text-[10px] uppercase font-bold text-neutral-700 pt-0.5 font-mono">
+                    {selectedVoucherForPrint.data.paymentMethod || 'CASH'}
+                  </div>
+                  <div className="text-right font-black text-neutral-950 pt-0.5 font-mono">
+                    ৳{selectedVoucherForPrint.data.amount.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Financial Totals */}
+              <div className="space-y-1 text-[11px] border-b-2 border-dashed border-neutral-400 pb-2.5 text-neutral-800">
+                <div className="flex justify-between text-neutral-600">
+                  <span>সাবটোটাল (Subtotal):</span>
+                  <span className="font-mono">৳{selectedVoucherForPrint.data.amount.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-neutral-600">
+                  <span>ডিসকাউন্ট (Discount):</span>
+                  <span className="font-mono">৳০</span>
+                </div>
+                <div className="flex justify-between text-base font-black text-neutral-950 border-t border-neutral-300 pt-1">
+                  <span>সর্বমোট (Total):</span>
+                  <span className="font-mono">৳{selectedVoucherForPrint.data.amount.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between font-bold text-emerald-800">
+                  <span>পরিশোধিত (Paid):</span>
+                  <span className="font-mono">৳{selectedVoucherForPrint.data.amount.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-neutral-600 text-[10px]">
+                  <span>অবশিষ্ট / বকেয়া (Due):</span>
+                  <span className="font-semibold text-emerald-800">৳০ (পরিশোধিত)</span>
+                </div>
+              </div>
+
+              {/* Barcode & Footer Note */}
+              <div className="text-center pt-1 space-y-1">
+                <div className="font-mono tracking-widest text-[10px] text-neutral-700 font-bold">
+                  *{selectedVoucherForPrint.data.voucherNo || 'VCH-INVOICE'}*
+                </div>
+                <div className="text-[10px] font-sans font-bold text-neutral-800">
+                  *** ধন্যবাদ, আবার আসবেন ***
+                </div>
+                <div className="text-[8px] text-neutral-600">
+                  Computer Generated Invoice Slip • Valid Without Physical Signature
+                </div>
+              </div>
+
+              {/* Signatures */}
+              <div className="pt-4 flex justify-between items-end text-[9px] text-neutral-700 border-t border-neutral-300">
+                <div className="text-center border-t border-dotted border-neutral-500 pt-1 w-20">
+                  গ্রাহকের স্বাক্ষর
+                </div>
+                <div className="text-center border-t border-dotted border-neutral-500 pt-1 w-24">
+                  কর্তৃপক্ষের স্বাক্ষর
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Bottom Actions (Screen only, hidden on print) */}
+            <div className="no-print pt-2 flex items-center justify-end gap-2.5">
               <button
-                onClick={() => window.print()}
-                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow"
+                type="button"
+                onClick={() => {
+                  setSelectedVoucherForPrint(null);
+                  document.body.classList.remove('printing-invoice-receipt');
+                }}
+                className="px-4 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white text-xs font-semibold transition-colors cursor-pointer"
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span>প্রিন্ট করুন</span>
+                {language === 'bn' ? 'বন্ধ করুন' : 'Close'}
+              </button>
+
+              <button
+                id="modal-print-invoice-btn"
+                type="button"
+                onClick={() => {
+                  document.body.classList.add('printing-invoice-receipt');
+                  setTimeout(() => {
+                    window.print();
+                  }, 100);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-emerald-950/60 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <Printer className="w-4 h-4" />
+                <span>{language === 'bn' ? 'ইনভয়েস প্রিন্ট করুন' : 'Print Invoice'}</span>
               </button>
             </div>
           </div>

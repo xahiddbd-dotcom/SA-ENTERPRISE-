@@ -521,6 +521,32 @@ export interface WebsiteSettings {
 
   // Staff Text-To-Speech (TTS) Notification Settings
   staffTtsSettings?: StaffTtsSettings;
+
+  // Employee of the Month (মাসের সেরা কর্মী)
+  employeeOfTheMonth?: {
+    enabled: boolean;
+    name: string;
+    nameBn: string;
+    role: string;
+    roleBn: string;
+    photo: string;
+    comment: string;
+    commentBn: string;
+    month: string;
+    monthBn: string;
+    joinedYear?: string;
+    rating?: number;
+  };
+
+  // Section & Global Backside Looping Video Settings
+  videoBackground?: {
+    enabled: boolean;
+    videoUrl: string;
+    opacity: number; // 0 to 100
+    blur: number; // 0 to 20 px
+    playbackRate?: number;
+    preset?: string;
+  };
 }
 
 export type StoreExpenseCategory =
@@ -561,6 +587,7 @@ export interface DailyCounterSale {
   counterNo?: string;
   voucherNo?: string;
   notes?: string;
+  status?: 'completed' | 'pending' | 'cancelled';
   createdAt?: string;
 }
 
@@ -577,6 +604,7 @@ export interface StoreExpenseRecord {
   paidTo?: string;
   note?: string;
   notes?: string;
+  status?: 'completed' | 'pending';
   createdAt?: string;
 }
 
