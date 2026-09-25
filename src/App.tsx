@@ -28,10 +28,11 @@ import { DynamicSEO } from './components/common/DynamicSEO';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { BackgroundLayer } from './components/common/BackgroundLayer';
 import { PageProofHeader } from './components/common/PageProofHeader';
-import { DahuaLiveCameraWidget } from './components/public/DahuaLiveCameraWidget';
-import { DahuaLiveCameraModal } from './components/public/DahuaLiveCameraModal';
 import { parseCurrentRoute, updateBrowserUrl } from './utils/navigation';
 import { Shield, Lock } from 'lucide-react';
+import { TTSNotificationProvider } from './context/TTSNotificationContext';
+import { CustomerAssistanceButton } from './components/public/CustomerAssistanceButton';
+import { StaffTTSControlWidget } from './components/common/StaffTTSControlWidget';
 
 const MainLayout: React.FC = () => {
   const { currentUser, isAuthenticated, isAdmin, isSuperAdmin, isStaffOrAdmin, logout } = useAuth();
@@ -46,7 +47,6 @@ const MainLayout: React.FC = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register' | 'staff' | 'admin'>('login');
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
 
   // Sync browser back/forward history buttons & hash changes
   useEffect(() => {
@@ -190,12 +190,7 @@ const MainLayout: React.FC = () => {
         {/* PUBLIC HOME */}
         {activeTab === 'home' && (
           <>
-            <Hero
-              setActiveTab={setActiveTab}
-              onOpenLiveCamera={() => setIsCameraModalOpen(true)}
-            />
-            {/* 30-35s Auto Product Slider */}
-            <ProductSlider openCart={() => setIsCartOpen(true)} />
+            <Hero setActiveTab={setActiveTab} />
             <TejgaonSpecial
               onSelectService={(serviceId) => {
                 setActiveTab('services');
@@ -207,13 +202,11 @@ const MainLayout: React.FC = () => {
               initialServiceId={selectedServiceId}
               onServiceSelect={handleSelectService}
             />
-            <ShopSection
+            {/* Featured Product Showcase Slider */}
+            <ProductSlider
               openCart={() => setIsCartOpen(true)}
-              initialProductId={selectedProductId}
-              onProductSelect={handleSelectProduct}
+              onViewAllProducts={() => setActiveTab('shop')}
             />
-            {/* Staff & Founder Profiles Section */}
-            <TeamSection />
             <TrustSection />
             <ContactSection />
           </>
@@ -428,14 +421,13 @@ const MainLayout: React.FC = () => {
         onSelectProduct={() => setActiveTab('shop')}
       />
 
-      {/* Floating Corner CCTV Broadcast Widget (Home Page / Site-wide Access) */}
-      <DahuaLiveCameraWidget onOpenLiveModal={() => setIsCameraModalOpen(true)} />
+      {/* Floating Customer Assistance Button (For Website & Shop Visitors) */}
+      <CustomerAssistanceButton />
 
-      {/* Dahua DH-IPC-H5AS 5MP Live Streaming Modal */}
-      <DahuaLiveCameraModal
-        isOpen={isCameraModalOpen}
-        onClose={() => setIsCameraModalOpen(false)}
-      />
+      {/* Floating Staff Text-to-Speech Control Center (For Staff & Admin) */}
+      {isAuthenticated && isStaffOrAdmin && (
+        <StaffTTSControlWidget variant="floating" />
+      )}
     </div>
   );
 };
@@ -446,7 +438,9 @@ export default function App() {
       <LanguageProvider>
         <DataProvider>
           <AuthProvider>
-            <MainLayout />
+            <TTSNotificationProvider>
+              <MainLayout />
+            </TTSNotificationProvider>
           </AuthProvider>
         </DataProvider>
       </LanguageProvider>

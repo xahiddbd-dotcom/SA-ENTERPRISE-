@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { Service, ServiceCategory } from '../../types';
-import { ShareProofButton } from '../common/ShareProofButton';
-import { ProofLinkBox } from '../common/ProofLinkBox';
 import { buildUrl } from '../../utils/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -286,12 +284,6 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                               <span>{language === 'bn' ? 'জনপ্রিয়' : 'Popular'}</span>
                             </span>
                           )}
-                          <ShareProofButton
-                            type="service"
-                            id={service.id}
-                            title={language === 'bn' ? service.nameBn : service.name}
-                            variant="icon-only"
-                          />
                         </div>
                       </div>
 
@@ -383,14 +375,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/60 to-black/50" />
 
-              {/* Header Buttons: Share Proof Link & Close */}
+              {/* Modal Close Button */}
               <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
-                <ShareProofButton
-                  type="service"
-                  id={activeServiceModal.id}
-                  title={language === 'bn' ? activeServiceModal.nameBn : activeServiceModal.name}
-                  variant="badge"
-                />
                 <button
                   id="close-service-modal-btn"
                   onClick={handleCloseModal}
@@ -446,12 +432,19 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                   </div>
 
                   <div className="pt-3 flex flex-wrap items-center justify-center gap-3">
-                    <ShareProofButton
-                      type="tracker"
-                      id={createdAppNumber}
-                      title={`Application #${createdAppNumber}`}
-                      variant="button"
-                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (createdAppNumber) {
+                          navigator.clipboard.writeText(createdAppNumber);
+                          alert(language === 'bn' ? 'আবেদন নম্বর কপি করা হয়েছে!' : 'Tracking ID copied!');
+                        }
+                      }}
+                      className="px-4 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>{language === 'bn' ? 'নম্বর কপি করুন' : 'Copy ID'}</span>
+                    </button>
 
                     <button
                       id="view-tracker-now-btn"
@@ -479,13 +472,6 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
               ) : (
                 /* Submission Form */
                 <form onSubmit={handleSubmitApplication} className="space-y-4">
-                  {/* Direct Proof Link Card */}
-                  <ProofLinkBox
-                    url={buildUrl({ tab: 'services', serviceId: activeServiceModal.id })}
-                    title={language === 'bn' ? activeServiceModal.nameBn : activeServiceModal.name}
-                    subtitle={language === 'bn' ? 'কাস্টমার বা প্রার্থীর কাছে পাঠানোর জন্য এই সেবার অফিসিয়াল প্রমাণ লিঙ্ক' : 'Official proof link to share with candidate/customer'}
-                    badgeLabel={language === 'bn' ? 'সেবার সরাসরি প্রমাণ লিঙ্ক' : 'Service Direct Proof Link'}
-                  />
 
                   {/* Service info summary */}
                   <div className="p-3.5 rounded-xl bg-neutral-950 border border-neutral-800 flex flex-wrap items-center justify-between gap-2 text-xs">

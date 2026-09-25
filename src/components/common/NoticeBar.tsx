@@ -11,10 +11,10 @@ export const NoticeBar: React.FC = () => {
   if (!settings.showNoticeBanner || dismissed) return null;
 
   return (
-    <div id="notice-banner" className="bg-gradient-to-r from-emerald-950 via-neutral-900 to-amber-950/80 border-b border-emerald-500/20 text-xs py-2 px-4 text-emerald-300 flex items-center justify-between transition-all">
+    <div id="notice-banner" className="bg-neutral-900 border-b border-neutral-800 text-xs py-2 px-4 text-neutral-200 flex items-center justify-between transition-all">
       <div className="container mx-auto flex items-center justify-center gap-2 text-center font-medium overflow-hidden">
-        <Megaphone className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
-        <span className="truncate">
+        <Megaphone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+        <span className="truncate text-xs text-neutral-300">
           {language === 'bn' ? settings.noticeBannerBn : settings.noticeBanner}
         </span>
       </div>

@@ -19,8 +19,11 @@ import {
   ChevronDown,
   BookOpen,
   Sun,
-  Moon
+  Moon,
+  Headphones
 } from 'lucide-react';
+import { StaffTTSControlWidget } from './StaffTTSControlWidget';
+import { CustomerAssistanceModal } from '../public/CustomerAssistanceModal';
 
 interface HeaderProps {
   activeTab: string;
@@ -43,6 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
   const { settings, cartItemCount } = useData();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [assistanceModalOpen, setAssistanceModalOpen] = useState(false);
 
   const navLinks = [
     { id: 'home', label: t('home') },
@@ -77,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-6">
             <span className="flex items-center gap-1.5">
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20" />
               <span className="text-emerald-500 font-semibold">
                 {language === 'bn' ? 'দোকান খোলা আছে' : 'Shop Open Now'}
               </span>
@@ -108,6 +112,15 @@ export const Header: React.FC<HeaderProps> = ({
               <MessageSquare className="w-3.5 h-3.5 text-emerald-500" />
               <span>{settings.whatsappNumber} (bKash/WhatsApp)</span>
             </a>
+
+            <button
+              onClick={() => setAssistanceModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-600/30 transition-all font-semibold"
+              title="Request Staff Assistance (Live Voice Alert)"
+            >
+              <Headphones className="w-3.5 h-3.5" />
+              <span>{language === 'bn' ? 'সহায়তা ডাকুন 🛎️' : 'Call Staff 🛎️'}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -250,6 +263,11 @@ export const Header: React.FC<HeaderProps> = ({
           {/* User Account / Staff / Admin buttons */}
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
+              {(isAdmin || isStaff) && (
+                <div className="hidden lg:block">
+                  <StaffTTSControlWidget variant="compact" />
+                </div>
+              )}
               {isAdmin && (
                 <button
                   id="header-admin-cms-shortcut"
@@ -562,6 +580,12 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       )}
+
+      {/* Customer Assistance Modal */}
+      <CustomerAssistanceModal
+        isOpen={assistanceModalOpen}
+        onClose={() => setAssistanceModalOpen(false)}
+      />
     </header>
   );
 };

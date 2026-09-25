@@ -30,7 +30,6 @@ import {
   LockOpen
 } from 'lucide-react';
 
-import { ShareProofButton } from '../common/ShareProofButton';
 import { updateBrowserUrl, buildUrl, copyToClipboard } from '../../utils/navigation';
 
 interface ApplicationTrackerProps {
@@ -304,13 +303,15 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
                     {matchedApplication.paymentStatus === 'paid' ? 'Fee Paid (৳' + matchedApplication.paidAmount + ')' : 'Payment Pending'}
                   </span>
 
-                  {/* Shareable Proof Link Button */}
-                  <ShareProofButton
-                    type="tracker"
-                    id={matchedApplication.applicationNumber}
-                    title={`Application #${matchedApplication.applicationNumber} - Saiful Enterprise`}
-                    variant="badge"
-                  />
+                  {/* Shareable Link Button */}
+                  <button
+                    onClick={() => handleCopyShareLink(matchedApplication.applicationNumber)}
+                    className="px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors border border-neutral-700"
+                    title={language === 'bn' ? 'ট্র্যাকিং লিঙ্ক কপি করুন' : 'Copy Tracking Link'}
+                  >
+                    {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-neutral-400" />}
+                    <span>{copiedLink ? (language === 'bn' ? 'কপি হয়েছে' : 'Copied') : (language === 'bn' ? 'লিঙ্ক কপি' : 'Share Link')}</span>
+                  </button>
 
                   {/* Print Slip Button */}
                   <button

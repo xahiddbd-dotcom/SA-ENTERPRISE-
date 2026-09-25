@@ -387,10 +387,41 @@ export interface AppNotification {
   titleBn: string;
   message: string;
   messageBn: string;
-  type: 'order' | 'application' | 'inventory' | 'payment' | 'system';
+  type: 'order' | 'application' | 'inventory' | 'payment' | 'system' | 'assistance';
   link?: string;
   isRead: boolean;
   createdAt: string;
+}
+
+export type AssistanceRequestStatus = 'pending' | 'attending' | 'resolved';
+
+export interface CustomerAssistanceRequest {
+  id: string;
+  requestNumber: string;
+  customerName: string;
+  customerPhone?: string;
+  category: 'order_help' | 'print_copy' | 'college_admission' | 'judicial_stamp' | 'payment' | 'general';
+  topic: string;
+  topicBn: string;
+  location: string;
+  notes?: string;
+  status: AssistanceRequestStatus;
+  assignedStaffName?: string;
+  createdAt: string;
+  attendingAt?: string;
+  resolvedAt?: string;
+}
+
+export interface StaffTtsSettings {
+  enabled: boolean;
+  chimeEnabled: boolean;
+  volume: number; // 0.0 to 1.0
+  rate: number; // 0.7 to 1.3
+  pitch: number; // 0.8 to 1.2
+  language: 'bn' | 'en' | 'bilingual';
+  announceNewOrders: boolean;
+  announceAssistanceRequests: boolean;
+  repeatUnattendedIntervalMinutes: number; // 0 to disable
 }
 
 export interface HeroSlide {
@@ -487,6 +518,9 @@ export interface WebsiteSettings {
     resolution?: string;
     fps?: number;
   };
+
+  // Staff Text-To-Speech (TTS) Notification Settings
+  staffTtsSettings?: StaffTtsSettings;
 }
 
 export type StoreExpenseCategory =

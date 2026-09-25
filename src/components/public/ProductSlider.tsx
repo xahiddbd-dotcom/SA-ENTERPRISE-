@@ -19,9 +19,10 @@ import {
 
 interface ProductSliderProps {
   openCart: () => void;
+  onViewAllProducts?: () => void;
 }
 
-export const ProductSlider: React.FC<ProductSliderProps> = ({ openCart }) => {
+export const ProductSlider: React.FC<ProductSliderProps> = ({ openCart, onViewAllProducts }) => {
   const { language } = useLanguage();
   const { products, addToCart } = useData();
   const { isDark } = useTheme();
@@ -116,14 +117,13 @@ export const ProductSlider: React.FC<ProductSliderProps> = ({ openCart }) => {
           {/* Controls & Rotation Indicator */}
           <div className="flex items-center gap-3">
             <span
-              className={`text-xs font-mono hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${
+              className={`text-xs font-semibold px-3 py-1.5 rounded-xl border ${
                 isDark
-                  ? 'text-neutral-400 bg-neutral-900 border-neutral-800'
-                  : 'text-slate-600 bg-white border-slate-200 shadow-xs'
+                  ? 'text-neutral-300 bg-neutral-900 border-neutral-800'
+                  : 'text-slate-700 bg-white border-slate-200 shadow-2xs'
               }`}
             >
-              <Clock className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Auto-slide: 32s {isPaused ? '(Paused)' : ''}</span>
+              <span>{currentIndex + 1} / {sliderItems.length}</span>
             </span>
 
             <div className="flex items-center gap-1.5">
@@ -377,6 +377,24 @@ export const ProductSlider: React.FC<ProductSliderProps> = ({ openCart }) => {
             </button>
           ))}
         </div>
+
+        {onViewAllProducts && (
+          <div className="mt-8 text-center">
+            <button
+              type="button"
+              id="slider-view-all-products-btn"
+              onClick={onViewAllProducts}
+              className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-xs sm:text-sm border transition-all active:scale-95 shadow-sm ${
+                isDark
+                  ? 'bg-neutral-900 hover:bg-neutral-800 border-neutral-700 text-emerald-400 hover:text-emerald-300'
+                  : 'bg-white hover:bg-slate-50 border-slate-200 text-emerald-700 hover:text-emerald-800'
+              }`}
+            >
+              <span>{language === 'bn' ? 'সকল পেপার ও স্টেশনারি আইটেম দেখুন' : 'Explore All Store Supplies & Paper'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

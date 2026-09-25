@@ -22,7 +22,8 @@ import {
   DailyCashReconciliation,
   StampItemConfig,
   StampSaleRecord,
-  StampStockPurchase
+  StampStockPurchase,
+  CustomerAssistanceRequest
 } from '../types';
 
 export const initialSettings: WebsiteSettings = {
@@ -85,6 +86,19 @@ export const initialSettings: WebsiteSettings = {
     ptzSupported: true,
     resolution: '5MP 3K QHD (2880 × 1620)',
     fps: 25
+  },
+
+  // Staff Text-To-Speech (TTS) Voice Notification Engine Defaults
+  staffTtsSettings: {
+    enabled: true,
+    chimeEnabled: true,
+    volume: 0.9,
+    rate: 0.95,
+    pitch: 1.0,
+    language: 'bn',
+    announceNewOrders: true,
+    announceAssistanceRequests: true,
+    repeatUnattendedIntervalMinutes: 2
   }
 };
 
@@ -1155,5 +1169,37 @@ export const initialStampConfigs: StampItemConfig[] = [
 export const initialStampSales: StampSaleRecord[] = [];
 
 export const initialStampPurchases: StampStockPurchase[] = [];
+
+// Sample Customer Assistance Requests for demonstration & testing
+export const initialAssistanceRequests: CustomerAssistanceRequest[] = [
+  {
+    id: "req_demo_01",
+    requestNumber: "REQ-001",
+    customerName: "আব্দুল করিম",
+    customerPhone: "01712345678",
+    category: "college_admission",
+    topic: "Tejgaon College Admission Form",
+    topicBn: "তেজগাঁও কলেজ অনার্স ভর্তি ফরম পূরণে জরুরি সহায়তা",
+    location: "কাউন্টার ২ (সাইবার স্টেশন)",
+    notes: "ছবি ও স্বাক্ষর রিসাইজ সংক্রান্ত সহায়তা প্রয়োজন",
+    status: "attending",
+    assignedStaffName: "Md. Saiful Islam",
+    createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+    attendingAt: new Date(Date.now() - 10 * 60 * 1000).toISOString()
+  },
+  {
+    id: "req_demo_02",
+    requestNumber: "REQ-002",
+    customerName: "সুলতানা রহমান",
+    customerPhone: "01898765432",
+    category: "order_help",
+    topic: "Online Cart & bKash Payment Query",
+    topicBn: "অনলাইন স্টোরে কার্ট চেকআউট ও বিকাশ পেমেন্ট সাহায্য",
+    location: "অনলাইন ওয়েবসাইট গ্রাহক",
+    notes: "বিকাশ ট্রানজেকশন আইডি প্রদান নিয়ে প্রশ্ন",
+    status: "pending",
+    createdAt: new Date(Date.now() - 4 * 60 * 1000).toISOString()
+  }
+];
 
 

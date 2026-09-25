@@ -3,6 +3,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { Product, Service, Invoice } from '../../types';
+import { StaffTTSControlWidget } from '../common/StaffTTSControlWidget';
 import {
   Calculator,
   Printer,
@@ -227,6 +228,7 @@ export const POSCounter: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          <StaffTTSControlWidget variant="compact" />
           <span className="text-xs px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 font-mono flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>Cashier: <strong className="text-emerald-400">{currentUser?.name || 'Admin'}</strong></span>

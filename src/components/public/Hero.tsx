@@ -16,17 +16,15 @@ import {
   MapPin,
   Clock,
   Store,
-  Award,
-  Video
+  Award
 } from 'lucide-react';
 
 interface HeroProps {
   setActiveTab: (tab: string) => void;
   openServiceModal?: (serviceId: string) => void;
-  onOpenLiveCamera?: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ setActiveTab, onOpenLiveCamera }) => {
+export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
   const { language, t } = useLanguage();
   const { settings, heroSlides } = useData();
   const { isDark } = useTheme();
@@ -46,68 +44,19 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab, onOpenLiveCamera }) =>
       <HeroBackgroundSlider onSlideChange={idx => setActiveSlideIndex(idx)} />
 
       <div className="container mx-auto px-4 relative z-20">
-        {/* Top Badges & Highlights */}
-        <div className="flex flex-wrap items-center justify-center gap-2.5 mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div
-            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md transition-colors shadow-sm ${
-              isDark
-                ? 'bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 shadow-xl'
-                : 'bg-emerald-50 border border-emerald-200 text-emerald-800'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-emerald-500 animate-spin" />
-            <span>
-              {language === 'bn' ? 'ফার্মগেট ও ইন্দিরা রোডের বিশ্বস্ত ডিজিটাল সেন্টার' : 'Trusted Digital Center in Farmgate'}
-            </span>
-          </div>
-
-          <div
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md transition-colors shadow-sm ${
-              isDark
-                ? 'bg-amber-950/80 border border-amber-500/30 text-amber-300 shadow-xl'
-                : 'bg-amber-50 border border-amber-200 text-amber-900'
-            }`}
-          >
-            <MapPin className="w-3.5 h-3.5 text-amber-500" />
-            <span>
-              {language === 'bn' ? 'তেজগাঁও কলেজের ঠিক পাশে' : 'Beside Tejgaon College'}
-            </span>
-          </div>
-
-          <div
-            className={`hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md transition-colors shadow-sm ${
-              isDark
-                ? 'bg-neutral-900/80 border border-neutral-700 text-neutral-300'
-                : 'bg-slate-100 border border-slate-200 text-slate-700'
-            }`}
-          >
-            <Award className="w-3.5 h-3.5 text-teal-500" />
-            <span>
-              {language === 'bn' ? '১৫+ বছরের নির্ভরযোগ্য সেবা' : '15+ Years of Service'}
-            </span>
-          </div>
-
-          {/* Dahua DH-IPC-H5AS 5MP Live CCTV Badge Button */}
-          {onOpenLiveCamera && (
-            <button
-              onClick={onOpenLiveCamera}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md transition-all shadow-sm hover:scale-105 cursor-pointer ${
-                isDark
-                  ? 'bg-rose-950/80 border border-rose-500/40 text-rose-300 hover:bg-rose-900/90 shadow-xl'
-                  : 'bg-rose-50 border border-rose-200 text-rose-800 hover:bg-rose-100'
-              }`}
-              title="Watch Dahua 5MP CCTV Live Stream"
-            >
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500" />
-              </span>
-              <Video className="w-3.5 h-3.5 text-rose-400" />
-              <span className="font-bold">
-                {language === 'bn' ? 'দোকান সিসিটিভি সরাসরি সম্প্রচার (Dahua 5MP)' : 'Shop CCTV Live (Dahua 5MP)'}
-              </span>
-            </button>
-          )}
+        {/* Top Location & Trust Kicker */}
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm font-medium mb-6 text-center">
+          <span className={isDark ? 'text-emerald-400 font-semibold' : 'text-emerald-700 font-semibold'}>
+            📍 {language === 'bn' ? 'ইন্দিরা রোড ও ফার্মগেট' : 'Indira Road, Farmgate'}
+          </span>
+          <span className={isDark ? 'text-neutral-600' : 'text-slate-300'}>·</span>
+          <span className={isDark ? 'text-neutral-300' : 'text-slate-700'}>
+            {language === 'bn' ? 'তেজগাঁও কলেজের প্রধান গেট সংলগ্ন' : 'Beside Tejgaon College Main Gate'}
+          </span>
+          <span className={isDark ? 'text-neutral-600' : 'text-slate-300'}>·</span>
+          <span className={isDark ? 'text-teal-400 font-semibold' : 'text-teal-700 font-semibold'}>
+            {language === 'bn' ? '১৫+ বছরের আস্থার প্রতীক' : '15+ Years of Service'}
+          </span>
         </div>
 
         {/* Main Headline Container with Card Shape behind text */}

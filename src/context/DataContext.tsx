@@ -27,7 +27,9 @@ import {
   DailyCashReconciliation,
   StampItemConfig,
   StampSaleRecord,
-  StampStockPurchase
+  StampStockPurchase,
+  CustomerAssistanceRequest,
+  AssistanceRequestStatus
 } from '../types';
 import {
   initialCategories,
@@ -51,7 +53,8 @@ import {
   initialDailyCashReconciliations,
   initialStampConfigs,
   initialStampSales,
-  initialStampPurchases
+  initialStampPurchases,
+  initialAssistanceRequests
 } from '../data/initialData';
 
 interface DataContextType {
@@ -187,6 +190,12 @@ interface DataContextType {
   updateStampConfig: (id: string, updates: Partial<StampItemConfig>) => void;
   addStampConfig: (config: Omit<StampItemConfig, 'id'>) => StampItemConfig;
   deleteStampConfig: (id: string) => void;
+
+  // Customer Assistance Requests (গ্রাহক সেবা ও কাউন্টার সহায়তা)
+  assistanceRequests: CustomerAssistanceRequest[];
+  createAssistanceRequest: (reqData: Omit<CustomerAssistanceRequest, 'id' | 'requestNumber' | 'createdAt' | 'status'>) => CustomerAssistanceRequest;
+  updateAssistanceRequestStatus: (id: string, status: AssistanceRequestStatus, assignedStaffName?: string) => void;
+  deleteAssistanceRequest: (id: string) => void;
 
   // Reset / Export Data
   resetAllData: () => void;
@@ -457,6 +466,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : initialStampPurchases;
   });
 
+  const [assistanceRequests, setAssistanceRequests] = useState<CustomerAssistanceRequest[]>(() => {
+    const saved = localStorage.getItem('se_assistance_requests');
+    return saved ? JSON.parse(saved) : initialAssistanceRequests;
+  });
+
   // Server Synchronization Engine (সার্ভার ডাটাবেজ ব্যাকআপ ও সিঙ্ক)
   const [isServerSyncing, setIsServerSyncing] = useState<boolean>(false);
   const patchTimeoutRef = useRef<Record<string, any>>({});
@@ -685,6 +699,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     syncKeyToServer('stampPurchases', stampPurchases);
   }, [stampPurchases]);
 
+  useEffect(() => {
+    localStorage.setItem('se_assistance_requests', JSON.stringify(assistanceRequests));
+    syncKeyToServer('assistanceRequests', assistanceRequests);
+  }, [assistanceRequests]);
+
   const updateSettings = (newSettings: Partial<WebsiteSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
   };
@@ -867,6 +886,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     logActivity('Order Placed', `Order #${orderNumber} created for ৳${newOrder.total}`);
+
+    // Trigger Text-to-Speech notification for staff
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('se:new-order', {
+        detail: {
+          orderNumber: newOrder.orderNumber,
+          customerName: newOrder.customerName,
+          total: newOrder.total,
+          itemCount: newOrder.items.length
+        }
+      }));
+    }
+
     return newOrder;
   };
 
@@ -1803,6 +1835,74 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logActivity('Stamp Item Deleted', `Deleted stamp config ${id}`);
   };
 
+  // Customer Assistance Requests (গ্রাহক সেবা ও কাউন্টার সহায়তা)
+  const createAssistanceRequest = (
+    reqData: Omit<CustomerAssistanceRequest, 'id' | 'requestNumber' | 'createdAt' | 'status'>
+  ) => {
+    const requestNumber = `REQ-${new Date().getFullYear().toString().slice(-2)}-${String(assistanceRequests.length + 1).padStart(3, '0')}`;
+    const newReq: CustomerAssistanceRequest = {
+      ...reqData,
+      id: `req_${Date.now()}`,
+      requestNumber,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+
+    setAssistanceRequests(prev => [newReq, ...prev]);
+
+    // Create system notification
+    addNotification({
+      title: `Staff Assistance: ${newReq.topic}`,
+      titleBn: `গ্রাহক সহায়তা: ${newReq.topicBn}`,
+      message: `${newReq.customerName} (${newReq.location}): ${newReq.notes || 'No extra notes'}`,
+      messageBn: `${newReq.customerName} (${newReq.location}): ${newReq.notes || 'সহায়তা প্রয়োজন'}`,
+      type: 'assistance',
+      link: '/admin/assistance'
+    });
+
+    logActivity('Assistance Requested', `Customer "${newReq.customerName}" requested help: "${newReq.topic}" at ${newReq.location}`);
+
+    // Trigger Text-to-Speech notification for staff
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('se:assistance-request', {
+        detail: {
+          customerName: newReq.customerName,
+          topic: newReq.topic,
+          topicBn: newReq.topicBn,
+          location: newReq.location
+        }
+      }));
+    }
+
+    return newReq;
+  };
+
+  const updateAssistanceRequestStatus = (
+    id: string,
+    status: AssistanceRequestStatus,
+    assignedStaffName?: string
+  ) => {
+    setAssistanceRequests(prev =>
+      prev.map(r => {
+        if (r.id === id) {
+          return {
+            ...r,
+            status,
+            ...(assignedStaffName ? { assignedStaffName } : {}),
+            ...(status === 'attending' ? { attendingAt: new Date().toISOString() } : {}),
+            ...(status === 'resolved' ? { resolvedAt: new Date().toISOString() } : {})
+          };
+        }
+        return r;
+      })
+    );
+    logActivity('Assistance Status Updated', `Assistance request ${id} marked as ${status}`);
+  };
+
+  const deleteAssistanceRequest = (id: string) => {
+    setAssistanceRequests(prev => prev.filter(r => r.id !== id));
+  };
+
   // Reset & Backup
   const resetAllData = () => {
     localStorage.removeItem('se_settings');
@@ -1826,6 +1926,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('se_stamp_configs');
     localStorage.removeItem('se_stamp_sales');
     localStorage.removeItem('se_stamp_purchases');
+    localStorage.removeItem('se_assistance_requests');
 
     setSettings(initialSettings);
     setCategories(initialCategories);
@@ -1846,6 +1947,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setStampConfigs(initialStampConfigs);
     setStampSales(initialStampSales);
     setStampPurchases(initialStampPurchases);
+    setAssistanceRequests(initialAssistanceRequests);
 
     // Reset on server disk as well
     fetch('/api/database/reset', { method: 'POST' }).catch(e => console.error('Server reset error:', e));
@@ -1868,7 +1970,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         expensesCount: expenses.length,
         dailySalesCount: dailyCounterSales.length,
         storeExpensesCount: storeExpenses.length,
-        stampSalesCount: stampSales.length
+        stampSalesCount: stampSales.length,
+        assistanceRequestsCount: assistanceRequests.length
       },
       settings,
       categories,
@@ -1889,7 +1992,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ledgerSettings,
       stampConfigs,
       stampSales,
-      stampPurchases
+      stampPurchases,
+      assistanceRequests
     };
     return JSON.stringify(payload, null, 2);
   };
@@ -1984,6 +2088,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.stampPurchases && Array.isArray(data.stampPurchases)) {
         setStampPurchases(data.stampPurchases);
         localStorage.setItem('se_stamp_purchases', JSON.stringify(data.stampPurchases));
+      }
+      if (data.assistanceRequests && Array.isArray(data.assistanceRequests)) {
+        setAssistanceRequests(data.assistanceRequests);
+        localStorage.setItem('se_assistance_requests', JSON.stringify(data.assistanceRequests));
       }
       return true;
     } catch (e) {
@@ -2085,6 +2193,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateStampConfig,
         addStampConfig,
         deleteStampConfig,
+        assistanceRequests,
+        createAssistanceRequest,
+        updateAssistanceRequestStatus,
+        deleteAssistanceRequest,
         notifications,
         markNotificationAsRead,
         markAllNotificationsAsRead,

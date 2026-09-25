@@ -3,8 +3,6 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { Product } from '../../types';
 import { Image } from '../common/Image';
-import { ShareProofButton } from '../common/ShareProofButton';
-import { ProofLinkBox } from '../common/ProofLinkBox';
 import { buildUrl } from '../../utils/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -244,19 +242,13 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
                       )}
                     </div>
 
-                    {/* Top Right: Save Badge & Proof Share Button */}
+                    {/* Top Right: Save Badge */}
                     <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
                       {hasDiscount && (
                         <span className="px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold shadow-md">
                           SAVE ৳{product.price - (product.discountPrice || product.price)}
                         </span>
                       )}
-                      <ShareProofButton
-                        type="product"
-                        id={product.id}
-                        title={language === 'bn' ? product.nameBn : product.name}
-                        variant="icon-only"
-                      />
                     </div>
                   </div>
 
@@ -340,12 +332,6 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <ShareProofButton
-                  type="product"
-                  id={selectedProductModal.id}
-                  title={language === 'bn' ? selectedProductModal.nameBn : selectedProductModal.name}
-                  variant="badge"
-                />
                 <button
                   onClick={handleCloseModal}
                   className="p-1 rounded-lg text-neutral-400 hover:text-white transition-colors"
@@ -391,14 +377,6 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
                 </div>
               )}
 
-              {/* Direct Proof Link Card */}
-              <ProofLinkBox
-                url={buildUrl({ tab: 'shop', productId: selectedProductModal.id })}
-                title={language === 'bn' ? selectedProductModal.nameBn : selectedProductModal.name}
-                subtitle={language === 'bn' ? 'কাস্টমারদের কাছে পাঠানোর জন্য এই পণ্যের অফিসিয়াল সরাসরি প্রমাণ লিঙ্ক' : 'Official proof link to share with customer'}
-                badgeLabel={language === 'bn' ? 'পণ্যের সরাসরি প্রমাণ লিঙ্ক' : 'Product Direct Proof Link'}
-              />
-
               <div className="flex items-center justify-between pt-2">
                 <div>
                   <span className="text-xs text-neutral-400 block">{t('price')}</span>
@@ -408,13 +386,6 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                  <ShareProofButton
-                    type="product"
-                    id={selectedProductModal.id}
-                    title={language === 'bn' ? selectedProductModal.nameBn : selectedProductModal.name}
-                    variant="button"
-                  />
-
                   <button
                     onClick={() => {
                       addToCart(selectedProductModal, 1, selectedProductModal.gsm);
