@@ -173,7 +173,7 @@ export const EmployeeOfTheMonthCard: React.FC<EmployeeOfTheMonthCardProps> = ({
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className="w-4 h-4 fill-amber-400" />
               ))}
-              <span className="text-xs font-bold ml-1.5 text-neutral-400">
+              <span className={`text-xs font-bold ml-1.5 ${isDark ? 'text-neutral-400' : 'text-slate-600'}`}>
                 5.0 / 5.0 {language === 'bn' ? '(সার্বক্ষণিক সেরা মূল্যায়ন)' : '(Exceptional Performance)'}
               </span>
             </div>
@@ -183,18 +183,20 @@ export const EmployeeOfTheMonthCard: React.FC<EmployeeOfTheMonthCardProps> = ({
               <div className={`relative p-4 rounded-2xl border text-xs sm:text-sm leading-relaxed italic ${
                 isDark
                   ? 'bg-neutral-950/70 border-neutral-800 text-neutral-300'
-                  : 'bg-white/80 border-amber-100 text-slate-700 shadow-xs'
+                  : 'bg-white/95 border-amber-200 text-slate-800 shadow-xs'
               }`}>
                 <Quote className="w-5 h-5 text-amber-500/40 absolute -top-2.5 -left-2 fill-amber-500/20" />
                 <p className="relative z-10 pl-2">
                   "{comment}"
                 </p>
-                <div className="mt-2 flex items-center justify-between text-[11px] not-italic text-neutral-400 font-sans border-t pt-2 border-neutral-800/40">
-                  <span className="font-semibold text-amber-500">
+                <div className={`mt-2 flex items-center justify-between text-[11px] not-italic font-sans border-t pt-2 ${
+                  isDark ? 'border-neutral-800/60 text-neutral-400' : 'border-slate-200 text-slate-600'
+                }`}>
+                  <span className="font-semibold text-amber-600 dark:text-amber-500">
                     — সাইফুল এন্টারপ্রাইজ ম্যানেজমেন্ট মূল্যায়ন
                   </span>
-                  <span className="flex items-center gap-1 text-rose-400">
-                    <Heart className="w-3 h-3 fill-rose-400" />
+                  <span className="flex items-center gap-1 text-rose-500">
+                    <Heart className="w-3 h-3 fill-rose-500" />
                     <span>{language === 'bn' ? 'অসাধারণ কর্মনিষ্ঠা' : 'Star Performer'}</span>
                   </span>
                 </div>

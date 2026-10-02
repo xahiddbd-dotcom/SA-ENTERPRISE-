@@ -20,7 +20,11 @@ import {
   BookOpen,
   Sun,
   Moon,
-  Headphones
+  Headphones,
+  Home,
+  Briefcase,
+  Info,
+  PhoneCall
 } from 'lucide-react';
 import { StaffTTSControlWidget } from './StaffTTSControlWidget';
 import { CustomerAssistanceModal } from '../public/CustomerAssistanceModal';
@@ -49,12 +53,12 @@ export const Header: React.FC<HeaderProps> = ({
   const [assistanceModalOpen, setAssistanceModalOpen] = useState(false);
 
   const navLinks = [
-    { id: 'home', label: t('home') },
-    { id: 'services', label: t('services') },
-    { id: 'shop', label: t('shop') },
-    { id: 'tracker', label: language === 'bn' ? 'আবেদন ট্র্যাকিং' : 'Tracker' },
-    { id: 'about', label: t('about') },
-    { id: 'contact', label: t('contact') }
+    { id: 'home', label: t('home'), icon: Home },
+    { id: 'services', label: t('services'), icon: Briefcase },
+    { id: 'shop', label: t('shop'), icon: ShoppingBag },
+    { id: 'tracker', label: language === 'bn' ? 'আবেদন ট্র্যাকিং' : 'Tracker', icon: FileCheck },
+    { id: 'about', label: t('about'), icon: Info },
+    { id: 'contact', label: t('contact'), icon: PhoneCall }
   ];
 
   const handleNavClick = (tabId: string) => {
@@ -156,26 +160,39 @@ export const Header: React.FC<HeaderProps> = ({
             isDark ? 'bg-neutral-900/60 border-neutral-800' : 'bg-slate-100 border-slate-200/90'
           }`}
         >
-          {navLinks.map(link => (
-            <a
-              key={link.id}
-              id={`nav-${link.id}`}
-              href={link.id === 'home' ? '/' : `/${link.id}`}
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavClick(link.id);
-              }}
-              className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                activeTab === link.id
-                  ? 'bg-emerald-600 text-white shadow-xs font-semibold'
-                  : isDark
-                  ? 'text-neutral-300 hover:text-white hover:bg-neutral-800/60'
-                  : 'text-slate-700 hover:text-slate-950 hover:bg-white hover:shadow-xs'
-              }`}
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map(link => {
+            const Icon = link.icon;
+            const isActive = activeTab === link.id;
+            return (
+              <a
+                key={link.id}
+                id={`nav-${link.id}`}
+                href={link.id === 'home' ? '/' : `/${link.id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick(link.id);
+                }}
+                className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-emerald-600 text-white shadow-xs font-semibold'
+                    : isDark
+                    ? 'text-neutral-300 hover:text-white hover:bg-neutral-800/60'
+                    : 'text-slate-700 hover:text-slate-950 hover:bg-white hover:shadow-xs'
+                }`}
+              >
+                <Icon
+                  className={`w-4 h-4 shrink-0 transition-colors ${
+                    isActive
+                      ? 'text-white'
+                      : isDark
+                      ? 'text-neutral-400 group-hover:text-emerald-400'
+                      : 'text-slate-500 group-hover:text-emerald-600'
+                  }`}
+                />
+                <span className="whitespace-nowrap">{link.label}</span>
+              </a>
+            );
+          })}
         </nav>
 
         {/* Right side actions */}
@@ -438,25 +455,30 @@ export const Header: React.FC<HeaderProps> = ({
           isDark ? 'bg-neutral-950 border-neutral-800' : 'bg-white border-slate-200 shadow-lg'
         }`}>
           <div className={`grid grid-cols-2 gap-2 pb-2 border-b ${isDark ? 'border-neutral-800' : 'border-slate-100'}`}>
-            {navLinks.map(link => (
-              <a
-                key={link.id}
-                href={link.id === 'home' ? '/' : `/${link.id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavClick(link.id);
-                }}
-                className={`text-left px-3 py-2 rounded-lg text-sm font-semibold block transition-colors ${
-                  activeTab === link.id
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : isDark
-                    ? 'bg-neutral-900 text-neutral-300 hover:text-white'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map(link => {
+              const Icon = link.icon;
+              const isActive = activeTab === link.id;
+              return (
+                <a
+                  key={link.id}
+                  href={link.id === 'home' ? '/' : `/${link.id}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavClick(link.id);
+                  }}
+                  className={`text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors ${
+                    isActive
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : isDark
+                      ? 'bg-neutral-900 text-neutral-300 hover:text-white'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-emerald-500'}`} />
+                  <span className="truncate">{link.label}</span>
+                </a>
+              );
+            })}
           </div>
 
           <div className="flex flex-col gap-2 pt-1">

@@ -12,19 +12,22 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const THEME_STORAGE_KEY = 'saiful_enterprise_theme_mode';
+const THEME_DEFAULT_APPLIED_KEY = 'saiful_enterprise_default_light_v1';
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [themeMode, setThemeModeState] = useState<ThemeMode>(() => {
-    if (typeof window === 'undefined') return 'dark';
+    if (typeof window === 'undefined') return 'light';
+    const defaultApplied = localStorage.getItem(THEME_DEFAULT_APPLIED_KEY);
+    if (!defaultApplied) {
+      localStorage.setItem(THEME_DEFAULT_APPLIED_KEY, 'true');
+      localStorage.setItem(THEME_STORAGE_KEY, 'light');
+      return 'light';
+    }
     const saved = localStorage.getItem(THEME_STORAGE_KEY);
     if (saved === 'light' || saved === 'dark') {
       return saved;
     }
-    // Check system preference if no saved choice
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-      return 'light';
-    }
-    return 'dark';
+    return 'light';
   });
 
   useEffect(() => {

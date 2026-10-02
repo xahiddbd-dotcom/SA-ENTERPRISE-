@@ -16,7 +16,8 @@ import {
   MapPin,
   Clock,
   Store,
-  Award
+  Award,
+  Image as ImageIcon
 } from 'lucide-react';
 
 interface HeroProps {
@@ -29,6 +30,7 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
   const { settings, heroSlides } = useData();
   const { isDark } = useTheme();
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [openWallpaperStudio, setOpenWallpaperStudio] = useState(false);
 
   const slides = (heroSlides && heroSlides.length > 0) ? heroSlides : [];
   const currentSlide = slides[activeSlideIndex] || slides[0] || {
@@ -39,9 +41,13 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
   const isShopOpen = settings.isShopOpen !== false;
 
   return (
-    <section id="hero-section" className="relative overflow-hidden pt-8 pb-20 lg:py-24 min-h-[580px] lg:min-h-[660px] flex items-center">
+    <section id="hero-section" className="relative z-0 isolate overflow-hidden pt-8 pb-20 lg:py-24 min-h-[580px] lg:min-h-[660px] flex items-center">
       {/* Background Photo & Video Carousel Slide Engine */}
-      <HeroBackgroundSlider onSlideChange={idx => setActiveSlideIndex(idx)} />
+      <HeroBackgroundSlider
+        onSlideChange={idx => setActiveSlideIndex(idx)}
+        openWallpaperModalExternally={openWallpaperStudio}
+        onCloseWallpaperModalExternally={() => setOpenWallpaperStudio(false)}
+      />
 
       <div className="container mx-auto px-4 relative z-20">
         {/* Top Location & Trust Kicker */}
@@ -57,6 +63,21 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
           <span className={isDark ? 'text-teal-400 font-semibold' : 'text-teal-700 font-semibold'}>
             {language === 'bn' ? '১৫+ বছরের আস্থার প্রতীক' : '15+ Years of Service'}
           </span>
+          <span className={isDark ? 'text-neutral-600' : 'text-slate-300'}>·</span>
+          <button
+            type="button"
+            id="hero-wallpaper-trigger-top"
+            onClick={() => setOpenWallpaperStudio(true)}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md border transition-all active:scale-95 shadow-xs cursor-pointer ${
+              isDark
+                ? 'bg-neutral-900/90 border-emerald-500/40 text-emerald-300 hover:bg-neutral-800 hover:text-white'
+                : 'bg-white/95 border-emerald-500/40 text-emerald-800 hover:bg-slate-50'
+            }`}
+            title={language === 'bn' ? 'ওয়ালপেপার পরিবর্তন বা নতুন যোগ করুন' : 'Change or add wallpaper'}
+          >
+            <ImageIcon className="w-3.5 h-3.5 text-emerald-500" />
+            <span>{language === 'bn' ? 'ওয়ালপেপার যোগ / পরিবর্তন' : 'Add / Change Wallpaper'}</span>
+          </button>
         </div>
 
         {/* Main Headline Container with Card Shape behind text */}

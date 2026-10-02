@@ -109,6 +109,32 @@ html.light [class*="bg-neutral-950/"] {
   border-color: #e2e8f0 !important;
 }
 
+/* Secondary boxes, chips, secondary buttons and pills */
+html.light .bg-neutral-850,
+html.light [class*="bg-neutral-850/"],
+html.light .bg-neutral-800:not([class*="bg-emerald-"], [class*="bg-teal-"], [class*="bg-rose-"], [class*="bg-amber-"], [class*="bg-blue-"], [class*="bg-gradient-"]),
+html.light [class*="bg-neutral-800/"]:not([class*="bg-emerald-"], [class*="bg-teal-"], [class*="bg-rose-"], [class*="bg-amber-"], [class*="bg-blue-"], [class*="bg-gradient-"]) {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Light mode text contrast enhancements */
+html.light .text-neutral-100 {
+  color: #0f172a !important; /* Slate-900 (High contrast heading) */
+}
+html.light .text-neutral-200 {
+  color: #1e293b !important; /* Slate-800 */
+}
+html.light .text-neutral-300 {
+  color: #334155 !important; /* Slate-700 (Body text) */
+}
+html.light .text-neutral-400 {
+  color: #475569 !important; /* Slate-600 (Accessible secondary) */
+}
+html.light .text-neutral-500 {
+  color: #64748b !important; /* Slate-500 (Subtle) */
+}
+
 /* Light mode borders */
 html.light .border-neutral-800,
 html.light [class*="border-neutral-800/"] {

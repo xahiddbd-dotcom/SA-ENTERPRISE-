@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
+import { useTheme } from '../../context/ThemeContext';
 import { Application, ApplicationStatus } from '../../types';
 import {
   Search,
@@ -39,6 +40,7 @@ interface ApplicationTrackerProps {
 export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialSearchId }) => {
   const { language } = useLanguage();
   const { applications, settings } = useData();
+  const { isDark } = useTheme();
 
   const [query, setQuery] = useState(initialSearchId || '');
   const [matchedApplication, setMatchedApplication] = useState<Application | null>(null);
@@ -150,37 +152,49 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
     switch (status) {
       case 'completed':
         return {
-          bg: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40',
+          bg: isDark
+            ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
+            : 'bg-emerald-50 text-emerald-800 border-emerald-200',
           labelBn: 'কাজ সম্পন্ন (Ready)',
           labelEn: 'Completed'
         };
       case 'delivered':
         return {
-          bg: 'bg-teal-500/15 text-teal-300 border-teal-500/40',
+          bg: isDark
+            ? 'bg-teal-500/15 text-teal-300 border-teal-500/40'
+            : 'bg-teal-50 text-teal-800 border-teal-200',
           labelBn: 'ডেলিভারি সম্পন্ন',
           labelEn: 'Delivered'
         };
       case 'submitted':
         return {
-          bg: 'bg-blue-500/15 text-blue-300 border-blue-500/40',
+          bg: isDark
+            ? 'bg-blue-500/15 text-blue-300 border-blue-500/40'
+            : 'bg-blue-50 text-blue-800 border-blue-200',
           labelBn: 'পোর্টালে দাখিল সম্পন্ন',
           labelEn: 'Submitted to Portal'
         };
       case 'processing':
         return {
-          bg: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
+          bg: isDark
+            ? 'bg-amber-500/15 text-amber-300 border-amber-500/40'
+            : 'bg-amber-50 text-amber-800 border-amber-200',
           labelBn: 'প্রক্রিয়াধীন রয়েছে',
           labelEn: 'In Progress'
         };
       case 'cancelled':
         return {
-          bg: 'bg-rose-500/15 text-rose-300 border-rose-500/40',
+          bg: isDark
+            ? 'bg-rose-500/15 text-rose-300 border-rose-500/40'
+            : 'bg-rose-50 text-rose-800 border-rose-200',
           labelBn: 'আবেদন স্থগিত / বাতিল',
           labelEn: 'Cancelled'
         };
       default:
         return {
-          bg: 'bg-neutral-800 text-neutral-300 border-neutral-700',
+          bg: isDark
+            ? 'bg-neutral-800 text-neutral-300 border-neutral-700'
+            : 'bg-slate-100 text-slate-700 border-slate-200',
           labelBn: 'নতুন আবেদন (Received)',
           labelEn: 'Received'
         };
@@ -192,26 +206,32 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
   };
 
   return (
-    <section id="application-tracker-section" className="py-12 sm:py-16 bg-neutral-950 text-neutral-100">
+    <section id="application-tracker-section" className={`py-12 sm:py-16 transition-colors duration-200 ${
+      isDark ? 'bg-neutral-950/60 text-neutral-100' : 'bg-transparent text-slate-900'
+    }`}>
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="text-center space-y-3 mb-8 sm:mb-12">
           <div className="flex flex-wrap items-center justify-center gap-2">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-              <FileCheck className="w-4 h-4 text-emerald-400" />
+            <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold border ${
+              isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+            }`}>
+              <FileCheck className="w-4 h-4 text-emerald-500" />
               <span>{language === 'bn' ? 'স্মার্ট অনলাইন আবেদন ট্র্যাকিং' : 'Smart Application Live Tracker'}</span>
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-500/30 text-teal-300 text-xs font-semibold">
-              <LockOpen className="w-3.5 h-3.5 text-teal-400" />
+            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
+              isDark ? 'bg-teal-500/15 border-teal-500/30 text-teal-300' : 'bg-teal-50 border-teal-200 text-teal-800'
+            }`}>
+              <LockOpen className="w-3.5 h-3.5 text-teal-500" />
               <span>{language === 'bn' ? 'উন্মুক্ত ট্র্যাকিং • নো-লগইন' : 'Public Access • No Login Required'}</span>
             </div>
           </div>
 
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h2 className={`text-2xl sm:text-4xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
             {language === 'bn' ? 'আবেদনের বর্তমান অবস্থা ও হিস্টোরি জানুন' : 'Track Your Application & History'}
           </h2>
 
-          <p className="text-neutral-400 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
+          <p className={`text-xs sm:text-sm max-w-xl mx-auto leading-relaxed font-medium ${isDark ? 'text-neutral-400' : 'text-slate-600'}`}>
             {language === 'bn'
               ? 'আপনার আবেদন ট্র্যাকিং আইডি (যেমন: APP-2026-0001) দিয়ে লগইন ছাড়াই যেকোনো সময় তাৎক্ষণিক প্রতিটি ধাপের লাইভ অগ্রগতি, ভেরিফিকেশন ও ডেলিভারি স্লিপ দেখুন।'
               : 'Public, no-login access: Enter your Tracking ID to view real-time timeline logs, specialist updates, and confirmation slips.'}
@@ -220,21 +240,29 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
 
         {/* Search Bar - High Contrast & Mobile Friendly */}
         <form onSubmit={handleSearch} className="mb-8 max-w-2xl mx-auto">
-          <div className="relative flex items-center bg-neutral-900 border-2 border-neutral-800 focus-within:border-emerald-500 rounded-2xl p-1.5 sm:p-2 shadow-2xl transition-all">
-            <Search className="w-5 h-5 text-neutral-400 ml-3 shrink-0" />
+          <div className={`relative flex items-center border-2 rounded-2xl p-1.5 sm:p-2 transition-all shadow-md ${
+            isDark
+              ? 'bg-neutral-900 border-neutral-800 focus-within:border-emerald-500 shadow-2xl'
+              : 'bg-white border-slate-200 focus-within:border-emerald-500 shadow-lg shadow-slate-200/50'
+          }`}>
+            <Search className={`w-5 h-5 ml-3 shrink-0 ${isDark ? 'text-neutral-400' : 'text-slate-400'}`} />
             <input
               type="text"
               id="app-tracker-input"
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder={language === 'bn' ? 'আবেদন আইডি (APP-2026-0001) বা ফোন নম্বর দিন...' : 'Enter App ID (APP-2026-0001) or Phone...'}
-              className="w-full bg-transparent px-3 py-2 text-xs sm:text-base text-white placeholder:text-neutral-500 focus:outline-none font-mono"
+              className={`w-full bg-transparent px-3 py-2 text-xs sm:text-base focus:outline-none font-mono ${
+                isDark ? 'text-white placeholder:text-neutral-500' : 'text-slate-900 placeholder:text-slate-400 font-semibold'
+              }`}
             />
             {query && (
               <button
                 type="button"
                 onClick={() => { setQuery(''); setMatchedApplication(null); setHasSearched(false); }}
-                className="p-1 text-neutral-400 hover:text-white mr-1"
+                className={`p-1.5 mr-1 rounded-lg transition-colors ${
+                  isDark ? 'text-neutral-400 hover:text-white' : 'text-slate-400 hover:text-slate-800'
+                }`}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -242,15 +270,17 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
             <button
               type="submit"
               id="app-tracker-submit-btn"
-              className="px-4 sm:px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-xs sm:text-sm whitespace-nowrap shadow-lg shadow-emerald-950 transition-all active:scale-95"
+              className="px-4 sm:px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:brightness-110 text-white font-bold text-xs sm:text-sm whitespace-nowrap shadow-md shadow-emerald-950/20 transition-all active:scale-95"
             >
               {language === 'bn' ? 'অনুসন্ধান' : 'Track Now'}
             </button>
           </div>
 
           {/* Quick Demo Selector Chips */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-3 text-xs text-neutral-400">
-            <span className="text-[11px] text-neutral-500">{language === 'bn' ? 'টেস্ট আইডি:' : 'Try Demo ID:'}</span>
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-3 text-xs">
+            <span className={`text-[11px] font-medium ${isDark ? 'text-neutral-500' : 'text-slate-500'}`}>
+              {language === 'bn' ? 'টেস্ট আইডি:' : 'Try Demo ID:'}
+            </span>
             {applications.slice(0, 3).map((app) => (
               <button
                 key={app.id}
@@ -260,7 +290,11 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
                   setHasSearched(true);
                   setMatchedApplication(app);
                 }}
-                className="px-2.5 py-1 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-emerald-500/40 text-emerald-400 font-mono text-[11px] transition-colors"
+                className={`px-2.5 py-1 rounded-lg border font-mono text-[11px] transition-colors ${
+                  isDark
+                    ? 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 hover:border-emerald-500/40 text-emerald-400'
+                    : 'bg-white hover:bg-slate-50 border-slate-200 text-emerald-700 shadow-2xs'
+                }`}
               >
                 {app.applicationNumber}
               </button>
@@ -271,19 +305,25 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
         {/* Results Box */}
         {hasSearched && (
           matchedApplication ? (
-            <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-5 sm:p-8 shadow-2xl space-y-8 animate-in fade-in duration-300">
+            <div className={`border rounded-3xl p-5 sm:p-8 space-y-8 animate-in fade-in duration-300 transition-all shadow-xl ${
+              isDark ? 'bg-neutral-900 border-neutral-800 shadow-2xl' : 'bg-white border-slate-200 shadow-slate-200/50'
+            }`}>
               {/* Top Summary Banner */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-neutral-800">
+              <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b ${
+                isDark ? 'border-neutral-800' : 'border-slate-100'
+              }`}>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-neutral-400 uppercase font-mono tracking-wider">
+                    <span className={`text-[11px] uppercase font-mono tracking-wider ${isDark ? 'text-neutral-400' : 'text-slate-500'}`}>
                       {language === 'bn' ? 'আবেদন ট্র্যাকিং নম্বর' : 'Application Tracking Number'}
                     </span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-neutral-800 text-neutral-300 border border-neutral-700">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                      isDark ? 'bg-neutral-800 text-neutral-300 border-neutral-700' : 'bg-slate-100 text-slate-700 border-slate-200'
+                    }`}>
                       {matchedApplication.category}
                     </span>
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono tracking-tight">
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono tracking-tight">
                     {matchedApplication.applicationNumber}
                   </h3>
                 </div>
@@ -297,8 +337,12 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
                   {/* Payment Status Badge */}
                   <span className={`text-xs px-3 py-1.5 rounded-full font-bold uppercase border ${
                     matchedApplication.paymentStatus === 'paid'
-                      ? 'bg-emerald-950 text-emerald-300 border-emerald-600/40'
-                      : 'bg-amber-950 text-amber-300 border-amber-600/40'
+                      ? isDark
+                        ? 'bg-emerald-950 text-emerald-300 border-emerald-600/40'
+                        : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      : isDark
+                      ? 'bg-amber-950 text-amber-300 border-amber-600/40'
+                      : 'bg-amber-50 text-amber-800 border-amber-200'
                   }`}>
                     {matchedApplication.paymentStatus === 'paid' ? 'Fee Paid (৳' + matchedApplication.paidAmount + ')' : 'Payment Pending'}
                   </span>
@@ -306,20 +350,28 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
                   {/* Shareable Link Button */}
                   <button
                     onClick={() => handleCopyShareLink(matchedApplication.applicationNumber)}
-                    className="px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors border border-neutral-700"
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors border ${
+                      isDark
+                        ? 'bg-neutral-800 hover:bg-neutral-700 text-white border-neutral-700'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200 shadow-2xs'
+                    }`}
                     title={language === 'bn' ? 'ট্র্যাকিং লিঙ্ক কপি করুন' : 'Copy Tracking Link'}
                   >
-                    {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-neutral-400" />}
+                    {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-neutral-400" />}
                     <span>{copiedLink ? (language === 'bn' ? 'কপি হয়েছে' : 'Copied') : (language === 'bn' ? 'লিঙ্ক কপি' : 'Share Link')}</span>
                   </button>
 
                   {/* Print Slip Button */}
                   <button
                     onClick={() => setShowSlipModal(true)}
-                    className="px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors border border-neutral-700"
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors border ${
+                      isDark
+                        ? 'bg-neutral-800 hover:bg-neutral-700 text-white border-neutral-700'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200 shadow-2xs'
+                    }`}
                     title="View & Print Slip"
                   >
-                    <Printer className="w-3.5 h-3.5 text-emerald-400" />
+                    <Printer className="w-3.5 h-3.5 text-emerald-500" />
                     <span>{language === 'bn' ? 'স্লিপ দেখুন' : 'Slip'}</span>
                   </button>
                 </div>
@@ -329,7 +381,9 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
               <div className="py-2">
                 <div className="grid grid-cols-5 gap-1 sm:gap-3 relative">
                   {/* Horizontal Connection Bar */}
-                  <div className="absolute top-4 left-4 right-4 h-1 bg-neutral-800 -z-0 hidden sm:block">
+                  <div className={`absolute top-4 left-4 right-4 h-1 -z-0 hidden sm:block ${
+                    isDark ? 'bg-neutral-800' : 'bg-slate-200'
+                  }`}>
                     <div
                       className="h-full bg-emerald-500 transition-all duration-500 rounded"
                       style={{
@@ -348,18 +402,24 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
                         <div
                           className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 ${
                             isDone
-                              ? 'bg-emerald-500 text-neutral-950 shadow-lg shadow-emerald-500/30'
-                              : 'bg-neutral-800 text-neutral-500 border border-neutral-700'
+                              ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30'
+                              : isDark
+                              ? 'bg-neutral-800 text-neutral-500 border border-neutral-700'
+                              : 'bg-slate-100 text-slate-400 border border-slate-200'
                           } ${isCurrent ? 'ring-4 ring-emerald-500/30 scale-110' : ''}`}
                         >
                           {isDone ? <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" /> : idx + 1}
                         </div>
                         <span className={`text-[10px] sm:text-xs font-bold block ${
-                          isDone ? 'text-white' : 'text-neutral-500'
+                          isDone
+                            ? isDark ? 'text-white' : 'text-slate-900'
+                            : isDark ? 'text-neutral-500' : 'text-slate-400'
                         }`}>
                           {language === 'bn' ? step.labelBn : step.labelEn}
                         </span>
-                        <span className="text-[9px] text-neutral-500 hidden md:block max-w-[100px] leading-tight">
+                        <span className={`text-[9px] hidden md:block max-w-[100px] leading-tight ${
+                          isDark ? 'text-neutral-500' : 'text-slate-500'
+                        }`}>
                           {language === 'bn' ? step.descBn : step.descEn}
                         </span>
                       </div>
@@ -369,56 +429,78 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
               </div>
 
               {/* Service & Applicant Details Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-neutral-950 p-4 sm:p-5 rounded-2xl border border-neutral-800 text-xs">
+              <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3.5 p-4 sm:p-5 rounded-2xl border text-xs transition-colors ${
+                isDark ? 'bg-neutral-950 border-neutral-800' : 'bg-slate-50 border-slate-200'
+              }`}>
                 <div className="space-y-1">
-                  <span className="text-neutral-400 block text-[11px]">{language === 'bn' ? 'নির্দিষ্ট সেবা:' : 'Requested Service:'}</span>
-                  <span className="text-white font-bold text-sm block">
+                  <span className={`block text-[11px] ${isDark ? 'text-neutral-400' : 'text-slate-500'}`}>
+                    {language === 'bn' ? 'নির্দিষ্ট সেবা:' : 'Requested Service:'}
+                  </span>
+                  <span className={`font-bold text-sm block ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {language === 'bn' ? matchedApplication.serviceNameBn : matchedApplication.serviceName}
                   </span>
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-neutral-400 block text-[11px]">{language === 'bn' ? 'আবেদনকারী:' : 'Applicant Name:'}</span>
-                  <span className="text-neutral-200 font-semibold block">{matchedApplication.applicantName}</span>
+                  <span className={`block text-[11px] ${isDark ? 'text-neutral-400' : 'text-slate-500'}`}>
+                    {language === 'bn' ? 'আবেদনকারী:' : 'Applicant Name:'}
+                  </span>
+                  <span className={`font-semibold block ${isDark ? 'text-neutral-200' : 'text-slate-800'}`}>
+                    {matchedApplication.applicantName}
+                  </span>
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-neutral-400 block text-[11px]">{language === 'bn' ? 'মোবাইল নম্বর:' : 'Phone Number:'}</span>
-                  <span className="text-neutral-200 font-mono block">{matchedApplication.applicantPhone}</span>
+                  <span className={`block text-[11px] ${isDark ? 'text-neutral-400' : 'text-slate-500'}`}>
+                    {language === 'bn' ? 'মোবাইল নম্বর:' : 'Phone Number:'}
+                  </span>
+                  <span className={`font-mono font-semibold block ${isDark ? 'text-neutral-200' : 'text-slate-800'}`}>
+                    {matchedApplication.applicantPhone}
+                  </span>
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-neutral-400 block text-[11px]">{language === 'bn' ? 'দাখিলের তারিখ ও সময়:' : 'Created Timestamp:'}</span>
-                  <span className="text-neutral-300 block font-mono">
+                  <span className={`block text-[11px] ${isDark ? 'text-neutral-400' : 'text-slate-500'}`}>
+                    {language === 'bn' ? 'দাখিলের তারিখ ও সময়:' : 'Created Timestamp:'}
+                  </span>
+                  <span className={`block font-mono ${isDark ? 'text-neutral-300' : 'text-slate-700'}`}>
                     {new Date(matchedApplication.createdAt).toLocaleString(language === 'bn' ? 'bn-BD' : 'en-US')}
                   </span>
                 </div>
 
                 {matchedApplication.assignedStaffName && (
                   <div className="space-y-1">
-                    <span className="text-neutral-400 block text-[11px]">{language === 'bn' ? 'দায়িত্বপ্রাপ্ত অপারেটর:' : 'Assigned Specialist:'}</span>
-                    <span className="text-emerald-400 font-semibold block">{matchedApplication.assignedStaffName}</span>
+                    <span className={`block text-[11px] ${isDark ? 'text-neutral-400' : 'text-slate-500'}`}>
+                      {language === 'bn' ? 'দায়িত্বপ্রাপ্ত অপারেটর:' : 'Assigned Specialist:'}
+                    </span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-semibold block">
+                      {matchedApplication.assignedStaffName}
+                    </span>
                   </div>
                 )}
 
                 <div className="space-y-1">
-                  <span className="text-neutral-400 block text-[11px]">{language === 'bn' ? 'সেবা ফি ও পেমেন্ট মেথড:' : 'Fee & Payment Method:'}</span>
-                  <span className="text-neutral-200 font-semibold block">
+                  <span className={`block text-[11px] ${isDark ? 'text-neutral-400' : 'text-slate-500'}`}>
+                    {language === 'bn' ? 'সেবা ফি ও পেমেন্ট মেথড:' : 'Fee & Payment Method:'}
+                  </span>
+                  <span className={`font-semibold block ${isDark ? 'text-neutral-200' : 'text-slate-800'}`}>
                     ৳{matchedApplication.amount} ({matchedApplication.paymentMethod?.toUpperCase() || 'Counter'})
                   </span>
                 </div>
               </div>
 
-              {/* TIMELINE & AUDIT HISTORY SECTION (আবেদনের প্রতিটি পর্যায়ের বিস্তারিত হিস্টোরি) */}
+              {/* TIMELINE & AUDIT HISTORY SECTION */}
               <div className="space-y-4 pt-2">
-                <div className="flex items-center justify-between pb-2 border-b border-neutral-800">
+                <div className={`flex items-center justify-between pb-2 border-b ${
+                  isDark ? 'border-neutral-800' : 'border-slate-100'
+                }`}>
                   <div className="flex items-center gap-2">
-                    <History className="w-4 h-4 text-emerald-400" />
-                    <h4 className="text-sm font-bold text-white uppercase tracking-wider">
+                    <History className="w-4 h-4 text-emerald-500" />
+                    <h4 className={`text-sm font-bold uppercase tracking-wider ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       {language === 'bn' ? 'আবেদনের পূর্ণাঙ্গ ট্র্যাকিং হিস্টোরি' : 'Step-by-Step Processing Timeline'}
                     </h4>
                   </div>
-                  <span className="text-[11px] font-mono text-neutral-400">
+                  <span className={`text-[11px] font-mono ${isDark ? 'text-neutral-400' : 'text-slate-500'}`}>
                     {matchedApplication.timeline?.length || 1} {language === 'bn' ? 'টি আপডেট' : 'logs recorded'}
                   </span>
                 </div>
@@ -433,32 +515,46 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
                           <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 ${
                             isLatest
                               ? 'bg-emerald-500 border-emerald-300 ring-4 ring-emerald-500/20'
-                              : 'bg-neutral-900 border-emerald-500'
+                              : isDark
+                              ? 'bg-neutral-900 border-emerald-500'
+                              : 'bg-white border-emerald-500'
                           }`} />
 
-                          <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 space-y-2 hover:border-neutral-700 transition-colors">
+                          <div className={`border rounded-2xl p-4 space-y-2 transition-colors ${
+                            isDark
+                              ? 'bg-neutral-950 border-neutral-800 hover:border-neutral-700'
+                              : 'bg-slate-50 border-slate-200 hover:border-slate-300'
+                          }`}>
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                              <h5 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                              <h5 className={`text-xs sm:text-sm font-bold flex items-center gap-2 ${
+                                isDark ? 'text-white' : 'text-slate-900'
+                              }`}>
                                 <span>{language === 'bn' ? (event.titleBn || event.title) : event.title}</span>
                                 {isLatest && (
-                                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30 font-semibold uppercase">
+                                  <span className={`text-[9px] px-2 py-0.5 rounded-full font-semibold uppercase border ${
+                                    isDark
+                                      ? 'bg-emerald-950 text-emerald-300 border-emerald-500/30'
+                                      : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                  }`}>
                                     Latest
                                   </span>
                                 )}
                               </h5>
-                              <span className="text-[10px] text-neutral-400 font-mono">
-                                <Clock className="w-3 h-3 inline mr-1 text-neutral-500" />
+                              <span className={`text-[10px] font-mono ${isDark ? 'text-neutral-400' : 'text-slate-500'}`}>
+                                <Clock className="w-3 h-3 inline mr-1 text-emerald-500" />
                                 {new Date(event.timestamp).toLocaleString(language === 'bn' ? 'bn-BD' : 'en-US')}
                               </span>
                             </div>
 
-                            <p className="text-xs text-neutral-300 leading-relaxed">
+                            <p className={`text-xs leading-relaxed ${isDark ? 'text-neutral-300' : 'text-slate-600'}`}>
                               {language === 'bn' ? (event.descriptionBn || event.description) : event.description}
                             </p>
 
                             {event.updatedBy && (
-                              <div className="flex items-center gap-2 text-[10px] text-neutral-400 pt-1 border-t border-neutral-900">
-                                <User className="w-3 h-3 text-emerald-400" />
+                              <div className={`flex items-center gap-2 text-[10px] pt-1 border-t ${
+                                isDark ? 'border-neutral-900 text-neutral-400' : 'border-slate-200 text-slate-500'
+                              }`}>
+                                <User className="w-3 h-3 text-emerald-500" />
                                 <span>{language === 'bn' ? 'আপডেটকারী:' : 'Logged by:'} {event.updatedBy}</span>
                               </div>
                             )}
@@ -469,16 +565,18 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
                   ) : (
                     /* Fallback default timeline entry */
                     <div className="pl-6 border-l-2 border-emerald-500/30">
-                      <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 space-y-1.5">
+                      <div className={`border rounded-2xl p-4 space-y-1.5 ${
+                        isDark ? 'bg-neutral-950 border-neutral-800' : 'bg-slate-50 border-slate-200'
+                      }`}>
                         <div className="flex items-center justify-between">
-                          <h5 className="text-xs font-bold text-white">
+                          <h5 className={`text-xs font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                             {language === 'bn' ? 'আবেদন নথিভুক্তকরণ' : 'Application Received'}
                           </h5>
-                          <span className="text-[10px] text-neutral-400 font-mono">
+                          <span className={`text-[10px] font-mono ${isDark ? 'text-neutral-400' : 'text-slate-500'}`}>
                             {new Date(matchedApplication.createdAt).toLocaleString()}
                           </span>
                         </div>
-                        <p className="text-xs text-neutral-300">
+                        <p className={`text-xs ${isDark ? 'text-neutral-300' : 'text-slate-600'}`}>
                           {matchedApplication.notes || (language === 'bn' ? 'আবেদনটি সাফল্যের সাথে সিস্টেমে সংরক্ষিত হয়েছে।' : 'Application saved to desk.')}
                         </p>
                       </div>
@@ -490,9 +588,11 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
               {/* Attached Documents & Slips */}
               {matchedApplication.documents && matchedApplication.documents.length > 0 && (
                 <div className="space-y-3 pt-2">
-                  <div className="flex items-center gap-2 pb-2 border-b border-neutral-800">
-                    <FileText className="w-4 h-4 text-emerald-400" />
-                    <h4 className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
+                  <div className={`flex items-center gap-2 pb-2 border-b ${
+                    isDark ? 'border-neutral-800' : 'border-slate-100'
+                  }`}>
+                    <FileText className="w-4 h-4 text-emerald-500" />
+                    <h4 className={`text-xs font-bold uppercase tracking-wider ${isDark ? 'text-neutral-300' : 'text-slate-700'}`}>
                       {language === 'bn' ? 'সংযুক্ত ডকুমেন্ট ও কনফার্মেশন ফাইল' : 'Attached Documents & Slips'}
                     </h4>
                   </div>
@@ -501,13 +601,21 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
                     {matchedApplication.documents.map(doc => (
                       <div
                         key={doc.id}
-                        className="flex items-center justify-between p-3.5 rounded-xl bg-neutral-950 border border-neutral-800 hover:border-emerald-500/40 text-xs transition-colors"
+                        className={`flex items-center justify-between p-3.5 rounded-2xl border text-xs transition-colors ${
+                          isDark
+                            ? 'bg-neutral-950 border-neutral-800 hover:border-emerald-500/40'
+                            : 'bg-slate-50 border-slate-200 hover:border-emerald-400 shadow-2xs'
+                        }`}
                       >
                         <div className="flex items-center gap-2.5 truncate">
-                          <FileCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <FileCheck className="w-4 h-4 text-emerald-500 shrink-0" />
                           <div className="truncate">
-                            <span className="text-neutral-200 font-medium block truncate">{doc.name}</span>
-                            <span className="text-[10px] text-neutral-500">{doc.uploadedBy} • {doc.type.toUpperCase()}</span>
+                            <span className={`font-semibold block truncate ${isDark ? 'text-neutral-200' : 'text-slate-800'}`}>
+                              {doc.name}
+                            </span>
+                            <span className={`text-[10px] ${isDark ? 'text-neutral-500' : 'text-slate-400'}`}>
+                              {doc.uploadedBy} • {doc.type.toUpperCase()}
+                            </span>
                           </div>
                         </div>
                         <a
@@ -515,7 +623,11 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
                           target="_blank"
                           rel="noreferrer"
                           download={doc.name}
-                          className="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-emerald-950 text-emerald-400 hover:text-emerald-300 border border-neutral-700 text-[11px] font-semibold flex items-center gap-1 shrink-0 ml-2"
+                          className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold flex items-center gap-1 shrink-0 ml-2 border transition-colors ${
+                            isDark
+                              ? 'bg-neutral-800 hover:bg-emerald-950 text-emerald-400 hover:text-emerald-300 border-neutral-700'
+                              : 'bg-white hover:bg-emerald-50 text-emerald-700 border-slate-200 shadow-2xs'
+                          }`}
                         >
                           <Download className="w-3 h-3" />
                           <span>{language === 'bn' ? 'ডাউনলোড' : 'Download'}</span>
@@ -527,7 +639,9 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
               )}
 
               {/* Action Toolbar & Helpdesk Buttons */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-neutral-800">
+              <div className={`flex flex-wrap items-center justify-between gap-3 pt-4 border-t ${
+                isDark ? 'border-neutral-800' : 'border-slate-100'
+              }`}>
                 <div className="flex items-center gap-2">
                   <a
                     href={`https://wa.me/88${settings?.whatsappNumber || '01540004966'}?text=${encodeURIComponent(
@@ -535,7 +649,11 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
                     )}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-4 py-2.5 rounded-xl bg-emerald-950 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2 transition-colors"
+                    className={`px-4 py-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 transition-colors ${
+                      isDark
+                        ? 'bg-emerald-950 hover:bg-emerald-900 border-emerald-500/40 text-emerald-300'
+                        : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-800'
+                    }`}
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
                     <span>{language === 'bn' ? 'হোয়াটসঅ্যাপ হেল্পডেস্কে কথা বলুন' : 'WhatsApp Support'}</span>
@@ -543,16 +661,20 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
 
                   <a
                     href={`tel:${settings?.phonePrimary || '01540004966'}`}
-                    className="px-3.5 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-2 transition-colors"
+                    className={`px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-colors ${
+                      isDark
+                        ? 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
+                    }`}
                   >
-                    <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                    <Phone className="w-3.5 h-3.5 text-emerald-500" />
                     <span>{language === 'bn' ? 'কল করুন' : 'Call Desk'}</span>
                   </a>
                 </div>
 
                 <button
                   onClick={() => setShowSlipModal(true)}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950 transition-all active:scale-95 ml-auto"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:brightness-110 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950/20 transition-all active:scale-95 ml-auto"
                 >
                   <Printer className="w-4 h-4" />
                   <span>{language === 'bn' ? 'ট্র্যাকিং স্লিপ প্রিন্ট করুন' : 'Print Official Slip'}</span>
@@ -560,12 +682,14 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
               </div>
             </div>
           ) : (
-            <div className="text-center py-12 bg-neutral-900 border border-neutral-800 rounded-3xl space-y-3 animate-in fade-in duration-200">
+            <div className={`text-center py-12 border rounded-3xl space-y-3 animate-in fade-in duration-200 transition-colors shadow-sm ${
+              isDark ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-slate-200'
+            }`}>
               <AlertCircle className="w-12 h-12 text-rose-500 mx-auto" />
-              <h3 className="text-base font-bold text-white">
+              <h3 className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {language === 'bn' ? 'কোনো আবেদন পাওয়া যায়নি' : 'No Application Found'}
               </h3>
-              <p className="text-xs text-neutral-400 max-w-sm mx-auto leading-relaxed">
+              <p className={`text-xs max-w-sm mx-auto leading-relaxed ${isDark ? 'text-neutral-400' : 'text-slate-600'}`}>
                 {language === 'bn'
                   ? 'অনুগ্রহ করে আবেদন ট্র্যাকিং আইডি (যেমন: APP-2026-0001) বা সঠিক মোবাইল নম্বরটি টাইপ করে পুনরায় চেষ্টা করুন।'
                   : 'Please check your tracking number or phone number and try again.'}
@@ -576,7 +700,7 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
 
         {/* MODAL: Printable Official Tracking Slip */}
         {showSlipModal && matchedApplication && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white text-neutral-900 w-full max-w-2xl rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-start pb-4 border-b border-neutral-200">
                 <div>
