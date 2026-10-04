@@ -79,8 +79,12 @@ export const EmployeeOfTheMonthCard: React.FC<EmployeeOfTheMonthCardProps> = ({
       } ${className}`}
     >
       {/* Decorative Golden Orbs & Sparks */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+      <div
+        className="absolute inset-0 pointer-events-none opacity-20"
+        style={{
+          background: 'radial-gradient(circle at 95% 5%, rgba(245,158,11,0.25) 0%, transparent 45%), radial-gradient(circle at 5% 95%, rgba(16,185,129,0.2) 0%, transparent 45%)'
+        }}
+      />
 
       <div className="relative p-6 sm:p-8">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6 lg:gap-8">

@@ -35,37 +35,26 @@ export const ProductSlider: React.FC<ProductSliderProps> = ({ openCart, onViewAl
   const [isPaused, setIsPaused] = useState(false);
   const [addedProductId, setAddedProductId] = useState<string | null>(null);
 
-  // Rotation interval: 32 seconds (30-35 seconds as requested by user)
+  // Rotation interval: 32 seconds
   const ROTATION_INTERVAL_MS = 32000;
-  const [progress, setProgress] = useState(0);
 
+  // Efficient single timer for slide rotation (no 100ms continuous React state update lag)
   useEffect(() => {
     if (sliderItems.length <= 1 || isPaused) return;
 
-    const intervalStep = 100;
-    const progressStep = (intervalStep / ROTATION_INTERVAL_MS) * 100;
+    const timer = setTimeout(() => {
+      setCurrentIndex(current => (current + 1) % sliderItems.length);
+    }, ROTATION_INTERVAL_MS);
 
-    const timer = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          setCurrentIndex(current => (current + 1) % sliderItems.length);
-          return 0;
-        }
-        return prev + progressStep;
-      });
-    }, intervalStep);
-
-    return () => clearInterval(timer);
+    return () => clearTimeout(timer);
   }, [sliderItems.length, isPaused, currentIndex]);
 
   const handleNext = () => {
     setCurrentIndex(prev => (prev + 1) % sliderItems.length);
-    setProgress(0);
   };
 
   const handlePrev = () => {
     setCurrentIndex(prev => (prev - 1 + sliderItems.length) % sliderItems.length);
-    setProgress(0);
   };
 
   const handleAddToCart = (product: Product, e: React.MouseEvent) => {
@@ -157,11 +146,15 @@ export const ProductSlider: React.FC<ProductSliderProps> = ({ openCart, onViewAl
           </div>
         </div>
 
-        {/* Dynamic Timer Progress Bar */}
+        {/* Dynamic Timer Progress Bar (Hardware Accelerated CSS Animation) */}
         <div className={`w-full h-1 rounded-full mb-6 overflow-hidden ${isDark ? 'bg-neutral-800' : 'bg-slate-200'}`}>
           <div
-            className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full transition-all duration-100 ease-linear rounded-full"
-            style={{ width: `${progress}%` }}
+            key={`${currentIndex}-${isPaused}`}
+            className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full"
+            style={{
+              animation: isPaused ? 'none' : `progressFill ${ROTATION_INTERVAL_MS / 1000}s linear forwards`,
+              width: isPaused ? '100%' : undefined
+            }}
           />
         </div>
 
@@ -174,8 +167,12 @@ export const ProductSlider: React.FC<ProductSliderProps> = ({ openCart, onViewAl
           }`}
         >
           {/* Subtle Ambient Glow */}
-          <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -left-20 -top-20 w-80 h-80 bg-teal-600/10 rounded-full blur-3xl pointer-events-none" />
+          <div
+            className="absolute inset-0 pointer-events-none opacity-20"
+            style={{
+              background: 'radial-gradient(circle at 90% 90%, rgba(16,185,129,0.2) 0%, transparent 45%), radial-gradient(circle at 10% 10%, rgba(20,184,166,0.2) 0%, transparent 45%)'
+            }}
+          />
 
           {/* Product Big Photo Slider */}
           <div
@@ -353,7 +350,6 @@ export const ProductSlider: React.FC<ProductSliderProps> = ({ openCart, onViewAl
               type="button"
               onClick={() => {
                 setCurrentIndex(idx);
-                setProgress(0);
               }}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all shrink-0 ${
                 idx === currentIndex

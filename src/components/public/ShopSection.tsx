@@ -208,11 +208,8 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
         </div>
 
         {/* Product Cards Grid */}
-        <motion.div
-          layout
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-        >
-          <AnimatePresence mode="popLayout">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <AnimatePresence>
             {filteredProducts.map((product, index) => {
               const hasDiscount = product.discountPrice && product.discountPrice < product.price;
               const isOutOfStock = product.stock <= 0;
@@ -220,11 +217,10 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
               return (
                 <motion.div
                   key={product.id}
-                  layout
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.3), ease: [0.25, 1, 0.5, 1] }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
                   whileHover={{ y: -4 }}
                   id={`product-card-${product.id}`}
                   onClick={() => handleOpenProduct(product)}
@@ -336,7 +332,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
               );
             })}
           </AnimatePresence>
-        </motion.div>
+        </div>
       </div>
 
       {/* Floating Add Notification */}

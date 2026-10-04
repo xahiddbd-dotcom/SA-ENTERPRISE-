@@ -237,11 +237,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
         </div>
 
         {/* Services Grid with Visual Photography Cards */}
-        <motion.div
-          layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          <AnimatePresence mode="popLayout">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <AnimatePresence>
             {filteredServices.map((service, index) => {
               const category = categories.find(c => c.id === service.categoryId);
               const IconComponent = getCategoryIcon(category?.iconName || 'Layers');
@@ -249,11 +246,10 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
               return (
                 <motion.div
                   key={service.id}
-                  layout
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.3), ease: [0.25, 1, 0.5, 1] }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
                   whileHover={{ y: -5 }}
                   id={`service-card-${service.id}`}
                   className={`border rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group ${
@@ -385,7 +381,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
               );
             })}
           </AnimatePresence>
-        </motion.div>
+        </div>
       </div>
 
       {/* Service Application Modal */}

@@ -164,14 +164,19 @@ export const BackgroundLayer: React.FC = () => {
         }`}
       />
 
-      {/* 3. LIGHT MODE AMBIENT GEOMETRIC SHAPES & ORBS (Behind text and cards) */}
+      {/* 3. LIGHT MODE AMBIENT GEOMETRIC SHAPES & ORBS (Fast GPU-friendly radial gradients) */}
       {!isDark && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-32 -left-32 w-[550px] h-[550px] rounded-full bg-emerald-300/20 blur-[120px]" />
-          <div className="absolute top-1/4 -right-32 w-[600px] h-[600px] rounded-full bg-teal-200/25 blur-[140px]" />
-          <div className="absolute top-2/3 left-10 w-[500px] h-[500px] rounded-full bg-indigo-200/15 blur-[130px]" />
-          <div className="absolute -bottom-32 right-1/4 w-[650px] h-[650px] rounded-full bg-emerald-200/20 blur-[150px]" />
-        </div>
+        <div
+          className="absolute inset-0 overflow-hidden pointer-events-none gpu-layer"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 5% 5%, rgba(16, 185, 129, 0.08) 0%, transparent 45%),
+              radial-gradient(circle at 95% 30%, rgba(20, 184, 166, 0.08) 0%, transparent 50%),
+              radial-gradient(circle at 10% 75%, rgba(99, 102, 241, 0.05) 0%, transparent 45%),
+              radial-gradient(circle at 85% 95%, rgba(16, 185, 129, 0.07) 0%, transparent 50%)
+            `
+          }}
+        />
       )}
 
       {/* 4. SVG TEXTURE & GEOMETRIC PATTERN LAYER */}

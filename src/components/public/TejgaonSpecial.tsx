@@ -33,8 +33,12 @@ export const TejgaonSpecial: React.FC<TejgaonSpecialProps> = ({ onSelectService 
           }`}
         >
           {/* Subtle glowing elements */}
-          <div className="absolute -top-10 -right-10 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-10 -left-10 w-60 h-60 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div
+            className="absolute inset-0 pointer-events-none opacity-20"
+            style={{
+              background: 'radial-gradient(circle at 90% 10%, rgba(16,185,129,0.25) 0%, transparent 45%), radial-gradient(circle at 10% 90%, rgba(20,184,166,0.2) 0%, transparent 45%)'
+            }}
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
             {/* Left Col: Info & Highlight */}

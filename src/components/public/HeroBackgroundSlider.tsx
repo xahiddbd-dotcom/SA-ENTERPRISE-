@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -8,14 +8,7 @@ import {
   ChevronRight,
   Pause,
   Play,
-  Camera,
-  Printer,
-  FileText,
-  Package,
-  Layers,
-  Sparkles,
-  Image as ImageIcon,
-  SlidersHorizontal
+  Image as ImageIcon
 } from 'lucide-react';
 
 interface HeroBackgroundSliderProps {
@@ -34,7 +27,6 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({
   const { isDark } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [progress, setProgress] = useState(0);
   const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
 
   // Sync external trigger if provided
@@ -49,10 +41,10 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({
     onCloseWallpaperModalExternally?.();
   };
 
-  // Interval in seconds configured by admin or defaulted to 35 seconds (30-45s)
+  // Interval in seconds configured by admin or defaulted to 35 seconds
   const intervalSeconds = Math.max(15, Math.min(90, settings.heroIntervalSeconds || 35));
   const totalDurationMs = intervalSeconds * 1000;
-  // High-visibility wallpaper opacity (default 85% for deep photographic depth)
+  // High-visibility wallpaper opacity
   const backgroundOpacity = typeof settings.heroBackgroundOpacity === 'number' ? settings.heroBackgroundOpacity : (isDark ? 85 : 80);
 
   const slides = (heroSlides && heroSlides.length > 0) ? heroSlides : [
@@ -71,27 +63,17 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({
     }
   ];
 
-  // Reset progress & interval handling
+  // Efficient slide interval handling without continuous 100ms state updates (prevents UI lag)
   useEffect(() => {
     if (!isPlaying || slides.length <= 1) {
       return;
     }
 
-    setProgress(0);
-    const updateFreqMs = 100;
-    const progressStep = (updateFreqMs / totalDurationMs) * 100;
+    const timer = setTimeout(() => {
+      setCurrentIndex(curr => (curr + 1) % slides.length);
+    }, totalDurationMs);
 
-    const intervalTimer = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          setCurrentIndex(curr => (curr + 1) % slides.length);
-          return 0;
-        }
-        return prev + progressStep;
-      });
-    }, updateFreqMs);
-
-    return () => clearInterval(intervalTimer);
+    return () => clearTimeout(timer);
   }, [currentIndex, isPlaying, slides.length, totalDurationMs]);
 
   // Safely notify parent of slide changes
@@ -101,17 +83,14 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({
 
   const handleNext = () => {
     setCurrentIndex(prev => (prev + 1) % slides.length);
-    setProgress(0);
   };
 
   const handlePrev = () => {
     setCurrentIndex(prev => (prev - 1 + slides.length) % slides.length);
-    setProgress(0);
   };
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
-    setProgress(0);
   };
 
   const togglePlay = () => {
@@ -122,7 +101,7 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({
 
   return (
     <>
-      <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none z-0">
+      <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none z-0 gpu-layer">
         {/* Slides image container with vibrant wallpaper visibility */}
         <div className="relative w-full h-full">
           {slides.map((slide, index) => {
@@ -131,8 +110,8 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({
             return (
               <div
                 key={slide.id || index}
-                className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
-                  isActive ? 'z-10' : 'z-0 pointer-events-none'
+                className={`absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out ${
+                  isActive ? 'z-10 opacity-100' : 'z-0 opacity-0 pointer-events-none'
                 }`}
                 style={{
                   opacity: isActive ? backgroundOpacity / 100 : 0
@@ -142,10 +121,8 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({
                   src={slide.src}
                   alt={slide.titleEn || 'Saiful Enterprise background wallpaper'}
                   loading={index === 0 ? 'eager' : 'lazy'}
-                  className="w-full h-full object-cover transition-transform duration-[12000ms] ease-out"
-                  style={{
-                    transform: isActive ? 'scale(1.05)' : 'scale(1.0)'
-                  }}
+                  decoding="async"
+                  className="w-full h-full object-cover"
                 />
               </div>
             );
@@ -167,15 +144,14 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({
               : 'bg-radial from-transparent via-slate-900/5 to-slate-900/15'
           }`}
         />
-        <div
-          className={`absolute inset-0 z-20 backdrop-blur-[0.5px] ${
-            isDark ? 'bg-neutral-950/15' : 'bg-white/10'
-          }`}
-        />
 
-        {/* Ambient glowing orbs */}
-        <div className="absolute top-10 left-1/4 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl z-20 pointer-events-none animate-pulse" />
-        <div className="absolute bottom-10 right-1/4 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl z-20 pointer-events-none" />
+        {/* Lightweight ambient glow gradients (GPU-friendly, no expensive real-time filter blurs) */}
+        <div
+          className="absolute inset-0 z-20 pointer-events-none opacity-40"
+          style={{
+            background: 'radial-gradient(circle at 25% 15%, rgba(16,185,129,0.18) 0%, transparent 45%), radial-gradient(circle at 75% 85%, rgba(20,184,166,0.14) 0%, transparent 45%)'
+          }}
+        />
 
         {/* Interactive Controls Overlay Bar */}
         <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 z-30 container mx-auto px-4 pointer-events-auto flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -229,7 +205,7 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({
               type="button"
               onClick={handlePrev}
               aria-label="Previous Slide"
-              className={`p-1.5 rounded-lg backdrop-blur-md transition-all active:scale-95 shadow-sm ${
+              className={`p-1.5 rounded-lg backdrop-blur-md transition-all active:scale-95 shadow-sm cursor-pointer ${
                 isDark
                   ? 'bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-700/60 text-neutral-300 hover:text-white'
                   : 'bg-white/95 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900'
@@ -262,8 +238,12 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({
                   >
                     {active && (
                       <div
-                        className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-100"
-                        style={{ width: `${progress}%` }}
+                        key={`${currentIndex}-${isPlaying}`}
+                        className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full"
+                        style={{
+                          animation: isPlaying ? `progressFill ${intervalSeconds}s linear forwards` : 'none',
+                          width: isPlaying ? undefined : '100%'
+                        }}
                       />
                     )}
                   </button>
@@ -276,7 +256,7 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({
               type="button"
               onClick={handleNext}
               aria-label="Next Slide"
-              className={`p-1.5 rounded-lg backdrop-blur-md transition-all active:scale-95 shadow-sm ${
+              className={`p-1.5 rounded-lg backdrop-blur-md transition-all active:scale-95 shadow-sm cursor-pointer ${
                 isDark
                   ? 'bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-700/60 text-neutral-300 hover:text-white'
                   : 'bg-white/95 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900'
@@ -290,7 +270,7 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({
               type="button"
               onClick={togglePlay}
               aria-label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
-              className={`p-1.5 rounded-lg backdrop-blur-md transition-all active:scale-95 ml-1 shadow-sm ${
+              className={`p-1.5 rounded-lg backdrop-blur-md transition-all active:scale-95 ml-1 shadow-sm cursor-pointer ${
                 isDark
                   ? 'bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-700/60 text-neutral-300 hover:text-white'
                   : 'bg-white/95 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900'

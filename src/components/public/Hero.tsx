@@ -88,9 +88,13 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
               : 'bg-white/90 border-slate-200/90 shadow-xl shadow-slate-200/60'
           }`}
         >
-          {/* Subtle ambient decorative gradient shapes inside the card */}
-          <div className="absolute -top-24 -left-24 w-60 h-60 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 w-60 h-60 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
+          {/* Subtle ambient decorative gradient background inside the card */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-25"
+            style={{
+              background: 'radial-gradient(circle at 10% 10%, rgba(16,185,129,0.25) 0%, transparent 50%), radial-gradient(circle at 90% 90%, rgba(20,184,166,0.2) 0%, transparent 50%)'
+            }}
+          />
 
           <div className="relative z-10 space-y-4">
             <div className="space-y-2">
