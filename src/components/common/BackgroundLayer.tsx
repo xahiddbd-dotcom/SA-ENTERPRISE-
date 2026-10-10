@@ -141,26 +141,28 @@ export const BackgroundLayer: React.FC = () => {
         </div>
       )}
 
-      {/* 1. WALLPAPER LAYER */}
+      {/* 1. WALLPAPER LAYER (Hardware accelerated, no bg-fixed repaint jank) */}
       {shouldRenderWallpaper && (
         <div
-          className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${wallpaperFixed ? 'bg-fixed' : ''}`}
+          className="absolute inset-0 transition-opacity duration-700 ease-in-out pointer-events-none"
           style={{
             backgroundImage: `url(${activeWallpaperUrl})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             opacity: wallpaperOpacity,
-            filter: `blur(${wallpaperBlur}px)`
+            filter: wallpaperBlur > 0 ? `blur(${wallpaperBlur}px)` : undefined,
+            transform: 'translateZ(0)',
+            willChange: 'opacity'
           }}
         />
       )}
 
-      {/* 2. OVERLAY TINT FOR LEGIBILITY */}
+      {/* 2. OVERLAY TINT FOR LEGIBILITY (Ultra-fast solid alpha, zero backdrop-filter lag) */}
       <div
-        className={`absolute inset-0 transition-colors duration-500 ${
+        className={`absolute inset-0 transition-colors duration-500 pointer-events-none ${
           isDark
             ? (TINT_PRESETS[tint]?.bgClass || 'bg-neutral-950/85')
-            : 'bg-white/75 backdrop-blur-[0.5px]'
+            : 'bg-white/85'
         }`}
       />
 

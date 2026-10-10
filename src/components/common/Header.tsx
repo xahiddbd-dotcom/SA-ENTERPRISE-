@@ -24,7 +24,8 @@ import {
   Home,
   Briefcase,
   Info,
-  PhoneCall
+  PhoneCall,
+  MapPin
 } from 'lucide-react';
 import { StaffTTSControlWidget } from './StaffTTSControlWidget';
 import { CustomerAssistanceModal } from '../public/CustomerAssistanceModal';
@@ -83,18 +84,49 @@ export const Header: React.FC<HeaderProps> = ({
         }`}
       >
         <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20" />
-              <span className="text-emerald-500 font-semibold">
-                {language === 'bn' ? 'দোকান খোলা আছে' : 'Shop Open Now'}
+          <div className="flex items-center gap-3">
+            {/* Live Open/Closed Pulse Beacon Pill with Glow */}
+            <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs transition-all duration-300 border ${
+              settings.isShopOpen !== false
+                ? 'bg-emerald-500/10 dark:bg-emerald-950/40 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 shadow-xs shadow-emerald-500/10 hover:border-emerald-400'
+                : 'bg-rose-500/10 dark:bg-rose-950/40 border-rose-500/30 text-rose-700 dark:text-rose-400'
+            }`}>
+              <span className="relative flex h-2 w-2 shrink-0">
+                {settings.isShopOpen !== false && (
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                )}
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${
+                  settings.isShopOpen !== false ? 'bg-emerald-500 shadow-xs shadow-emerald-500/50' : 'bg-rose-500'
+                }`} />
               </span>
-              <span>• {language === 'bn' ? settings.openingHoursBn : settings.openingHours}</span>
-            </span>
-            <span className={isDark ? 'text-neutral-600' : 'text-slate-300'}>|</span>
-            <span className="truncate max-w-md">
-              📍 {language === 'bn' ? settings.addressBn : settings.address}
-            </span>
+              <span className="font-bold tracking-tight">
+                {settings.isShopOpen !== false
+                  ? (language === 'bn' ? 'দোকান খোলা আছে' : 'Shop Open Now')
+                  : (language === 'bn' ? 'দোকান সাময়িক বন্ধ' : 'Currently Closed')}
+              </span>
+              <span className="opacity-40">•</span>
+              <span className="text-[11px] opacity-80 font-mono">
+                {language === 'bn' ? settings.openingHoursBn : settings.openingHours}
+              </span>
+            </div>
+
+            <span className={isDark ? 'text-neutral-700' : 'text-slate-300'}>|</span>
+
+            {/* Interactive Location Badge with Pin Icon and Tooltip Glow */}
+            <a
+              href={settings.googleMapUrl || 'https://maps.google.com/?q=Tejgaon+College+Indira+Road+Dhaka'}
+              target="_blank"
+              rel="noreferrer"
+              title={language === 'bn' ? 'গুগল ম্যাপে আমাদের লোকেশন দেখুন' : 'View our location on Google Maps'}
+              className={`group flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs truncate max-w-sm transition-all duration-200 border border-transparent hover:border-slate-300 dark:hover:border-neutral-700 hover:bg-white/80 dark:hover:bg-neutral-800/60 ${
+                isDark ? 'text-neutral-300 hover:text-white' : 'text-slate-700 hover:text-slate-900'
+              }`}
+            >
+              <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0 group-hover:scale-110 group-hover:text-emerald-400 transition-transform" />
+              <span className="truncate">
+                {language === 'bn' ? settings.addressBn : settings.address}
+              </span>
+            </a>
           </div>
 
           <div className="flex items-center gap-4 font-medium">
@@ -144,7 +176,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className={`font-bold text-lg leading-tight tracking-tight flex items-center gap-1.5 ${
               isDark ? 'text-white' : 'text-slate-900'
             }`}>
-              <span>{language === 'bn' ? settings.businessNameBn : settings.businessName}</span>
+              <span className="matrix-glow-brand font-black tracking-tight drop-shadow-xs">{language === 'bn' ? settings.businessNameBn : settings.businessName}</span>
             </div>
             <div className={`text-[11px] truncate max-w-[200px] sm:max-w-xs ${
               isDark ? 'text-neutral-400' : 'text-slate-500 font-medium'

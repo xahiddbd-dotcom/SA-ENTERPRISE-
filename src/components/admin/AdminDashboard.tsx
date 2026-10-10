@@ -150,7 +150,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
     staff, addStaffMember, updateStaffMember, deleteStaffMember, toggleBlockStaff,
     customers, addCustomer, updateCustomer, deleteCustomer, toggleBlockCustomer,
     heroSlides,
-    settings, updateSettings
+    settings, updateSettings,
+    syncFullDatabaseToServer, isServerSyncing
   } = useData();
   const { currentUser, logout, isAdmin, isSuperAdmin } = useAuth();
 
@@ -272,6 +273,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
   const [settingsForm, setSettingsForm] = useState(settings);
   const [settingsSaved, setSettingsSaved] = useState(false);
 
+  // Synchronize settingsForm whenever settings updates in DataContext
+  useEffect(() => {
+    setSettingsForm(settings);
+  }, [settings]);
+
   // Local expense ledger storage for comprehensive accounting
   const [expenses, setExpenses] = useState<ExpenseItem[]>(() => {
     const saved = localStorage.getItem('se_admin_expenses');
@@ -352,11 +358,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
   const lowStockCount = products.filter(p => p.stock <= p.lowStockAlert).length;
   const totalPaperStockReams = products.filter(p => p.categoryId === 'paper').reduce((s, p) => s + p.stock, 0);
 
-  const handleSaveSettings = (e: React.FormEvent) => {
+  const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateSettings(settingsForm);
+    const updated = {
+      ...settingsForm,
+      noticeBanner: settingsForm.noticeBanner || (settingsForm as any).noticeEn || '',
+      noticeBannerBn: settingsForm.noticeBannerBn || (settingsForm as any).noticeBn || '',
+      noticeEn: settingsForm.noticeBanner || (settingsForm as any).noticeEn || '',
+      noticeBn: settingsForm.noticeBannerBn || (settingsForm as any).noticeBn || ''
+    };
+    updateSettings(updated);
+    await syncFullDatabaseToServer();
     setSettingsSaved(true);
-    setTimeout(() => setSettingsSaved(false), 3000);
+    setTimeout(() => setSettingsSaved(false), 3500);
   };
 
   const handleSaveService = (e: React.FormEvent) => {
@@ -913,43 +927,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
 
         {/* Main Content Workspace */}
         <main className="flex-1 p-4 sm:p-8 overflow-y-auto max-w-7xl">
-          {/* Active Section Direct Link Info Bar */}
-          <div className="mb-6 px-4 py-3 rounded-2xl bg-neutral-900/90 border border-neutral-800 flex flex-wrap items-center justify-between gap-3 text-xs shadow-lg">
-            <div className="flex items-center gap-2 flex-wrap min-w-0">
-              <div className="flex items-center gap-1.5 text-neutral-400 font-medium">
-                <Link2 className="w-4 h-4 text-amber-400 shrink-0" />
-                <span className="font-semibold text-neutral-300">
-                  {language === 'bn' ? 'বর্তমান সেকশনের সরাসরি লিঙ্ক:' : 'Direct Section URL:'}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 bg-neutral-950 px-3 py-1 rounded-xl border border-neutral-800">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                <code className="text-emerald-400 font-mono font-bold text-[11px] sm:text-xs select-all">
-                  {typeof window !== 'undefined' ? `${window.location.origin}/admin?section=${activeMenu}` : `/admin?section=${activeMenu}`}
-                </code>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={(e) => handleCopySectionLink(e, activeMenu)}
-                className="px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold flex items-center gap-1.5 border border-neutral-700 transition-all active:scale-95 shadow-sm"
-                title={language === 'bn' ? 'বর্তমান সেকশনের সরাসরি লিঙ্ক কপি করুন' : 'Copy Direct Link'}
-              >
-                {copiedLinkSection === activeMenu ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400 animate-in zoom-in" />
-                    <span className="text-emerald-400 font-bold">{language === 'bn' ? 'লিঙ্ক কপি হয়েছে!' : 'Link Copied!'}</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5 text-amber-400" />
-                    <span>{language === 'bn' ? 'এই সেকশনের লিঙ্ক কপি' : 'Copy Link'}</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
 
           {/* VIEW 1: OVERVIEW */}
           {activeMenu === 'overview' && (
@@ -2015,6 +1992,47 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
               )}
 
               <form onSubmit={handleSaveSettings} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 space-y-5">
+                {/* Quick Status Toggles: Shop Open & Notice Bar */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-neutral-950/80 border border-neutral-800">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <span className="block text-xs font-bold text-white">দোকানের লাইভ স্ট্যাটাস (Shop Status)</span>
+                      <span className="text-[11px] text-neutral-400">বর্তমানে দোকান খোলা নাকি সাময়িক বন্ধ</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSettingsForm({ ...settingsForm, isShopOpen: !settingsForm.isShopOpen })}
+                      className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-colors flex items-center gap-1.5 ${
+                        settingsForm.isShopOpen
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-rose-900 text-rose-200'
+                      }`}
+                    >
+                      <span className={`w-2 h-2 rounded-full ${settingsForm.isShopOpen ? 'bg-white animate-pulse' : 'bg-rose-400'}`} />
+                      <span>{settingsForm.isShopOpen ? 'খোলা (Open)' : 'বন্ধ (Closed)'}</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <span className="block text-xs font-bold text-white">টপ নোটিশ বার (Notice Banner)</span>
+                      <span className="text-[11px] text-neutral-400">ওয়েবসাইটের শীর্ষে জরুরি নোটিশ প্রদর্শন</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSettingsForm({ ...settingsForm, showNoticeBanner: !settingsForm.showNoticeBanner })}
+                      className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-colors flex items-center gap-1.5 ${
+                        settingsForm.showNoticeBanner
+                          ? 'bg-amber-600 text-white'
+                          : 'bg-neutral-800 text-neutral-400'
+                      }`}
+                    >
+                      <span>{settingsForm.showNoticeBanner ? 'সক্রিয় (Active)' : 'লুকানো (Hidden)'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Business Names */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-neutral-300 mb-1">Business Name (English)</label>
@@ -2036,6 +2054,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                   </div>
                 </div>
 
+                {/* Taglines */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Tagline (English)</label>
+                    <input
+                      type="text"
+                      value={settingsForm.tagline || ''}
+                      onChange={e => setSettingsForm({ ...settingsForm, tagline: e.target.value })}
+                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Tagline (Bangla)</label>
+                    <input
+                      type="text"
+                      value={settingsForm.taglineBn || ''}
+                      onChange={e => setSettingsForm({ ...settingsForm, taglineBn: e.target.value })}
+                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Hotlines & Contacts */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-neutral-300 mb-1">Primary Hotline</label>
@@ -2047,7 +2088,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">WhatsApp & bKash Number</label>
+                    <label className="block text-xs font-semibold text-neutral-300 mb-1">WhatsApp & bKash / Nagad</label>
                     <input
                       type="text"
                       value={settingsForm.whatsappNumber}
@@ -2056,7 +2097,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Inside Dhaka Delivery Fee (৳)</label>
+                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Official Email</label>
+                    <input
+                      type="email"
+                      value={settingsForm.email || ''}
+                      onChange={e => setSettingsForm({ ...settingsForm, email: e.target.value })}
+                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Delivery Charges */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Inside Dhaka Delivery (৳)</label>
                     <input
                       type="number"
                       value={settingsForm.deliveryChargeInsideDhaka}
@@ -2064,8 +2118,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                       className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
                     />
                   </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Outside Dhaka Delivery (৳)</label>
+                    <input
+                      type="number"
+                      value={settingsForm.deliveryChargeOutsideDhaka ?? 120}
+                      onChange={e => setSettingsForm({ ...settingsForm, deliveryChargeOutsideDhaka: Number(e.target.value) })}
+                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Min Order Amount (৳)</label>
+                    <input
+                      type="number"
+                      value={settingsForm.minOrderAmount ?? 100}
+                      onChange={e => setSettingsForm({ ...settingsForm, minOrderAmount: Number(e.target.value) })}
+                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                    />
+                  </div>
                 </div>
 
+                {/* Addresses */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-neutral-300 mb-1">Full Shop Address (English)</label>
@@ -2087,13 +2160,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                   </div>
                 </div>
 
+                {/* Top Notice Bar Banners */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-neutral-300 mb-1">Top Notice Bar Text (English)</label>
                     <textarea
                       rows={2}
-                      value={settingsForm.noticeEn}
-                      onChange={e => setSettingsForm({ ...settingsForm, noticeEn: e.target.value })}
+                      value={settingsForm.noticeBanner ?? (settingsForm as any).noticeEn ?? ''}
+                      onChange={e => setSettingsForm({ ...settingsForm, noticeBanner: e.target.value, noticeEn: e.target.value } as any)}
+                      placeholder="Special notice to display across top of site..."
                       className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
                     />
                   </div>
@@ -2101,20 +2176,48 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                     <label className="block text-xs font-semibold text-neutral-300 mb-1">Top Notice Bar Text (Bangla)</label>
                     <textarea
                       rows={2}
-                      value={settingsForm.noticeBn}
-                      onChange={e => setSettingsForm({ ...settingsForm, noticeBn: e.target.value })}
+                      value={settingsForm.noticeBannerBn ?? (settingsForm as any).noticeBn ?? ''}
+                      onChange={e => setSettingsForm({ ...settingsForm, noticeBannerBn: e.target.value, noticeBn: e.target.value } as any)}
+                      placeholder="ওয়েবসাইটের শীর্ষে প্রদর্শনের জন্য বিশেষ নোটিশ..."
                       className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
                     />
                   </div>
                 </div>
 
-                <div className="pt-2 flex justify-end">
+                {/* Opening Hours */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Opening Hours (English)</label>
+                    <input
+                      type="text"
+                      value={settingsForm.openingHours || ''}
+                      onChange={e => setSettingsForm({ ...settingsForm, openingHours: e.target.value })}
+                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Opening Hours (Bangla)</label>
+                    <input
+                      type="text"
+                      value={settingsForm.openingHoursBn || ''}
+                      onChange={e => setSettingsForm({ ...settingsForm, openingHoursBn: e.target.value })}
+                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2 flex items-center justify-between flex-wrap gap-3">
+                  <div className="flex items-center gap-2 text-xs text-neutral-400">
+                    <Database className="w-4 h-4 text-emerald-400" />
+                    <span>সকল পরিবর্তন স্বয়ংক্রিয়ভাবে ব্রাউজার ও সার্ভার ডিস্কে সংরক্ষিত থাকবে</span>
+                  </div>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950"
+                    disabled={isServerSyncing}
+                    className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
                   >
                     <Save className="w-4 h-4" />
-                    <span>Save All Settings</span>
+                    <span>{isServerSyncing ? 'সংরক্ষণ হচ্ছে...' : 'সেটিংস সম্পূর্ণ সংরক্ষণ করুন (Save All Settings)'}</span>
                   </button>
                 </div>
               </form>

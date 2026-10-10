@@ -86,7 +86,7 @@ export const StaffTTSControlWidget: React.FC<StaffTTSControlWidgetProps> = ({
     <>
       {/* Floating Widget (Rendered for staff/admin or when active) */}
       {variant === 'floating' && (
-        <div className="fixed bottom-5 left-5 z-40 flex items-center gap-2 animate-fade-in print:hidden">
+        <div className="fixed bottom-12 sm:bottom-14 left-5 z-40 flex items-center gap-2 animate-fade-in print:hidden">
           <div className="relative group">
             <button
               onClick={() => {

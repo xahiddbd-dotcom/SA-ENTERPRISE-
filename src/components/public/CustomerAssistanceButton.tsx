@@ -9,7 +9,7 @@ export const CustomerAssistanceButton: React.FC = () => {
 
   return (
     <>
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 print:hidden">
+      <div className="fixed bottom-12 right-4 sm:bottom-14 sm:right-6 z-40 print:hidden">
         <button
           id="customer-assistance-floating-btn"
           onClick={() => setIsOpen(true)}

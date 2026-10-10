@@ -13,11 +13,11 @@ export const NoticeBar: React.FC = () => {
   return (
     <div
       id="notice-banner"
-      className="bg-emerald-50 dark:bg-neutral-900 border-b border-emerald-200 dark:border-neutral-800 text-xs py-2 px-4 text-emerald-950 dark:text-neutral-200 flex items-center justify-between transition-colors shadow-2xs"
+      className="fixed bottom-0 inset-x-0 z-40 bg-emerald-50 dark:bg-neutral-900 border-t border-emerald-200 dark:border-neutral-800 text-xs py-2 px-4 text-emerald-950 dark:text-neutral-200 flex items-center justify-between transition-all shadow-lg backdrop-blur-xs"
     >
-      <div className="container mx-auto flex items-center justify-center gap-2 text-center font-medium overflow-hidden">
-        <Megaphone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-        <span className="truncate text-xs font-semibold text-emerald-900 dark:text-neutral-200">
+      <div className="container mx-auto flex items-center gap-2.5 overflow-hidden min-w-0 pr-2">
+        <Megaphone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 animate-pulse" />
+        <span className="inline-block whitespace-nowrap text-xs font-semibold text-emerald-900 dark:text-neutral-200 animate-marquee-slow cursor-default">
           {language === 'bn' ? settings.noticeBannerBn : settings.noticeBanner}
         </span>
       </div>

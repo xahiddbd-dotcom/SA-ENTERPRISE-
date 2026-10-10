@@ -471,26 +471,48 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : initialAssistanceRequests;
   });
 
-  // Server Synchronization Engine (সার্ভার ডাটাবেজ ব্যাকআপ ও সিঙ্ক)
+  // Server Synchronization Engine (সার্ভার ডাটাবেজ ব্যাকআপ ও স্থায়ী সংরক্ষণ)
   const [isServerSyncing, setIsServerSyncing] = useState<boolean>(false);
   const patchTimeoutRef = useRef<Record<string, any>>({});
+  const isHydratedRef = useRef<boolean>(false);
 
-  const syncKeyToServer = (key: string, value: any) => {
+  // Synchronously record modification timestamp in localStorage
+  const recordLocalModification = () => {
+    try {
+      localStorage.setItem('se_last_modified_timestamp', String(Date.now()));
+    } catch (e) {
+      // Storage quota or private browsing fallback
+    }
+  };
+
+  // Immediate or debounced sync to server with keepalive for guaranteed delivery
+  const syncKeyToServer = (key: string, value: any, immediate = false) => {
+    recordLocalModification();
     if (patchTimeoutRef.current[key]) {
       clearTimeout(patchTimeoutRef.current[key]);
+      delete patchTimeoutRef.current[key];
     }
-    patchTimeoutRef.current[key] = setTimeout(() => {
+
+    const executePatch = () => {
       fetch('/api/database/patch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [key]: value })
+        body: JSON.stringify({ [key]: value }),
+        keepalive: true
       }).catch(err => console.warn(`Auto-sync error for ${key}:`, err));
-    }, 400);
+    };
+
+    if (immediate) {
+      executePatch();
+    } else {
+      patchTimeoutRef.current[key] = setTimeout(executePatch, 150);
+    }
   };
 
   const syncFullDatabaseToServer = async (): Promise<boolean> => {
     try {
       setIsServerSyncing(true);
+      recordLocalModification();
       const fullDb = {
         settings,
         categories,
@@ -516,12 +538,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         stampConfigs,
         stampSales,
         stampPurchases,
+        assistanceRequests,
+        lastUpdatedAt: new Date().toISOString(),
         lastSyncedAt: new Date().toISOString()
       };
       const res = await fetch('/api/database', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(fullDb)
+        body: JSON.stringify(fullDb),
+        keepalive: true
       });
       setIsServerSyncing(false);
       return res.ok;
@@ -532,7 +557,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Initial load from Server Disk Database
+  // Flush any pending patches before page closes or reloads
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      Object.keys(patchTimeoutRef.current).forEach(key => {
+        clearTimeout(patchTimeoutRef.current[key]);
+      });
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  // Initial load & smart reconciliation from Server Disk Database
   useEffect(() => {
     let active = true;
     setIsServerSyncing(true);
@@ -541,38 +577,58 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .then(result => {
         if (!active || !result) {
           setIsServerSyncing(false);
+          isHydratedRef.current = true;
           return;
         }
+
         if (result.initialized && result.data) {
           const d = result.data;
-          if (d.settings) setSettings(d.settings);
-          if (d.categories) setCategories(d.categories);
-          if (d.services) setServices(d.services);
-          if (d.products) setProducts(d.products);
-          if (d.staff) setStaff(d.staff);
-          if (d.customers) setCustomers(d.customers);
-          if (d.orders) setOrders(d.orders);
-          if (d.applications) setApplications(d.applications);
-          if (d.expenses) setExpenses(d.expenses);
-          if (d.posSales) setPOSSales(d.posSales);
-          if (d.heroSlides) setHeroSlides(d.heroSlides);
-          if (d.seoSettings) setSeoSettings(d.seoSettings);
-          if (d.dailyCounterSales) setDailyCounterSales(d.dailyCounterSales);
-          if (d.storeExpenses) setStoreExpenses(d.storeExpenses);
-          if (d.operatorLedgers) setOperatorLedgers(d.operatorLedgers);
-          if (d.cashReconciliations) setCashReconciliations(d.cashReconciliations);
-          if (d.ledgerSettings) setLedgerSettings(d.ledgerSettings);
-          if (d.stampConfigs) setStampConfigs(d.stampConfigs);
-          if (d.stampSales) setStampSales(d.stampSales);
-          if (d.stampPurchases) setStampPurchases(d.stampPurchases);
+          const localTimestamp = Number(localStorage.getItem('se_last_modified_timestamp') || 0);
+          const serverDateStr = d.lastUpdatedAt || d.lastSyncedAt;
+          const serverTimestamp = serverDateStr ? new Date(serverDateStr).getTime() : 0;
+
+          // If client has made recent changes that haven't been written to server yet,
+          // preserve client modifications and push to server disk!
+          if (localTimestamp > serverTimestamp && localTimestamp - serverTimestamp > 1000) {
+            console.log('Local client changes are newer than disk database, syncing client state to server');
+            syncFullDatabaseToServer();
+          } else {
+            // Server database is authoritative; hydrate state safely without erasing missing properties
+            if (d.settings) {
+              setSettings(prev => ({ ...initialSettings, ...prev, ...d.settings }));
+            }
+            if (d.categories && Array.isArray(d.categories)) setCategories(d.categories);
+            if (d.services && Array.isArray(d.services)) setServices(d.services);
+            if (d.products && Array.isArray(d.products)) setProducts(d.products);
+            if (d.gsmOptions && Array.isArray(d.gsmOptions)) setGsmOptions(d.gsmOptions);
+            if (d.staff && Array.isArray(d.staff)) setStaff(d.staff);
+            if (d.customers && Array.isArray(d.customers)) setCustomers(d.customers);
+            if (d.orders && Array.isArray(d.orders)) setOrders(d.orders);
+            if (d.applications && Array.isArray(d.applications)) setApplications(d.applications);
+            if (d.expenses && Array.isArray(d.expenses)) setExpenses(d.expenses);
+            if (d.posSales && Array.isArray(d.posSales)) setPOSSales(d.posSales);
+            if (d.heroSlides && Array.isArray(d.heroSlides)) setHeroSlides(d.heroSlides);
+            if (d.seoSettings) setSeoSettings(d.seoSettings);
+            if (d.dailyCounterSales && Array.isArray(d.dailyCounterSales)) setDailyCounterSales(d.dailyCounterSales);
+            if (d.storeExpenses && Array.isArray(d.storeExpenses)) setStoreExpenses(d.storeExpenses);
+            if (d.operatorLedgers && Array.isArray(d.operatorLedgers)) setOperatorLedgers(d.operatorLedgers);
+            if (d.cashReconciliations && Array.isArray(d.cashReconciliations)) setCashReconciliations(d.cashReconciliations);
+            if (d.ledgerSettings) setLedgerSettings(d.ledgerSettings);
+            if (d.stampConfigs && Array.isArray(d.stampConfigs)) setStampConfigs(d.stampConfigs);
+            if (d.stampSales && Array.isArray(d.stampSales)) setStampSales(d.stampSales);
+            if (d.stampPurchases && Array.isArray(d.stampPurchases)) setStampPurchases(d.stampPurchases);
+            if (d.assistanceRequests && Array.isArray(d.assistanceRequests)) setAssistanceRequests(d.assistanceRequests);
+          }
         } else {
           // Initialize server disk database on first launch
           syncFullDatabaseToServer();
         }
+        isHydratedRef.current = true;
         setIsServerSyncing(false);
       })
       .catch(err => {
         console.warn('Fallback to local browser storage:', err);
+        isHydratedRef.current = true;
         setIsServerSyncing(false);
       });
 

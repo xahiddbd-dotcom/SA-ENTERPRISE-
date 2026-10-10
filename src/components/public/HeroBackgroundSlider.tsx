@@ -163,7 +163,7 @@ export const HeroBackgroundSlider: React.FC<HeroBackgroundSliderProps> = ({
                 : 'bg-white/95 border border-slate-200 text-slate-800 shadow-slate-300/40'
             }`}
           >
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-xs" />
             <span className={`font-semibold ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
               {language === 'bn' ? currentSlide.tagBn : currentSlide.tagEn}
             </span>
