@@ -29,7 +29,8 @@ import {
   StampSaleRecord,
   StampStockPurchase,
   CustomerAssistanceRequest,
-  AssistanceRequestStatus
+  AssistanceRequestStatus,
+  StaffAttendanceRecord
 } from '../types';
 import {
   initialCategories,
@@ -37,6 +38,7 @@ import {
   initialGsmOptions,
   initialProducts,
   initialStaff,
+  initialStaffAttendance,
   initialCustomers,
   initialOrders,
   initialApplications,
@@ -123,6 +125,12 @@ interface DataContextType {
   updateStaffMember: (id: string, updates: Partial<User>) => void;
   deleteStaffMember: (id: string) => void;
   toggleBlockStaff: (id: string, reason?: string) => void;
+
+  // Staff Attendance & QR Check-In / Check-Out
+  staffAttendance: StaffAttendanceRecord[];
+  checkInStaff: (staffIdOrEmployeeId: string, counterId?: string, notes?: string) => { success: boolean; record?: StaffAttendanceRecord; message: string; messageBn: string; staff?: User };
+  checkOutStaff: (staffIdOrEmployeeId: string, notes?: string) => { success: boolean; record?: StaffAttendanceRecord; message: string; messageBn: string; staff?: User };
+  getActiveCheckedInStaff: () => StaffAttendanceRecord[];
 
   // Customers Management
   customers: User[];
@@ -303,6 +311,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     return initialStaff;
   });
+
+  const [staffAttendance, setStaffAttendance] = useState<StaffAttendanceRecord[]>(() => {
+    const saved = localStorage.getItem('se_staff_attendance');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {
+        console.error('Failed to parse staff attendance', e);
+      }
+    }
+    return initialStaffAttendance;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('se_staff_attendance', JSON.stringify(staffAttendance));
+  }, [staffAttendance]);
 
   const [customers, setCustomers] = useState<User[]>(() => {
     const saved = localStorage.getItem('se_customers');
@@ -1215,6 +1240,151 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return s;
     }));
+  };
+
+  // Staff Attendance QR Check-In & Check-Out
+  const checkInStaff = (staffIdOrEmployeeId: string, counterId: string = 'POS-Counter-1', notes?: string) => {
+    const trimmed = (staffIdOrEmployeeId || '').trim();
+    const matchedStaff = staff.find(
+      s => s.id === trimmed ||
+           (s.employeeId && s.employeeId.toUpperCase() === trimmed.toUpperCase()) ||
+           (s.phone && s.phone === trimmed)
+    );
+
+    if (!matchedStaff) {
+      return {
+        success: false,
+        message: 'Staff member not recognized. Please verify Employee QR Pass.',
+        messageBn: 'স্টাফ সদস্যকে শনাক্ত করা যায়নি। কিউআর পাস সঠিক কিনা যাচাই করুন।'
+      };
+    }
+
+    if (matchedStaff.isBlocked) {
+      return {
+        success: false,
+        staff: matchedStaff,
+        message: `Access Denied: ${matchedStaff.name} is currently suspended.`,
+        messageBn: `অনুমতি নেই: ${matchedStaff.nameBn || matchedStaff.name}-এর অ্যাকাউন্ট সাময়িক স্থগিত রয়েছে।`
+      };
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false });
+
+    // Check if staff is already checked in today and hasn't checked out
+    const alreadyCheckedIn = staffAttendance.find(
+      a => a.staffId === matchedStaff.id && a.date === todayStr && a.status === 'checked_in'
+    );
+
+    if (alreadyCheckedIn) {
+      return {
+        success: false,
+        staff: matchedStaff,
+        record: alreadyCheckedIn,
+        message: `${matchedStaff.name} is already checked in at ${alreadyCheckedIn.checkInTime}.`,
+        messageBn: `${matchedStaff.nameBn || matchedStaff.name} ইতোমধ্যে ${alreadyCheckedIn.checkInTime} এ চেক-ইন করেছেন।`
+      };
+    }
+
+    const newRecord: StaffAttendanceRecord = {
+      id: `att_${Date.now()}`,
+      staffId: matchedStaff.id,
+      staffName: matchedStaff.name,
+      staffNameBn: matchedStaff.nameBn,
+      employeeId: matchedStaff.employeeId || matchedStaff.id,
+      avatar: matchedStaff.avatar,
+      designation: matchedStaff.designation || 'Staff Operator',
+      shift: matchedStaff.shift || 'General Shift',
+      date: todayStr,
+      checkInTime: nowTime,
+      status: 'checked_in',
+      counterId,
+      notes: notes || `QR Check-In at ${counterId}`,
+      createdAt: new Date().toISOString()
+    };
+
+    setStaffAttendance(prev => [newRecord, ...prev]);
+    logActivity('Staff Check-In', `${matchedStaff.name} (${matchedStaff.employeeId}) checked in at ${counterId} at ${nowTime}`);
+
+    return {
+      success: true,
+      staff: matchedStaff,
+      record: newRecord,
+      message: `Welcome, ${matchedStaff.name}! Checked in at ${nowTime}.`,
+      messageBn: `স্বাগতম, ${matchedStaff.nameBn || matchedStaff.name}! সময় ${nowTime}-এ চেক-ইন সম্পন্ন হয়েছে।`
+    };
+  };
+
+  const checkOutStaff = (staffIdOrEmployeeId: string, notes?: string) => {
+    const trimmed = (staffIdOrEmployeeId || '').trim();
+    const matchedStaff = staff.find(
+      s => s.id === trimmed ||
+           (s.employeeId && s.employeeId.toUpperCase() === trimmed.toUpperCase()) ||
+           (s.phone && s.phone === trimmed)
+    );
+
+    if (!matchedStaff) {
+      return {
+        success: false,
+        message: 'Staff member not recognized. Please verify Employee QR Pass.',
+        messageBn: 'স্টাফ সদস্যকে শনাক্ত করা যায়নি। কিউআর পাস সঠিক কিনা যাচাই করুন।'
+      };
+    }
+
+    const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false });
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // Find latest checked_in record for this staff
+    const activeIndex = staffAttendance.findIndex(
+      a => a.staffId === matchedStaff.id && a.status === 'checked_in'
+    );
+
+    if (activeIndex === -1) {
+      return {
+        success: false,
+        staff: matchedStaff,
+        message: `No active check-in record found for ${matchedStaff.name}. Please check in first.`,
+        messageBn: `${matchedStaff.nameBn || matchedStaff.name}-এর কোনো সক্রিয় চেক-ইন নেই। আগে চেক-ইন করুন।`
+      };
+    }
+
+    const target = staffAttendance[activeIndex];
+    let durationMins = 0;
+    try {
+      const [inH, inM] = target.checkInTime.split(':').map(Number);
+      const [outH, outM] = nowTime.split(':').map(Number);
+      durationMins = Math.max(1, (outH * 60 + outM) - (inH * 60 + inM));
+    } catch {
+      durationMins = 60;
+    }
+
+    const updatedRecord: StaffAttendanceRecord = {
+      ...target,
+      checkOutTime: nowTime,
+      status: 'checked_out',
+      durationMinutes: durationMins,
+      notes: notes ? `${target.notes || ''} | ${notes}` : target.notes
+    };
+
+    setStaffAttendance(prev => {
+      const copy = [...prev];
+      copy[activeIndex] = updatedRecord;
+      return copy;
+    });
+
+    logActivity('Staff Check-Out', `${matchedStaff.name} checked out at ${nowTime} (Duty: ${Math.floor(durationMins / 60)}h ${durationMins % 60}m)`);
+
+    return {
+      success: true,
+      staff: matchedStaff,
+      record: updatedRecord,
+      message: `Shift ended for ${matchedStaff.name} at ${nowTime} (Duty: ${Math.floor(durationMins / 60)}h ${durationMins % 60}m).`,
+      messageBn: `${matchedStaff.nameBn || matchedStaff.name}-এর ডিউটি সমাপ্তি: ${nowTime} (মোট সময়: ${Math.floor(durationMins / 60)} ঘণ্টা ${durationMins % 60} মিনিট)।`
+    };
+  };
+
+  const getActiveCheckedInStaff = () => {
+    return staffAttendance.filter(a => a.status === 'checked_in');
   };
 
   // Customers Management CRUD
@@ -2214,6 +2384,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateStaffMember,
         deleteStaffMember,
         toggleBlockStaff,
+        staffAttendance,
+        checkInStaff,
+        checkOutStaff,
+        getActiveCheckedInStaff,
         customers,
         addCustomer,
         updateCustomer,

@@ -72,7 +72,18 @@ import {
   Copy,
   Check,
   Sun,
-  Moon
+  Moon,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  MapPin,
+  Sliders,
+  Store,
+  Lock,
+  Building2,
+  QrCode,
+  Volume2,
+  HelpCircle
 } from 'lucide-react';
 import {
   buildAdminSectionUrl,
@@ -273,6 +284,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
   const [appSearch, setAppSearch] = useState('');
   const [appStatusFilter, setAppStatusFilter] = useState<string>('all');
   const [orderSearch, setOrderSearch] = useState('');
+
+  // Sidebar menu search query and category filter
+  const [sidebarSearch, setSidebarSearch] = useState('');
+  const [sidebarCategoryFilter, setSidebarCategoryFilter] = useState<string>('all');
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
+
+  const toggleCategoryCollapse = (catId: string) => {
+    setCollapsedCategories(prev => ({ ...prev, [catId]: !prev[catId] }));
+  };
+
+  const expandAllCategories = () => {
+    setCollapsedCategories({});
+  };
+
+  // Settings sub-tab state
+  type SettingsTabKey = 'profile' | 'contacts' | 'delivery' | 'notice' | 'themes' | 'hardware' | 'system';
+  const [settingsSubTab, setSettingsSubTab] = useState<SettingsTabKey>('profile');
 
   // Settings form local state
   const [settingsForm, setSettingsForm] = useState(settings);
@@ -512,177 +540,278 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
       o.customerPhone.includes(orderSearch);
   });
 
-  const navigationMenuItems = useMemo(() => [
+  // Professionally Organized Navigation Categories
+  const navigationCategories = useMemo(() => [
     {
-      id: 'overview' as AdminMenuKey,
-      labelBn: 'ড্যাশবোর্ড ওভারভিউ',
-      labelEn: 'Dashboard Overview',
-      icon: LayoutDashboard,
-      categoryBn: 'প্রধান ড্যাশবোর্ড',
-      descBn: 'সার্ভিস, পেপার স্টক, গ্রাহক আবেদন ও ক্যাশ কাউন্টারের লাইভ পরিসংখ্যান'
-    },
-    {
-      id: 'ledger' as AdminMenuKey,
-      labelBn: 'দৈনিক হিসাব খাতা',
-      labelEn: 'Daily Shop Ledger',
-      icon: BookOpen,
-      badge: 'Special',
-      badgeColor: 'bg-amber-500 text-black font-bold',
-      categoryBn: 'ক্যাশ খাতা',
-      descBn: 'দোকানের ক্যাশ ড্রয়ার, বিক্রি ও খরচের পূর্ণাঙ্গ খতিয়ান'
-    },
-    {
-      id: 'stamps' as AdminMenuKey,
-      labelBn: 'স্ট্যাম্প ও কার্টিজ রেজিস্টার',
-      labelEn: 'Stamp Register',
-      icon: FileText,
-      badge: '৫০৳/১০০৳',
-      badgeColor: 'bg-amber-400 text-black font-bold',
-      categoryBn: 'সরকারি রেজিস্টার',
-      descBn: '৫০৳/১০০৳ স্ট্যাম্প, কার্টিজ পেপার সরকারি স্টক ও লাভ খাতা'
-    },
-    {
-      id: 'analytics' as AdminMenuKey,
-      labelBn: 'আয়-ব্যয় ও পারফরম্যান্স',
-      labelEn: 'Revenue & Analytics',
-      icon: PieChart,
-      badge: 'Live',
-      badgeColor: 'bg-emerald-950 text-emerald-300 border border-emerald-500/40',
-      categoryBn: 'রিপোর্ট',
-      descBn: 'দৈনিক, সাপ্তাহিক ও মাসিক লাভ-লোকসান চার্ট ও ট্রেন্ড'
-    },
-    {
-      id: 'cashmemo' as AdminMenuKey,
-      labelBn: 'ডিজিটাল ক্যাশ মেমো',
-      labelEn: 'Digital Cash Memo',
-      icon: Receipt,
-      badge: '3.5x5',
-      badgeColor: 'bg-teal-950 text-teal-300 border border-teal-500/40',
-      categoryBn: 'ইনভয়েস',
-      descBn: 'সাইফুল এন্টারপ্রাইজ প্রিন্টেবল ভাউচার ও রসিদ তৈরি'
-    },
-    {
-      id: 'services' as AdminMenuKey,
-      labelBn: 'অনলাইন সেবা CMS',
-      labelEn: 'Services Manager',
-      icon: Layers,
-      badge: services.length,
-      categoryBn: 'সার্ভিস',
-      descBn: 'সরকারি ও প্রতিরক্ষা আবেদন এবং কলেজ ভর্তি সেবার মূল্য তালিকা'
-    },
-    {
-      id: 'products' as AdminMenuKey,
-      labelBn: 'কাগজ ও স্টক',
-      labelEn: 'Paper & Stock',
-      icon: Package,
-      badge: lowStockCount > 0 ? `${lowStockCount} Low` : `${products.length}`,
-      badgeColor: lowStockCount > 0 ? 'bg-rose-950 text-rose-300 border border-rose-500/40' : undefined,
-      categoryBn: 'ইনভেন্টরি',
-      descBn: 'কাগজ, কার্টিজ, টোনার ও স্টেশনারি রি-অর্ডার ইনভেন্টরি'
-    },
-    {
-      id: 'applications' as AdminMenuKey,
-      labelBn: 'গ্রাহক আবেদনসমূহ',
-      labelEn: 'Online Applications',
-      icon: FileCheck,
-      badge: pendingAppsCount > 0 ? `${pendingAppsCount} New` : `${applications.length}`,
-      badgeColor: pendingAppsCount > 0 ? 'bg-amber-950 text-amber-300 border border-amber-500/40' : undefined,
-      categoryBn: 'আবেদন',
-      descBn: 'গ্রাহকদের জমা দেওয়া পুলিশ ক্লিয়ারেন্স, ভর্তি ও চাকরির ফর্ম'
-    },
-    {
-      id: 'orders' as AdminMenuKey,
-      labelBn: 'দোকান অর্ডার',
-      labelEn: 'E-Commerce Orders',
-      icon: ShoppingBag,
-      badge: orders.length,
-      categoryBn: 'অর্ডার',
-      descBn: 'অনলাইন ও অফলাইন প্রিন্টিং কাজের অর্ডার ট্র্যাকিং'
-    },
-    {
-      id: 'pos' as AdminMenuKey,
-      labelBn: 'পস ক্যাশিয়ার কাউন্টার',
-      labelEn: 'POS Cashier Terminal',
+      id: 'cat_sales_ledger',
+      nameEn: 'Sales & Daily Cash Registers',
+      nameBn: 'ক্যাশ কাউন্টার ও হিসাব খাতা',
       icon: Calculator,
-      categoryBn: 'কাউন্টার',
-      descBn: 'ক্যাশ কাউন্টারে দ্রুত বারকোড ও ক্যাশ মেমো বিলিং'
+      color: 'emerald',
+      items: [
+        {
+          id: 'pos' as AdminMenuKey,
+          labelBn: 'পস ক্যাশিয়ার কাউন্টার',
+          labelEn: 'POS Cashier Terminal',
+          icon: Calculator,
+          badge: 'Counter',
+          badgeColor: 'bg-emerald-500 text-black font-bold',
+          categoryBn: 'কাউন্টার',
+          descBn: 'ক্যাশ কাউন্টারে দ্রুত বারকোড ও ক্যাশ মেমো বিলিং'
+        },
+        {
+          id: 'ledger' as AdminMenuKey,
+          labelBn: 'দৈনিক হিসাব খাতা',
+          labelEn: 'Daily Shop Ledger',
+          icon: BookOpen,
+          badge: 'Special',
+          badgeColor: 'bg-amber-500 text-black font-bold',
+          categoryBn: 'ক্যাশ খাতা',
+          descBn: 'দোকানের ক্যাশ ড্রয়ার, বিক্রি ও খরচের পূর্ণাঙ্গ খতিয়ান'
+        },
+        {
+          id: 'cashmemo' as AdminMenuKey,
+          labelBn: 'ডিজিটাল ক্যাশ মেমো',
+          labelEn: 'Digital Cash Memo',
+          icon: Receipt,
+          badge: '3.5x5',
+          badgeColor: 'bg-teal-950 text-teal-300 border border-teal-500/40',
+          categoryBn: 'ইনভয়েস',
+          descBn: 'সাইফুল এন্টারপ্রাইজ প্রিন্টেবল ভাউচার ও রসিদ তৈরি'
+        },
+        {
+          id: 'stamps' as AdminMenuKey,
+          labelBn: 'স্ট্যাম্প ও কার্টিজ রেজিস্টার',
+          labelEn: 'Stamp Register',
+          icon: FileText,
+          badge: '৫০৳/১০০৳',
+          badgeColor: 'bg-amber-400 text-black font-bold',
+          categoryBn: 'সরকারি রেজিস্টার',
+          descBn: '৫০৳/১০০৳ স্ট্যাম্প, কার্টিজ পেপার সরকারি স্টক ও লাভ খাতা'
+        },
+        {
+          id: 'finance' as AdminMenuKey,
+          labelBn: 'দোকান ব্যয় ও খরচ খাতা',
+          labelEn: 'Store Expenses & Accounts',
+          icon: DollarSign,
+          categoryBn: 'হিসাব',
+          descBn: 'দোকান ভাড়া, বিদ্যুৎ বিল, নাস্তা ও দৈনন্দিন খরচের খাতা'
+        }
+      ]
     },
     {
-      id: 'finance' as AdminMenuKey,
-      labelBn: 'হিসাব ও ব্যয় খাতা',
-      labelEn: 'Finance & Accounts',
-      icon: DollarSign,
-      categoryBn: 'হিসাব',
-      descBn: 'দোকান ভাড়া, বিদ্যুৎ বিল, নাস্তা ও দৈনন্দিন খরচের খাতা'
+      id: 'cat_catalog',
+      nameEn: 'Catalog & Inventory Management',
+      nameBn: 'ক্যাটালগ ও পেপার স্টক',
+      icon: Package,
+      color: 'teal',
+      items: [
+        {
+          id: 'products' as AdminMenuKey,
+          labelBn: 'কাগজ ও ইনভেন্টরি স্টক',
+          labelEn: 'Paper & Stock Inventory',
+          icon: Package,
+          badge: lowStockCount > 0 ? `${lowStockCount} Low` : `${products.length}`,
+          badgeColor: lowStockCount > 0 ? 'bg-rose-950 text-rose-300 border border-rose-500/40' : undefined,
+          categoryBn: 'ইনভেন্টরি',
+          descBn: 'কাগজ, কার্টিজ, টোনার ও স্টেশনারি রি-অর্ডার ইনভেন্টরি'
+        },
+        {
+          id: 'services' as AdminMenuKey,
+          labelBn: 'অনলাইন সেবা CMS',
+          labelEn: 'Services Catalog',
+          icon: Layers,
+          badge: services.length,
+          categoryBn: 'সার্ভিস',
+          descBn: 'সরকারি ও প্রতিরক্ষা আবেদন এবং কলেজ ভর্তি সেবার মূল্য তালিকা'
+        }
+      ]
     },
     {
-      id: 'customers' as AdminMenuKey,
-      labelBn: 'কাস্টমার একাউন্টস',
-      labelEn: 'Customer Database',
-      icon: UserCheck,
-      badge: customers.length,
-      categoryBn: 'গ্রাহক',
-      descBn: 'নিয়মিত গ্রাহকদের নাম, ফোন নম্বর ও বাকি খাতা'
+      id: 'cat_orders_crm',
+      nameEn: 'Orders & Customer CRM',
+      nameBn: 'অর্ডার ও গ্রাহক ব্যবস্থাপনা',
+      icon: FileCheck,
+      color: 'indigo',
+      items: [
+        {
+          id: 'applications' as AdminMenuKey,
+          labelBn: 'গ্রাহক আবেদনসমূহ',
+          labelEn: 'Online Applications',
+          icon: FileCheck,
+          badge: pendingAppsCount > 0 ? `${pendingAppsCount} New` : `${applications.length}`,
+          badgeColor: pendingAppsCount > 0 ? 'bg-amber-950 text-amber-300 border border-amber-500/40' : undefined,
+          categoryBn: 'আবেদন',
+          descBn: 'গ্রাহকদের জমা দেওয়া পুলিশ ক্লিয়ারেন্স, ভর্তি ও চাকরির ফর্ম'
+        },
+        {
+          id: 'orders' as AdminMenuKey,
+          labelBn: 'দোকান ই-কমার্স অর্ডার',
+          labelEn: 'E-Commerce Orders',
+          icon: ShoppingBag,
+          badge: orders.length,
+          categoryBn: 'অর্ডার',
+          descBn: 'অনলাইন ও অফলাইন প্রিন্টিং কাজের অর্ডার ট্র্যাকিং'
+        },
+        {
+          id: 'customers' as AdminMenuKey,
+          labelBn: 'কাস্টমার ডাটাবেজ ও বাকি খাতা',
+          labelEn: 'Customer Database & CRM',
+          icon: UserCheck,
+          badge: customers.length,
+          categoryBn: 'গ্রাহক',
+          descBn: 'নিয়মিত গ্রাহকদের নাম, ফোন নম্বর ও বাকি খাতা'
+        }
+      ]
     },
     {
-      id: 'staff' as AdminMenuKey,
-      labelBn: 'স্টাফ ও অপারেটর',
-      labelEn: 'Staff & Roles',
+      id: 'cat_dashboard',
+      nameEn: 'Dashboard & Intelligence',
+      nameBn: 'ওভারভিউ ও ড্যাশবোর্ড',
+      icon: LayoutDashboard,
+      color: 'amber',
+      items: [
+        {
+          id: 'overview' as AdminMenuKey,
+          labelBn: 'ড্যাশবোর্ড ওভারভিউ',
+          labelEn: 'Dashboard Overview',
+          icon: LayoutDashboard,
+          categoryBn: 'প্রধান ড্যাশবোর্ড',
+          descBn: 'সার্ভিস, পেপার স্টক, গ্রাহক আবেদন ও ক্যাশ কাউন্টারের লাইভ পরিসংখ্যান'
+        },
+        {
+          id: 'analytics' as AdminMenuKey,
+          labelBn: 'আয়-ব্যয় ও অ্যানালিটিক্স',
+          labelEn: 'Revenue & Analytics',
+          icon: PieChart,
+          badge: 'Live',
+          badgeColor: 'bg-emerald-950 text-emerald-300 border border-emerald-500/40',
+          categoryBn: 'রিপোর্ট',
+          descBn: 'দৈনিক, সাপ্তাহিক ও মাসিক লাভ-লোকসান চার্ট ও ট্রেন্ড'
+        }
+      ]
+    },
+    {
+      id: 'cat_team_hr',
+      nameEn: 'Team & HR Operations',
+      nameBn: 'টিম ও কর্মী ব্যবস্থাপনা',
       icon: Users,
-      badge: staff.length,
-      categoryBn: 'টিম',
-      descBn: 'দোকানের কম্পিউটার অপারেটরদের অ্যাক্সেস ও রোল'
+      color: 'purple',
+      items: [
+        {
+          id: 'staff' as AdminMenuKey,
+          labelBn: 'স্টাফ ও অপারেটর রোলস',
+          labelEn: 'Staff & Roles',
+          icon: Users,
+          badge: staff.length,
+          categoryBn: 'টিম',
+          descBn: 'দোকানের কম্পিউটার অপারেটরদের অ্যাক্সেস ও রোল'
+        },
+        {
+          id: 'employee_of_month' as AdminMenuKey,
+          labelBn: 'মাসের সেরা কর্মী ও মিডিয়া',
+          labelEn: 'Employee of Month & Media',
+          icon: Award,
+          categoryBn: 'টিম',
+          descBn: 'কর্মীর ছবি, ইউটিউব ও ফেসবুক ভিডিও লিংক বা ফাইল আপলোড নিয়ন্ত্রণ'
+        }
+      ]
     },
     {
-      id: 'employee_of_month' as AdminMenuKey,
-      labelBn: 'মাসের সেরা কর্মী ও ভিডিও CMS',
-      labelEn: 'Employee of Month & Video',
-      icon: Award,
-      categoryBn: 'টিম',
-      descBn: 'কর্মীর ছবি, ইউটিউব ও ফেসবুক ভিডিও লিংক বা ফাইল আপলোড নিয়ন্ত্রণ'
-    },
-    {
-      id: 'hero_slides' as AdminMenuKey,
-      labelBn: 'হিরো ব্যাকগ্রাউন্ড ছবি',
-      labelEn: 'Hero Photo Carousel',
-      icon: ImageIcon,
-      badge: heroSlides.length,
-      categoryBn: 'ডিজাইন',
-      descBn: 'ওয়েবসাইটের প্রধান হিরো সেকশনের ফটো স্লাইডার'
-    },
-    {
-      id: 'background_settings' as AdminMenuKey,
-      labelBn: 'ব্যাকগ্রাউন্ড ও ওয়ালপেপার',
-      labelEn: 'Background & Wallpaper',
+      id: 'cat_website_media',
+      nameEn: 'Storefront CMS & Media',
+      nameBn: 'ওয়েবসাইট ও ব্র্যান্ডিং CMS',
       icon: Palette,
-      categoryBn: 'ডিজাইন',
-      descBn: 'সাইটের থিম, ব্যাকগ্রাউন্ড প্যাটার্ন ও ওয়ালপেপার'
+      color: 'sky',
+      items: [
+        {
+          id: 'hero_slides' as AdminMenuKey,
+          labelBn: 'হিরো ফটো স্লাইডার',
+          labelEn: 'Hero Photo Carousel',
+          icon: ImageIcon,
+          badge: heroSlides.length,
+          categoryBn: 'ডিজাইন',
+          descBn: 'ওয়েবসাইটের প্রধান হিরো সেকশনের ফটো স্লাইডার'
+        },
+        {
+          id: 'background_settings' as AdminMenuKey,
+          labelBn: 'ব্যাকগ্রাউন্ড ও ওয়ালপেপার',
+          labelEn: 'Background & Wallpaper',
+          icon: Palette,
+          categoryBn: 'ডিজাইন',
+          descBn: 'সাইটের থিম, ব্যাকগ্রাউন্ড প্যাটার্ন ও ওয়ালপেপার'
+        },
+        {
+          id: 'seo_meta' as AdminMenuKey,
+          labelBn: 'এসইও ও মেটা ট্যাগ',
+          labelEn: 'Dynamic SEO & Meta',
+          icon: Globe,
+          categoryBn: 'মার্কেটিং',
+          descBn: 'গুগল সার্চ ও সোশ্যাল মিডিয়া মেটা ট্যাগ সেটিংস'
+        }
+      ]
     },
     {
-      id: 'seo_meta' as AdminMenuKey,
-      labelBn: 'এসইও ও মেটা ট্যাগ',
-      labelEn: 'Dynamic SEO & Meta',
-      icon: Globe,
-      categoryBn: 'মার্কেটিং',
-      descBn: 'গুগল সার্চ ও সোশ্যাল মিডিয়া মেটা ট্যাগ সেটিংস'
-    },
-    {
-      id: 'settings' as AdminMenuKey,
-      labelBn: 'ব্যবসায়িক সেটিংস',
-      labelEn: 'Business Settings',
+      id: 'cat_system_config',
+      nameEn: 'System, Settings & Data',
+      nameBn: 'সিস্টেম ও কনফিগারেশন',
       icon: Settings,
-      categoryBn: 'কনফিগ',
-      descBn: 'দোকানের নাম, ঠিকানা, মোবাইল ও সামাজিক যোগাযোগ লিঙ্ক'
-    },
-    {
-      id: 'backup' as AdminMenuKey,
-      labelBn: 'ডাটাবেজ ব্যাকআপ',
-      labelEn: 'Database Backup',
-      icon: Database,
-      categoryBn: 'সিস্টেম',
-      descBn: 'সম্পূর্ণ দোকানের তথ্য JSON ব্যাকআপ ডাউনলোড ও রিস্টোর'
+      color: 'slate',
+      items: [
+        {
+          id: 'settings' as AdminMenuKey,
+          labelBn: 'ব্যবসায়িক মাস্টার সেটিংস',
+          labelEn: 'Business Settings',
+          icon: Settings,
+          categoryBn: 'কনফিগ',
+          descBn: 'দোকানের নাম, ঠিকানা, মোবাইল ও সামাজিক যোগাযোগ লিঙ্ক'
+        },
+        {
+          id: 'backup' as AdminMenuKey,
+          labelBn: 'ডাটাবেজ ব্যাকআপ ও রিস্টোর',
+          labelEn: 'Database Backup',
+          icon: Database,
+          categoryBn: 'সিস্টেম',
+          descBn: 'সম্পূর্ণ দোকানের তথ্য JSON ব্যাকআপ ডাউনলোড ও রিস্টোর'
+        }
+      ]
     }
   ], [services.length, lowStockCount, products.length, pendingAppsCount, applications.length, orders.length, customers.length, staff.length, heroSlides.length]);
+
+  // Flattened items for backward compatibility
+  const navigationMenuItems = useMemo(() => {
+    return navigationCategories.flatMap(cat => cat.items);
+  }, [navigationCategories]);
+
+  // Filtered categories based on sidebar search and category pill filter
+  const filteredCategories = useMemo(() => {
+    let cats = navigationCategories;
+    if (sidebarCategoryFilter !== 'all') {
+      cats = cats.filter(cat => cat.id === sidebarCategoryFilter);
+    }
+    if (!sidebarSearch.trim()) return cats;
+    const q = sidebarSearch.toLowerCase();
+    return cats
+      .map(cat => ({
+        ...cat,
+        items: cat.items.filter(
+          item =>
+            item.labelEn.toLowerCase().includes(q) ||
+            item.labelBn.includes(q) ||
+            item.id.toLowerCase().includes(q) ||
+            (item.descBn && item.descBn.includes(q))
+        )
+      }))
+      .filter(cat => cat.items.length > 0);
+  }, [navigationCategories, sidebarSearch, sidebarCategoryFilter]);
+
+  const activeMenuItem = useMemo(() => {
+    return navigationMenuItems.find(item => item.id === activeMenu) || navigationMenuItems[0];
+  }, [navigationMenuItems, activeMenu]);
+
+  const activeCategory = useMemo(() => {
+    return navigationCategories.find(cat => cat.items.some(item => item.id === activeMenu)) || navigationCategories[0];
+  }, [navigationCategories, activeMenu]);
 
   return (
     <div className={`min-h-screen ${currentThemeConfig.mainBg} ${currentThemeConfig.textPrimary} flex flex-col font-sans selection:bg-emerald-500 selection:text-neutral-950 transition-colors duration-200`}>
@@ -864,57 +993,197 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
               </div>
             </div>
 
-            {/* Navigation Menu */}
-            <nav className="space-y-1 text-xs font-semibold">
-              {navigationMenuItems.map(item => {
-                const Icon = item.icon;
-                const isActive = activeMenu === item.id;
-                const isCopied = copiedLinkSection === item.id;
-                return (
-                  <div key={item.id} className="group relative flex items-center">
+            {/* Quick Menu Search Filter */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+              <input
+                type="text"
+                value={sidebarSearch}
+                onChange={e => setSidebarSearch(e.target.value)}
+                placeholder={language === 'bn' ? 'মেনু সার্চ করুন...' : 'Search menus...'}
+                className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-neutral-950/80 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500/60 transition-colors"
+              />
+              {sidebarSearch && (
+                <button
+                  type="button"
+                  onClick={() => setSidebarSearch('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-neutral-400 hover:text-white"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Quick Category Filter Pills */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[10px] font-mono font-bold text-neutral-400 px-1">
+                <span>{language === 'bn' ? 'ক্যাটাগরি ফিল্টার' : 'Category Filter'}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (Object.keys(collapsedCategories).length > 0) {
+                      expandAllCategories();
+                    } else {
+                      const next: Record<string, boolean> = {};
+                      navigationCategories.forEach(cat => {
+                        if (!cat.items.some(it => it.id === activeMenu)) {
+                          next[cat.id] = true;
+                        }
+                      });
+                      setCollapsedCategories(next);
+                    }
+                  }}
+                  className="text-neutral-400 hover:text-emerald-400 transition-colors"
+                >
+                  {Object.keys(collapsedCategories).length > 0
+                    ? (language === 'bn' ? 'সব প্রসারিত' : 'Expand All')
+                    : (language === 'bn' ? 'সব সংকুচিত' : 'Collapse All')}
+                </button>
+              </div>
+
+              <div className="flex items-center gap-1 overflow-x-auto pb-1 text-[10px] font-semibold custom-scrollbar">
+                <button
+                  type="button"
+                  onClick={() => setSidebarCategoryFilter('all')}
+                  className={`px-2 py-0.5 rounded-lg shrink-0 transition-all font-mono ${
+                    sidebarCategoryFilter === 'all'
+                      ? 'bg-emerald-600 text-white shadow-sm font-bold'
+                      : 'bg-neutral-900/90 text-neutral-400 hover:text-white border border-neutral-800'
+                  }`}
+                >
+                  {language === 'bn' ? 'সব' : 'All'} ({navigationMenuItems.length})
+                </button>
+                {navigationCategories.map(cat => {
+                  const isSelected = sidebarCategoryFilter === cat.id;
+                  const shortLabel = language === 'bn'
+                    ? cat.nameBn.split(' ')[0]
+                    : cat.nameEn.split(' ')[0];
+                  return (
                     <button
-                      id={`admin-nav-${item.id}`}
-                      onClick={() => navigateToMenu(item.id)}
-                      className={`w-full flex items-center justify-between pl-3 pr-2 py-2 rounded-xl transition-all ${
-                        isActive
-                          ? currentThemeConfig.activeSidebarItem
-                          : currentThemeConfig.inactiveSidebarItem
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setSidebarCategoryFilter(cat.id === sidebarCategoryFilter ? 'all' : cat.id)}
+                      className={`px-2 py-0.5 rounded-lg shrink-0 transition-all flex items-center gap-1 ${
+                        isSelected
+                          ? 'bg-emerald-600 text-white shadow-sm font-bold'
+                          : 'bg-neutral-900/90 text-neutral-400 hover:text-white border border-neutral-800'
                       }`}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0 pr-1">
-                        <Icon className="w-4 h-4 shrink-0" />
-                        <span className="truncate">{language === 'bn' ? item.labelBn : item.labelEn}</span>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        {item.badge !== undefined && item.badge !== null && item.badge !== '' && (
-                          <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${item.badgeColor || 'bg-neutral-800 text-neutral-300'}`}>
-                            {item.badge}
-                          </span>
-                        )}
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          onClick={(e) => handleCopySectionLink(e, item.id)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              handleCopySectionLink(e as any, item.id);
-                            }
-                          }}
-                          className="p-1 rounded-lg text-neutral-400 hover:text-amber-400 hover:bg-neutral-800/80 transition-colors"
-                          title={`${language === 'bn' ? 'সরাসরি লিঙ্ক কপি করুন' : 'Copy direct link'}: /admin?section=${item.id}`}
-                        >
-                          {isCopied ? (
-                            <Check className="w-3.5 h-3.5 text-emerald-400 animate-in zoom-in" />
-                          ) : (
-                            <Link2 className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 transition-opacity" />
-                          )}
-                        </span>
-                      </div>
+                      <span>{shortLabel}</span>
+                      <span className="opacity-70 text-[9px] font-mono">({cat.items.length})</span>
                     </button>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Categorized Navigation Menu */}
+            <nav className="space-y-3 text-xs font-semibold overflow-y-auto max-h-[calc(100vh-330px)] pr-1 custom-scrollbar">
+              {filteredCategories.length === 0 ? (
+                <div className="p-4 text-center text-xs text-neutral-500 bg-neutral-950/40 rounded-xl border border-neutral-800/60">
+                  <p>{language === 'bn' ? 'কোনো মেনু পাওয়া যায়নি' : 'No menu found'}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSidebarSearch('');
+                      setSidebarCategoryFilter('all');
+                    }}
+                    className="mt-2 text-emerald-400 hover:underline text-[11px] font-bold"
+                  >
+                    {language === 'bn' ? 'ফিল্টার রিসেট করুন' : 'Reset filter'}
+                  </button>
+                </div>
+              ) : (
+                filteredCategories.map(cat => {
+                  const CatIcon = cat.icon || LayoutDashboard;
+                  const isCategoryActive = cat.items.some(item => item.id === activeMenu);
+                  const isCollapsed = !!collapsedCategories[cat.id] && !isCategoryActive;
+
+                  return (
+                    <div key={cat.id} className="space-y-1 bg-neutral-950/40 rounded-xl p-1 border border-neutral-800/40">
+                      {/* Category Section Header with Accordion Toggle */}
+                      <button
+                        type="button"
+                        onClick={() => toggleCategoryCollapse(cat.id)}
+                        className="w-full px-2 py-1.5 rounded-lg flex items-center justify-between text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-300 hover:text-white hover:bg-neutral-800/50 transition-colors group select-none cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <CatIcon className={`w-3.5 h-3.5 shrink-0 ${isCategoryActive ? 'text-emerald-400' : 'text-neutral-500 group-hover:text-neutral-300'}`} />
+                          <span className="truncate">{language === 'bn' ? cat.nameBn : cat.nameEn}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 font-mono">
+                            {cat.items.length}
+                          </span>
+                          {isCollapsed ? (
+                            <ChevronDown className="w-3.5 h-3.5 text-neutral-500 group-hover:text-neutral-300 transition-transform" />
+                          ) : (
+                            <ChevronUp className="w-3.5 h-3.5 text-neutral-500 group-hover:text-neutral-300 transition-transform" />
+                          )}
+                        </div>
+                      </button>
+
+                      {/* Category Items */}
+                      {!isCollapsed && (
+                        <div className="space-y-0.5 pt-0.5 animate-in fade-in duration-150">
+                          {cat.items.map(item => {
+                            const Icon = item.icon;
+                            const isActive = activeMenu === item.id;
+                            const isCopied = copiedLinkSection === item.id;
+                            return (
+                              <div key={item.id} className="group relative flex items-center">
+                                <button
+                                  id={`admin-nav-${item.id}`}
+                                  onClick={() => navigateToMenu(item.id)}
+                                  className={`w-full flex items-center justify-between pl-3 pr-2 py-2 rounded-xl transition-all relative ${
+                                    isActive
+                                      ? `${currentThemeConfig.activeSidebarItem} shadow-sm ring-1 ring-emerald-500/30`
+                                      : currentThemeConfig.inactiveSidebarItem
+                                  }`}
+                                >
+                                  {isActive && (
+                                    <span className="absolute left-1 top-2 bottom-2 w-1 rounded-full bg-emerald-400" />
+                                  )}
+                                  <div className="flex items-center gap-2.5 min-w-0 pr-1 pl-1">
+                                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-300' : 'text-neutral-400'}`} />
+                                    <span className="truncate">{language === 'bn' ? item.labelBn : item.labelEn}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    {item.badge !== undefined && item.badge !== null && item.badge !== '' && (
+                                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${item.badgeColor || 'bg-neutral-800 text-neutral-300'}`}>
+                                        {item.badge}
+                                      </span>
+                                    )}
+                                    <span
+                                      role="button"
+                                      tabIndex={0}
+                                      onClick={(e) => handleCopySectionLink(e, item.id)}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                          e.preventDefault();
+                                          handleCopySectionLink(e as any, item.id);
+                                        }
+                                      }}
+                                      className="p-1 rounded-lg text-neutral-400 hover:text-amber-400 hover:bg-neutral-800/80 transition-colors"
+                                      title={`${language === 'bn' ? 'সরাসরি লিঙ্ক কপি করুন' : 'Copy direct link'}: /admin?section=${item.id}`}
+                                    >
+                                      {isCopied ? (
+                                        <Check className="w-3.5 h-3.5 text-emerald-400 animate-in zoom-in" />
+                                      ) : (
+                                        <Link2 className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 transition-opacity" />
+                                      )}
+                                    </span>
+                                  </div>
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
             </nav>
           </div>
 
@@ -932,6 +1201,55 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
 
         {/* Main Content Workspace */}
         <main className="flex-1 p-4 sm:p-8 overflow-y-auto max-w-7xl">
+          {/* Top Workspace Breadcrumb & Context Navigation */}
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-neutral-900/80 border border-neutral-800 shadow-lg backdrop-blur-md">
+            <div className="flex items-center gap-2 text-xs flex-wrap">
+              <div className="flex items-center gap-1.5 text-neutral-400 font-medium">
+                <Building2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{language === 'bn' ? 'অ্যাডমিন প্যানেল' : 'Admin'}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-neutral-600" />
+                <span className="text-neutral-400">{language === 'bn' ? activeCategory?.nameBn : activeCategory?.nameEn}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-neutral-600" />
+              </div>
+              <div className="flex items-center gap-1.5 font-bold text-white bg-neutral-800 px-2.5 py-1 rounded-lg border border-neutral-700">
+                {activeMenuItem && React.createElement(activeMenuItem.icon, { className: 'w-3.5 h-3.5 text-emerald-400' })}
+                <span>{language === 'bn' ? activeMenuItem?.labelBn : activeMenuItem?.labelEn}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => navigateToMenu('pos')}
+                className="px-2.5 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold flex items-center gap-1 transition-all"
+              >
+                <Calculator className="w-3 h-3 text-emerald-400" />
+                <span>{language === 'bn' ? 'পস কাউন্টার' : 'POS Counter'}</span>
+              </button>
+              <button
+                onClick={() => navigateToMenu('settings')}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
+                  activeMenu === 'settings'
+                    ? 'bg-emerald-600 text-white shadow-md'
+                    : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700'
+                }`}
+              >
+                <Settings className="w-3 h-3 text-amber-400" />
+                <span>{language === 'bn' ? 'মাস্টার সেটিংস' : 'Settings'}</span>
+              </button>
+              <button
+                onClick={(e) => handleCopySectionLink(e, activeMenu)}
+                className="px-2 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white border border-neutral-700 text-[11px] flex items-center gap-1 transition-all"
+                title={language === 'bn' ? 'এই সেকশনের সরাসরি লিঙ্ক কপি করুন' : 'Copy direct link to this section'}
+              >
+                {copiedLinkSection === activeMenu ? (
+                  <Check className="w-3 h-3 text-emerald-400" />
+                ) : (
+                  <Link2 className="w-3 h-3" />
+                )}
+                <span className="hidden sm:inline">{language === 'bn' ? 'শেয়ার লিঙ্ক' : 'Share Link'}</span>
+              </button>
+            </div>
+          </div>
 
           {/* VIEW 1: OVERVIEW */}
           {activeMenu === 'overview' && (
@@ -1966,264 +2284,849 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
             </div>
           )}
 
-          {/* VIEW 9: BUSINESS & CMS SETTINGS */}
+          {/* VIEW 9: BUSINESS & CMS SETTINGS - PROFESSIONALLY TABBED & ORGANIZED */}
           {activeMenu === 'settings' && (
-            <div className="space-y-8 animate-in fade-in duration-200">
-              <div className="pb-4 border-b border-neutral-800">
-                <h1 className="text-2xl font-extrabold text-white">
-                  {language === 'bn' ? 'ওয়েবসাইট ও ব্যবসায়িক সেটিংস' : 'Business Information & Site Settings'}
-                </h1>
-                <p className="text-xs text-neutral-400">
-                  {language === 'bn'
-                    ? 'দোকানের নাম, ঠিকানা, বিকাশ/হোয়াটসঅ্যাপ নাম্বার, থিম ও টপ নোটিশ আপডেট করুন।'
-                    : 'Update shop address, hotline, bKash numbers, admin theme, and top announcement text.'}
-                </p>
-              </div>
+            <div className="space-y-6 animate-in fade-in duration-200">
+              {/* Settings Header Bar */}
+              <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center">
+                      <Settings className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h1 className="text-xl sm:text-2xl font-extrabold text-white">
+                        {language === 'bn' ? 'ব্যবসায়িক মাস্টার সেটিংস' : 'Master Business Settings'}
+                      </h1>
+                      <p className="text-xs text-neutral-400">
+                        {language === 'bn'
+                          ? 'দোকানের নাম, ঠিকানা, বিকাশ/হোয়াটসঅ্যাপ নাম্বার, ডেলিভারি চার্জ, টপ নোটিশ ও পস টার্মিনাল কনফিগারেশন'
+                          : 'Configure shop identity, hotline, payment accounts, shipping rates, notice banners, and POS hardware'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-              {/* ADMIN THEME PICKER (SETTINGS GRID) */}
-              <div className="p-6 rounded-3xl bg-neutral-900 border border-neutral-800 shadow-xl space-y-4">
-                <AdminThemeSwitcher
-                  currentTheme={adminTheme}
-                  onSelectTheme={handleThemeChange}
-                  variant="settings-grid"
-                />
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Shop Open / Closed Live Badge */}
+                  <div className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 text-xs font-bold ${
+                    settingsForm.isShopOpen
+                      ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-300'
+                      : 'bg-rose-950/80 border-rose-500/40 text-rose-300'
+                  }`}>
+                    <span className={`w-2 h-2 rounded-full ${settingsForm.isShopOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
+                    <span>{settingsForm.isShopOpen ? (language === 'bn' ? 'দোকান খোলা' : 'Shop Open') : (language === 'bn' ? 'দোকান বন্ধ' : 'Shop Closed')}</span>
+                  </div>
+
+                  {/* Top Notice Status Badge */}
+                  <div className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 text-xs font-semibold ${
+                    settingsForm.showNoticeBanner
+                      ? 'bg-amber-950/80 border-amber-500/40 text-amber-300'
+                      : 'bg-neutral-950/80 border-neutral-800 text-neutral-400'
+                  }`}>
+                    <Bell className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{settingsForm.showNoticeBanner ? (language === 'bn' ? 'নোটিশ সক্রিয়' : 'Notice Active') : (language === 'bn' ? 'নোটিশ লুকানো' : 'Notice Hidden')}</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleSaveSettings}
+                    disabled={isServerSyncing}
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-950 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>{isServerSyncing ? (language === 'bn' ? 'সংরক্ষণ হচ্ছে...' : 'Saving...') : (language === 'bn' ? 'সেভ করুন' : 'Save')}</span>
+                  </button>
+                </div>
               </div>
 
               {settingsSaved && (
-                <div className="p-4 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Settings saved and applied successfully across all public and admin views!</span>
+                <div className="p-4 rounded-xl bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2.5 shadow-lg animate-in slide-in-from-top duration-200">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                  <span>{language === 'bn' ? 'সকল সেটিংস সফলভাবে সংরক্ষিত হয়েছে এবং সাইটে প্রয়োগ করা হয়েছে!' : 'All settings saved and applied successfully across all public and admin views!'}</span>
                 </div>
               )}
 
-              <form onSubmit={handleSaveSettings} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 space-y-5">
-                {/* Quick Status Toggles: Shop Open & Notice Bar */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-neutral-950/80 border border-neutral-800">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <span className="block text-xs font-bold text-white">দোকানের লাইভ স্ট্যাটাস (Shop Status)</span>
-                      <span className="text-[11px] text-neutral-400">বর্তমানে দোকান খোলা নাকি সাময়িক বন্ধ</span>
-                    </div>
+              {/* Sub-Tab Navigation Bar */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-neutral-800 custom-scrollbar">
+                {[
+                  { id: 'profile' as SettingsTabKey, labelBn: 'দোকানের পরিচিতি ও স্ট্যাটাস', labelEn: 'Profile & Status', icon: Building2 },
+                  { id: 'contacts' as SettingsTabKey, labelBn: 'যোগাযোগ ও পেমেন্ট নম্বর', labelEn: 'Contacts & Payments', icon: Phone },
+                  { id: 'delivery' as SettingsTabKey, labelBn: 'ডেলিভারি চার্জ ও শর্তাবলী', labelEn: 'Delivery Rates', icon: Truck },
+                  { id: 'notice' as SettingsTabKey, labelBn: 'টপ নোটিশ বার ও ঘোষণা', labelEn: 'Notice Banner', icon: Bell },
+                  { id: 'themes' as SettingsTabKey, labelBn: 'অ্যাডমিন ভিজ্যুয়াল থিম', labelEn: 'Admin Themes', icon: Palette },
+                  { id: 'hardware' as SettingsTabKey, labelBn: 'পস ও ক্লাউড সিঙ্ক', labelEn: 'Hardware & Sync', icon: Database }
+                ].map(tab => {
+                  const Icon = tab.icon;
+                  const isActive = settingsSubTab === tab.id || (tab.id === 'hardware' && settingsSubTab === 'system');
+                  return (
                     <button
+                      key={tab.id}
                       type="button"
-                      onClick={() => setSettingsForm({ ...settingsForm, isShopOpen: !settingsForm.isShopOpen })}
-                      className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-colors flex items-center gap-1.5 ${
-                        settingsForm.isShopOpen
-                          ? 'bg-emerald-600 text-white'
-                          : 'bg-rose-900 text-rose-200'
+                      onClick={() => setSettingsSubTab(tab.id)}
+                      className={`px-3.5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 shrink-0 transition-all ${
+                        isActive
+                          ? 'bg-neutral-800 text-white shadow-md border border-neutral-700 ring-1 ring-emerald-500/40'
+                          : 'bg-neutral-900/60 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40 border border-transparent'
                       }`}
                     >
-                      <span className={`w-2 h-2 rounded-full ${settingsForm.isShopOpen ? 'bg-white animate-pulse' : 'bg-rose-400'}`} />
-                      <span>{settingsForm.isShopOpen ? 'খোলা (Open)' : 'বন্ধ (Closed)'}</span>
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : 'text-neutral-400'}`} />
+                      <span>{language === 'bn' ? tab.labelBn : tab.labelEn}</span>
                     </button>
-                  </div>
+                  );
+                })}
+              </div>
 
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <span className="block text-xs font-bold text-white">টপ নোটিশ বার (Notice Banner)</span>
-                      <span className="text-[11px] text-neutral-400">ওয়েবসাইটের শীর্ষে জরুরি নোটিশ প্রদর্শন</span>
+              {/* Main Settings Form */}
+              <form onSubmit={handleSaveSettings} className="space-y-6">
+                {/* TAB 1: PROFILE & STATUS */}
+                {settingsSubTab === 'profile' && (
+                  <div className="space-y-6 animate-in fade-in duration-150">
+                    {/* Live Shop Open / Closed Control Card */}
+                    <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-4">
+                      <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
+                        <div>
+                          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                            <Store className="w-4 h-4 text-emerald-400" />
+                            <span>{language === 'bn' ? 'দোকানের লাইভ স্ট্যাটাস ও কার্যকাল' : 'Live Shop Status & Operations'}</span>
+                          </h3>
+                          <p className="text-xs text-neutral-400">
+                            {language === 'bn'
+                              ? 'দোকান খোলা নাকি সাময়িক বন্ধ তা পাবলিক ভিজিটরদের সরাসরি দেখায়'
+                              : 'Control store live presence indicator displayed to public visitors'}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSettingsForm({ ...settingsForm, isShopOpen: !settingsForm.isShopOpen })}
+                          className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors flex items-center gap-2 shadow-md ${
+                            settingsForm.isShopOpen
+                              ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-950'
+                              : 'bg-rose-900 hover:bg-rose-800 text-rose-200 shadow-rose-950'
+                          }`}
+                        >
+                          <span className={`w-2.5 h-2.5 rounded-full ${settingsForm.isShopOpen ? 'bg-white animate-pulse' : 'bg-rose-400'}`} />
+                          <span>{settingsForm.isShopOpen ? (language === 'bn' ? 'দোকান খোলা (Open)' : 'Open (Live)') : (language === 'bn' ? 'দোকান বন্ধ (Closed)' : 'Closed')}</span>
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">
+                            {language === 'bn' ? 'কার্যঘণ্টা (English)' : 'Opening Hours (English)'}
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.openingHours || ''}
+                            onChange={e => setSettingsForm({ ...settingsForm, openingHours: e.target.value })}
+                            placeholder="Sat - Thu: 8:00 AM - 11:00 PM, Fri: 2:30 PM - 11:00 PM"
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white placeholder-neutral-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">
+                            {language === 'bn' ? 'কার্যঘণ্টা (বাংলা)' : 'Opening Hours (Bangla)'}
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.openingHoursBn || ''}
+                            onChange={e => setSettingsForm({ ...settingsForm, openingHoursBn: e.target.value })}
+                            placeholder="শনি - বৃহস্পতি: সকাল ৮:০০ - রাত ১১:০০, শুক্র: দুপুর ২:৩০ - রাত ১১:০০"
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white placeholder-neutral-500"
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setSettingsForm({ ...settingsForm, showNoticeBanner: !settingsForm.showNoticeBanner })}
-                      className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-colors flex items-center gap-1.5 ${
-                        settingsForm.showNoticeBanner
-                          ? 'bg-amber-600 text-white'
-                          : 'bg-neutral-800 text-neutral-400'
-                      }`}
-                    >
-                      <span>{settingsForm.showNoticeBanner ? 'সক্রিয় (Active)' : 'লুকানো (Hidden)'}</span>
-                    </button>
-                  </div>
-                </div>
 
-                {/* Business Names */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Business Name (English)</label>
-                    <input
-                      type="text"
-                      value={settingsForm.businessName}
-                      onChange={e => setSettingsForm({ ...settingsForm, businessName: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Business Name (Bangla)</label>
-                    <input
-                      type="text"
-                      value={settingsForm.businessNameBn}
-                      onChange={e => setSettingsForm({ ...settingsForm, businessNameBn: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
-                    />
-                  </div>
-                </div>
+                    {/* Business Identity Card */}
+                    <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-4">
+                      <div className="pb-3 border-b border-neutral-800">
+                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-emerald-400" />
+                          <span>{language === 'bn' ? 'দোকানের নাম ও স্লোগান' : 'Business Identity & Names'}</span>
+                        </h3>
+                        <p className="text-xs text-neutral-400">
+                          {language === 'bn' ? 'ওয়েবসাইটের হেডার, ফুটার এবং ক্যাশ মেমোতে ব্যবহৃত হবে' : 'Displayed on storefront headers, receipts, and invoices'}
+                        </p>
+                      </div>
 
-                {/* Taglines */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Tagline (English)</label>
-                    <input
-                      type="text"
-                      value={settingsForm.tagline || ''}
-                      onChange={e => setSettingsForm({ ...settingsForm, tagline: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Tagline (Bangla)</label>
-                    <input
-                      type="text"
-                      value={settingsForm.taglineBn || ''}
-                      onChange={e => setSettingsForm({ ...settingsForm, taglineBn: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
-                    />
-                  </div>
-                </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Business Name (English)</label>
+                          <input
+                            type="text"
+                            value={settingsForm.businessName}
+                            onChange={e => setSettingsForm({ ...settingsForm, businessName: e.target.value })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white font-medium"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Business Name (Bangla)</label>
+                          <input
+                            type="text"
+                            value={settingsForm.businessNameBn}
+                            onChange={e => setSettingsForm({ ...settingsForm, businessNameBn: e.target.value })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white font-medium"
+                          />
+                        </div>
+                      </div>
 
-                {/* Hotlines & Contacts */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Primary Hotline</label>
-                    <input
-                      type="text"
-                      value={settingsForm.phonePrimary}
-                      onChange={e => setSettingsForm({ ...settingsForm, phonePrimary: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">WhatsApp & bKash / Nagad</label>
-                    <input
-                      type="text"
-                      value={settingsForm.whatsappNumber}
-                      onChange={e => setSettingsForm({ ...settingsForm, whatsappNumber: e.target.value, bkashNumber: e.target.value, nagadNumber: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Official Email</label>
-                    <input
-                      type="email"
-                      value={settingsForm.email || ''}
-                      onChange={e => setSettingsForm({ ...settingsForm, email: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
-                    />
-                  </div>
-                </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Tagline (English)</label>
+                          <input
+                            type="text"
+                            value={settingsForm.tagline || ''}
+                            onChange={e => setSettingsForm({ ...settingsForm, tagline: e.target.value })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Tagline (Bangla)</label>
+                          <input
+                            type="text"
+                            value={settingsForm.taglineBn || ''}
+                            onChange={e => setSettingsForm({ ...settingsForm, taglineBn: e.target.value })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                          />
+                        </div>
+                      </div>
 
-                {/* Delivery Charges */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Inside Dhaka Delivery (৳)</label>
-                    <input
-                      type="number"
-                      value={settingsForm.deliveryChargeInsideDhaka}
-                      onChange={e => setSettingsForm({ ...settingsForm, deliveryChargeInsideDhaka: Number(e.target.value) })}
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Outside Dhaka Delivery (৳)</label>
-                    <input
-                      type="number"
-                      value={settingsForm.deliveryChargeOutsideDhaka ?? 120}
-                      onChange={e => setSettingsForm({ ...settingsForm, deliveryChargeOutsideDhaka: Number(e.target.value) })}
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Min Order Amount (৳)</label>
-                    <input
-                      type="number"
-                      value={settingsForm.minOrderAmount ?? 100}
-                      onChange={e => setSettingsForm({ ...settingsForm, minOrderAmount: Number(e.target.value) })}
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
-                    />
-                  </div>
-                </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Tejgaon Branch Highlight (English)</label>
+                          <input
+                            type="text"
+                            value={settingsForm.tejgaonCollegeHighlight || ''}
+                            onChange={e => setSettingsForm({ ...settingsForm, tejgaonCollegeHighlight: e.target.value })}
+                            placeholder="Beside Tejgaon College Gate, Indira Road"
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Tejgaon Branch Highlight (Bangla)</label>
+                          <input
+                            type="text"
+                            value={settingsForm.tejgaonCollegeHighlightBn || ''}
+                            onChange={e => setSettingsForm({ ...settingsForm, tejgaonCollegeHighlightBn: e.target.value })}
+                            placeholder="তেজগাঁও কলেজ গেট সংলগ্ন, ইন্দিরা রোড"
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
 
-                {/* Addresses */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Full Shop Address (English)</label>
-                    <textarea
-                      rows={2}
-                      value={settingsForm.address}
-                      onChange={e => setSettingsForm({ ...settingsForm, address: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
-                    />
+                    {/* Live Public Header Preview Card */}
+                    <div className="p-5 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-3">
+                      <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400 block">
+                        {language === 'bn' ? 'লাইভ পাবলিক প্রিভিউ (Public Storefront Simulation)' : 'Public Storefront Simulation'}
+                      </span>
+                      <div className="p-4 rounded-xl bg-neutral-900 border border-neutral-700/60 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-black text-sm">
+                            SE
+                          </div>
+                          <div>
+                            <h4 className="font-extrabold text-sm text-white">
+                              {language === 'bn' ? settingsForm.businessNameBn : settingsForm.businessName}
+                            </h4>
+                            <p className="text-xs text-neutral-400">
+                              {language === 'bn' ? settingsForm.taglineBn : settingsForm.tagline}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                            settingsForm.isShopOpen ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' : 'bg-rose-950 text-rose-300 border border-rose-500/40'
+                          }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${settingsForm.isShopOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
+                            {settingsForm.isShopOpen ? 'Open Now' : 'Closed'}
+                          </span>
+                          <span className="block text-[10px] text-neutral-500 mt-1 font-mono">
+                            {settingsForm.openingHours}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Full Shop Address (Bangla)</label>
-                    <textarea
-                      rows={2}
-                      value={settingsForm.addressBn}
-                      onChange={e => setSettingsForm({ ...settingsForm, addressBn: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
-                    />
-                  </div>
-                </div>
+                )}
 
-                {/* Top Notice Bar Banners */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Top Notice Bar Text (English)</label>
-                    <textarea
-                      rows={2}
-                      value={settingsForm.noticeBanner ?? (settingsForm as any).noticeEn ?? ''}
-                      onChange={e => setSettingsForm({ ...settingsForm, noticeBanner: e.target.value, noticeEn: e.target.value } as any)}
-                      placeholder="Special notice to display across top of site..."
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Top Notice Bar Text (Bangla)</label>
-                    <textarea
-                      rows={2}
-                      value={settingsForm.noticeBannerBn ?? (settingsForm as any).noticeBn ?? ''}
-                      onChange={e => setSettingsForm({ ...settingsForm, noticeBannerBn: e.target.value, noticeBn: e.target.value } as any)}
-                      placeholder="ওয়েবসাইটের শীর্ষে প্রদর্শনের জন্য বিশেষ নোটিশ..."
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
-                    />
-                  </div>
-                </div>
+                {/* TAB 2: CONTACTS & PAYMENTS */}
+                {settingsSubTab === 'contacts' && (
+                  <div className="space-y-6 animate-in fade-in duration-150">
+                    {/* Hotlines Card */}
+                    <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-4">
+                      <div className="pb-3 border-b border-neutral-800">
+                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-emerald-400" />
+                          <span>{language === 'bn' ? 'গ্রাহক হটলাইন ও হেল্পলাইন' : 'Customer Hotlines & Helpline'}</span>
+                        </h3>
+                        <p className="text-xs text-neutral-400">
+                          {language === 'bn' ? 'ওয়েবসাইটের হেডার, ফুটার এবং জরুরি কল বাটনে ব্যবহৃত হবে' : 'Main communication lines used across header and footer'}
+                        </p>
+                      </div>
 
-                {/* Opening Hours */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Opening Hours (English)</label>
-                    <input
-                      type="text"
-                      value={settingsForm.openingHours || ''}
-                      onChange={e => setSettingsForm({ ...settingsForm, openingHours: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">Opening Hours (Bangla)</label>
-                    <input
-                      type="text"
-                      value={settingsForm.openingHoursBn || ''}
-                      onChange={e => setSettingsForm({ ...settingsForm, openingHoursBn: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
-                    />
-                  </div>
-                </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Primary Hotline (প্রধান ফোন)</label>
+                          <input
+                            type="text"
+                            value={settingsForm.phonePrimary}
+                            onChange={e => setSettingsForm({ ...settingsForm, phonePrimary: e.target.value })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Secondary Mobile (বিকল্প ফোন)</label>
+                          <input
+                            type="text"
+                            value={settingsForm.phoneSecondary || ''}
+                            onChange={e => setSettingsForm({ ...settingsForm, phoneSecondary: e.target.value })}
+                            placeholder="017XXXXXXXX"
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Official Email (অফিসিয়াল ইমেইল)</label>
+                          <input
+                            type="email"
+                            value={settingsForm.email || ''}
+                            onChange={e => setSettingsForm({ ...settingsForm, email: e.target.value })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
 
-                <div className="pt-2 flex items-center justify-between flex-wrap gap-3">
+                    {/* WhatsApp & Mobile Financial Services (MFS) Card */}
+                    <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-4">
+                      <div className="pb-3 border-b border-neutral-800">
+                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                          <QrCode className="w-4 h-4 text-emerald-400" />
+                          <span>{language === 'bn' ? 'হোয়াটসঅ্যাপ ও মোবাইল ব্যাংকিং পেমেন্ট (bKash / Nagad)' : 'WhatsApp & Mobile Banking Payment Numbers'}</span>
+                        </h3>
+                        <p className="text-xs text-neutral-400">
+                          {language === 'bn' ? 'গ্রাহকরা অনলাইনে আবেদন ফি ও প্রিন্টিং বিল পরিশোধের সময় এই নম্বরগুলোতে পেমেন্ট পাঠাবে' : 'Accounts used for advance order payment and direct WhatsApp document submission'}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">WhatsApp Hotline (ডকুমেন্ট জমা)</label>
+                          <input
+                            type="text"
+                            value={settingsForm.whatsappNumber}
+                            onChange={e => setSettingsForm({ ...settingsForm, whatsappNumber: e.target.value })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">bKash Account (মার্চেন্ট / পার্সোনাল)</label>
+                          <input
+                            type="text"
+                            value={settingsForm.bkashNumber || settingsForm.whatsappNumber}
+                            onChange={e => setSettingsForm({ ...settingsForm, bkashNumber: e.target.value })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Nagad Account (নগদ নম্বর)</label>
+                          <input
+                            type="text"
+                            value={settingsForm.nagadNumber || settingsForm.whatsappNumber}
+                            onChange={e => setSettingsForm({ ...settingsForm, nagadNumber: e.target.value })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Quick Verification Actions */}
+                      <div className="pt-2 flex items-center gap-3">
+                        <a
+                          href={`https://wa.me/88${settingsForm.whatsappNumber}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3.5 py-1.5 rounded-xl bg-emerald-950 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          <span>{language === 'bn' ? 'হোয়াটসঅ্যাপ চ্যাট পরীক্ষা করুন' : 'Test WhatsApp Link'}</span>
+                        </a>
+                        <a
+                          href={`tel:${settingsForm.phonePrimary}`}
+                          className="px-3.5 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                        >
+                          <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>{language === 'bn' ? 'হটলাইন কল পরীক্ষা করুন' : 'Test Hotline Call'}</span>
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Shop Physical Address Card */}
+                    <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-4">
+                      <div className="pb-3 border-b border-neutral-800">
+                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-emerald-400" />
+                          <span>{language === 'bn' ? 'দোকানের ঠিকানা ও গুগল ম্যাপ' : 'Physical Shop Address & Google Maps'}</span>
+                        </h3>
+                        <p className="text-xs text-neutral-400">
+                          {language === 'bn' ? 'গ্রাহক রসিদ ও ডেলিভারি ইনভয়েসে মুদ্রিত ঠিকানা' : 'Official store location rendered on invoices and contact section'}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Full Shop Address (English)</label>
+                          <textarea
+                            rows={3}
+                            value={settingsForm.address}
+                            onChange={e => setSettingsForm({ ...settingsForm, address: e.target.value })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Full Shop Address (Bangla)</label>
+                          <textarea
+                            rows={3}
+                            value={settingsForm.addressBn}
+                            onChange={e => setSettingsForm({ ...settingsForm, addressBn: e.target.value })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-neutral-300 mb-1">Google Maps URL (গুগল ম্যাপ লিঙ্ক)</label>
+                        <input
+                          type="url"
+                          value={settingsForm.googleMapUrl || ''}
+                          onChange={e => setSettingsForm({ ...settingsForm, googleMapUrl: e.target.value })}
+                          placeholder="https://maps.google.com/..."
+                          className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 3: DELIVERY & COMMERCE */}
+                {settingsSubTab === 'delivery' && (
+                  <div className="space-y-6 animate-in fade-in duration-150">
+                    <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-4">
+                      <div className="pb-3 border-b border-neutral-800">
+                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                          <Truck className="w-4 h-4 text-emerald-400" />
+                          <span>{language === 'bn' ? 'হোম ডেলিভারি চার্জ ও অর্ডার শর্তাবলী' : 'Delivery Charges & Minimum Order Policy'}</span>
+                        </h3>
+                        <p className="text-xs text-neutral-400">
+                          {language === 'bn' ? 'কাগজ, প্রিন্টিং ও স্টেশনারি হোম ডেলিভারি ফি নির্ধারণ করুন' : 'Configure delivery fee for inside and outside Dhaka courier shipments'}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">
+                            {language === 'bn' ? 'ঢাকা সিটির ভেতরে ডেলিভারি চার্জ (৳)' : 'Inside Dhaka Delivery (৳)'}
+                          </label>
+                          <input
+                            type="number"
+                            value={settingsForm.deliveryChargeInsideDhaka}
+                            onChange={e => setSettingsForm({ ...settingsForm, deliveryChargeInsideDhaka: Number(e.target.value) })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                          />
+                          <span className="text-[10px] text-neutral-500 mt-1 block">Standard: ৳60 (Express 24h)</span>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">
+                            {language === 'bn' ? 'ঢাকার বাইরে ডেলিভারি চার্জ (৳)' : 'Outside Dhaka Delivery (৳)'}
+                          </label>
+                          <input
+                            type="number"
+                            value={settingsForm.deliveryChargeOutsideDhaka ?? 120}
+                            onChange={e => setSettingsForm({ ...settingsForm, deliveryChargeOutsideDhaka: Number(e.target.value) })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                          />
+                          <span className="text-[10px] text-neutral-500 mt-1 block">Standard: ৳120 (Sundarban/Steadfast)</span>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">
+                            {language === 'bn' ? 'সর্বনিম্ন অর্ডার মূল্য (৳)' : 'Minimum Order Amount (৳)'}
+                          </label>
+                          <input
+                            type="number"
+                            value={settingsForm.minOrderAmount ?? 100}
+                            onChange={e => setSettingsForm({ ...settingsForm, minOrderAmount: Number(e.target.value) })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                          />
+                          <span className="text-[10px] text-neutral-500 mt-1 block">Minimum checkout threshold</span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Currency Symbol (মুদ্রা প্রতীক)</label>
+                          <input
+                            type="text"
+                            value={settingsForm.currencySymbol || '৳'}
+                            onChange={e => setSettingsForm({ ...settingsForm, currencySymbol: e.target.value })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">VAT / Tax Rate (%) (ভ্যাট শতাংশ)</label>
+                          <input
+                            type="number"
+                            value={settingsForm.taxRate || 0}
+                            onChange={e => setSettingsForm({ ...settingsForm, taxRate: Number(e.target.value) })}
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs font-mono text-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Delivery Policy Note */}
+                    <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800 text-xs text-neutral-300 space-y-2">
+                      <div className="font-bold text-white flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <span>{language === 'bn' ? 'হোম ডেলিভারি পলিসি নির্দেশিকা' : 'Shipping Policy Summary'}</span>
+                      </div>
+                      <p className="text-neutral-400 leading-relaxed text-[11px]">
+                        {language === 'bn'
+                          ? '• তেজগাঁও, ফার্মগেট, ইন্দিরা রোড এলাকায় ১ ঘণ্টার মধ্যে স্পেশাল লোকাল ডেলিভারি সম্ভব।\n• ঢাকা সিটির ভেতর সুন্দরবন বা পাঠাও কুরিয়ারে ২৪ ঘণ্টায় ডেলিভারি।\n• ঢাকার বাইরে সুন্দরবন ও রেডেক্স সার্ভিসে ৪৮-৭২ ঘণ্টায় পণ্য পৌঁছে দেওয়া হয়।'
+                          : '• Farmgate & Indira Road local express delivery within 1 hour.\n• Inside Dhaka delivery within 24 hours via courier.\n• Nationwide parcel delivery across 64 districts in 48-72 hours.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 4: TOP ANNOUNCEMENT BANNER */}
+                {settingsSubTab === 'notice' && (
+                  <div className="space-y-6 animate-in fade-in duration-150">
+                    <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-5">
+                      <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
+                        <div>
+                          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                            <Bell className="w-4 h-4 text-amber-400" />
+                            <span>{language === 'bn' ? 'টপ নোটিশ বার ও জরুরি বার্তা' : 'Top Announcement Banner'}</span>
+                          </h3>
+                          <p className="text-xs text-neutral-400">
+                            {language === 'bn' ? 'ওয়েবসাইটের একদম শীর্ষে বিশেষ জরুরি বিজ্ঞপ্তি প্রদর্শন' : 'Live marquee announcement ticker bar displayed across the website header'}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSettingsForm({ ...settingsForm, showNoticeBanner: !settingsForm.showNoticeBanner })}
+                          className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors flex items-center gap-2 shadow-md ${
+                            settingsForm.showNoticeBanner
+                              ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-950'
+                              : 'bg-neutral-800 text-neutral-400'
+                          }`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${settingsForm.showNoticeBanner ? 'bg-white animate-pulse' : 'bg-neutral-500'}`} />
+                          <span>{settingsForm.showNoticeBanner ? (language === 'bn' ? 'নোটিশ সক্রিয় (Active)' : 'Active') : (language === 'bn' ? 'নোটিশ লুকানো (Hidden)' : 'Hidden')}</span>
+                        </button>
+                      </div>
+
+                      {/* Ready-Made Preset Buttons */}
+                      <div className="space-y-2">
+                        <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-400 block">
+                          {language === 'bn' ? 'এক ক্লিকে বিশেষ নোটিশ লোড করুন (Quick Presets)' : 'Quick Preset Templates'}
+                        </span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSettingsForm({
+                                ...settingsForm,
+                                showNoticeBanner: true,
+                                noticeBanner: 'Admission & Govt Job application forms are currently being submitted. Visit with required documents.',
+                                noticeBannerBn: 'বিশ্ববিদ্যালয় ভর্তি, ক্যাডেট কলেজ ও সরকারি চাকরির আবেদন ফর্ম পূরণ চলছে। প্রয়োজনীয় কাগজপত্র নিয়ে আসুন।'
+                              });
+                            }}
+                            className="p-2.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-left text-xs transition-all flex items-start gap-2"
+                          >
+                            <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                            <div>
+                              <span className="font-bold text-white block">বিশ্ববিদ্যালয় ভর্তি ও চাকরির আবেদন</span>
+                              <span className="text-[10px] text-neutral-400 block line-clamp-1">ভর্তি ও সরকারি চাকরির আবেদন সংক্রান্ত নোটিশ</span>
+                            </div>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSettingsForm({
+                                ...settingsForm,
+                                showNoticeBanner: true,
+                                noticeBanner: 'Holy Ramadan schedule: Open daily from 9:00 AM to 11:00 PM.',
+                                noticeBannerBn: 'পবিত্র মাহে রমজান উপলক্ষে আমাদের দোকান প্রতিদিন সকাল ৯:০০টা থেকে রাত ১১:০০টা পর্যন্ত খোলা থাকবে।'
+                              });
+                            }}
+                            className="p-2.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-left text-xs transition-all flex items-start gap-2"
+                          >
+                            <Moon className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                            <div>
+                              <span className="font-bold text-white block">পবিত্র মাহে রমজান সময়সূচি</span>
+                              <span className="text-[10px] text-neutral-400 block line-clamp-1">রমজানের বিশেষ সেবা সময়সূচি</span>
+                            </div>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSettingsForm({
+                                ...settingsForm,
+                                showNoticeBanner: true,
+                                noticeBanner: 'Friday special hours: Open from 2:30 PM (after Jummah prayer) until 11:00 PM.',
+                                noticeBannerBn: 'প্রতি শুক্রবার জুমার নামাজের পর দুপুর ২:৩০টা থেকে রাত ১১:০০টা পর্যন্ত সেবা চালু থাকে।'
+                              });
+                            }}
+                            className="p-2.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-left text-xs transition-all flex items-start gap-2"
+                          >
+                            <Clock className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
+                            <div>
+                              <span className="font-bold text-white block">শুক্রবার জুমার বিশেষ সময়সূচি</span>
+                              <span className="text-[10px] text-neutral-400 block line-clamp-1">শুক্রবার দুপুর ২:৩০টা থেকে খোলা</span>
+                            </div>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSettingsForm({
+                                ...settingsForm,
+                                showNoticeBanner: true,
+                                noticeBanner: 'Judicial Stamps (50 Tk, 100 Tk, 300 Tk) and Court Fees are in full stock.',
+                                noticeBannerBn: '৫০৳, ১০০৳ ও ৩০০৳ জুডিশিয়াল নন-জুডিশিয়াল স্ট্যাম্প এবং কোর্ট ফি পর্যাপ্ত পরিমাণে স্টকে আছে।'
+                              });
+                            }}
+                            className="p-2.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-left text-xs transition-all flex items-start gap-2"
+                          >
+                            <FileText className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                            <div>
+                              <span className="font-bold text-white block">জুডিশিয়াল স্ট্যাম্প ও কোর্ট ফি স্টক</span>
+                              <span className="text-[10px] text-neutral-400 block line-clamp-1">স্ট্যাম্প ও কার্টিজ পেপার বিজ্ঞপ্তি</span>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Top Notice Bar Text (English)</label>
+                          <textarea
+                            rows={3}
+                            value={settingsForm.noticeBanner ?? (settingsForm as any).noticeEn ?? ''}
+                            onChange={e => setSettingsForm({ ...settingsForm, noticeBanner: e.target.value, noticeEn: e.target.value } as any)}
+                            placeholder="Special notice to display across top of site..."
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-neutral-300 mb-1">Top Notice Bar Text (Bangla)</label>
+                          <textarea
+                            rows={3}
+                            value={settingsForm.noticeBannerBn ?? (settingsForm as any).noticeBn ?? ''}
+                            onChange={e => setSettingsForm({ ...settingsForm, noticeBannerBn: e.target.value, noticeBn: e.target.value } as any)}
+                            placeholder="ওয়েবসাইটের শীর্ষে প্রদর্শনের জন্য বিশেষ নোটিশ..."
+                            className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Live Notice Bar Simulation */}
+                      <div className="space-y-2">
+                        <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-400 block">
+                          {language === 'bn' ? 'লাইভ ব্যানার প্রিভিউ (Live Banner Preview)' : 'Live Notice Bar Simulation'}
+                        </span>
+                        <div className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs font-semibold ${
+                          settingsForm.showNoticeBanner
+                            ? 'bg-gradient-to-r from-amber-950/80 via-neutral-900 to-amber-950/80 border-amber-500/40 text-amber-200'
+                            : 'bg-neutral-950 border-neutral-800 text-neutral-500 opacity-60'
+                        }`}>
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                            <Bell className="w-4 h-4 text-amber-400 shrink-0" />
+                            <span className="truncate">
+                              {language === 'bn'
+                                ? (settingsForm.noticeBannerBn || 'কোনো নোটিশ টেক্সট দেওয়া হয়নি')
+                                : (settingsForm.noticeBanner || 'No notice text configured')}
+                            </span>
+                          </div>
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-black/40 border border-white/10 shrink-0 font-mono">
+                            {settingsForm.showNoticeBanner ? 'VISIBLE' : 'HIDDEN'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 5: ADMIN THEMES */}
+                {settingsSubTab === 'themes' && (
+                  <div className="space-y-6 animate-in fade-in duration-150">
+                    <div className="p-6 rounded-2xl bg-neutral-900/90 border border-neutral-800 shadow-xl space-y-4">
+                      <div className="pb-3 border-b border-neutral-800">
+                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                          <Palette className="w-4 h-4 text-emerald-400" />
+                          <span>{language === 'bn' ? 'অ্যাডমিন ভিজ্যুয়াল কালার প্যালেট' : 'Admin Visual Themes & Contrast Modes'}</span>
+                        </h3>
+                        <p className="text-xs text-neutral-400">
+                          {language === 'bn' ? 'অ্যাডমিন ড্যাশবোর্ডের রঙ ও ভিজ্যুয়াল স্টাইল নির্বাচন করুন' : 'Select color theme for the management control room'}
+                        </p>
+                      </div>
+
+                      <AdminThemeSwitcher
+                        currentTheme={adminTheme}
+                        onSelectTheme={handleThemeChange}
+                        variant="settings-grid"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 6: POS HARDWARE, AUDIO & CLOUD SYNC */}
+                {(settingsSubTab === 'hardware' || settingsSubTab === 'system') && (
+                  <div className="space-y-6 animate-in fade-in duration-150">
+                    {/* POS Hardware & Thermal Printer Card */}
+                    <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-4">
+                      <div className="pb-3 border-b border-neutral-800">
+                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                          <Printer className="w-4 h-4 text-emerald-400" />
+                          <span>{language === 'bn' ? 'পস থার্মাল প্রিন্টার ও হার্ডওয়্যার কনফিগারেশন' : 'POS Hardware & Thermal Printer Setup'}</span>
+                        </h3>
+                        <p className="text-xs text-neutral-400">
+                          {language === 'bn' ? 'দোকানের ক্যাশ কাউন্টার থার্মাল প্রিন্টার (80mm / 58mm) ও রসিদ ফরম্যাট' : 'Configure thermal printer paper width and receipt header preferences'}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800 space-y-2">
+                          <span className="block text-xs font-bold text-white">
+                            {language === 'bn' ? 'স্ট্যান্ডার্ড থার্মাল পেপার সাইজ' : 'Thermal Paper Width'}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="px-3 py-1.5 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-500/40 text-xs font-mono font-bold">
+                              80mm Standard POS (3-inch)
+                            </span>
+                            <span className="px-3 py-1.5 rounded-lg bg-neutral-900 text-neutral-400 border border-neutral-800 text-xs font-mono">
+                              58mm Compact Pocket
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-neutral-500">
+                            {language === 'bn' ? 'ডেলি রিপোর্ট ও ক্যাশ মেমো ৮৮ মিমি ও ৮০ মিমি থার্মাল প্রিন্টারের জন্য অপ্টিমাইজড।' : 'Formatted for standard EPSON / Xprinter 80mm roll printers.'}
+                          </p>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800 space-y-2">
+                          <span className="block text-xs font-bold text-white">
+                            {language === 'bn' ? 'রসিদে হেল্পলাইন ও ঠিকানা প্রদর্শন' : 'Print Slip Contact Header'}
+                          </span>
+                          <span className="px-3 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-semibold block truncate">
+                            {settingsForm.businessName} • {settingsForm.phonePrimary}
+                          </span>
+                          <p className="text-[11px] text-neutral-500">
+                            {language === 'bn' ? 'প্রিন্ট স্লিপের একদম উপরে দোকানের নাম, মোবাইল ও তেজগাঁও শাখা মুদ্রিত হবে।' : 'Automatically printed at top of thermal POS tickets and daily reports.'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Staff Audio & Voice Notifications */}
+                    <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-4">
+                      <div className="pb-3 border-b border-neutral-800">
+                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                          <Volume2 className="w-4 h-4 text-emerald-400" />
+                          <span>{language === 'bn' ? 'স্টাফ অডিও অ্যালার্ট ও ভয়েস নোটিফিকেশন (TTS)' : 'Voice & Sound Notifications (Text-To-Speech)'}</span>
+                        </h3>
+                        <p className="text-xs text-neutral-400">
+                          {language === 'bn' ? 'নতুন অনলাইন আবেদন বা অর্ডার জমা হলে বাংলা/ইংরেজি ভয়েস অ্যালার্ট' : 'Audio voice alerts for incoming applications and print orders'}
+                        </p>
+                      </div>
+
+                      <StaffTTSControlWidget />
+                    </div>
+
+                    {/* Cloud Database Synchronization & Diagnostics */}
+                    <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-4">
+                      <div className="pb-3 border-b border-neutral-800">
+                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                          <Database className="w-4 h-4 text-emerald-400" />
+                          <span>{language === 'bn' ? 'ক্লাউড ডাটাবেজ ও সার্ভার সিঙ্ক' : 'Cloud Database Synchronization & Health'}</span>
+                        </h3>
+                        <p className="text-xs text-neutral-400">
+                          {language === 'bn' ? 'ব্রাউজারের লোকাল স্টোরেজ ও সার্ভার ডিস্কের পূর্ণাঙ্গ লাইভ সিঙ্ক স্ট্যাটাস' : 'Persistent synchronization between browser cache and server storage'}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-between">
+                          <div>
+                            <span className="block text-xs font-bold text-white">Server Connection Status</span>
+                            <span className="text-[11px] text-neutral-400">Local Express Node Server</span>
+                          </div>
+                          <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/40 text-[10px] font-mono font-bold flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            ONLINE
+                          </span>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-between">
+                          <div>
+                            <span className="block text-xs font-bold text-white">Database Backup Suite</span>
+                            <span className="text-[11px] text-neutral-400">Full JSON snapshots & recovery</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => navigateToMenu('backup')}
+                            className="px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-bold transition-colors flex items-center gap-1"
+                          >
+                            <span>{language === 'bn' ? 'ব্যাকআপ পেজ' : 'Go to Backup'}</span>
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="pt-2">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await syncFullDatabaseToServer();
+                            setSettingsSaved(true);
+                            setTimeout(() => setSettingsSaved(false), 3000);
+                          }}
+                          disabled={isServerSyncing}
+                          className="px-5 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-emerald-400 font-bold text-xs flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${isServerSyncing ? 'animate-spin' : ''}`} />
+                          <span>{isServerSyncing ? (language === 'bn' ? 'সার্ভারে সিঙ্ক হচ্ছে...' : 'Syncing...') : (language === 'bn' ? 'সার্ভারে সম্পূর্ণ ডাটাবেজ ফোর্স সিঙ্ক করুন' : 'Force Full Cloud Sync Now')}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Global Settings Save Footer Bar */}
+                <div className="p-4 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-between flex-wrap gap-3 shadow-xl">
                   <div className="flex items-center gap-2 text-xs text-neutral-400">
                     <Database className="w-4 h-4 text-emerald-400" />
-                    <span>সকল পরিবর্তন স্বয়ংক্রিয়ভাবে ব্রাউজার ও সার্ভার ডিস্কে সংরক্ষিত থাকবে</span>
+                    <span>{language === 'bn' ? 'সকল পরিবর্তন স্বয়ংক্রিয়ভাবে ব্রাউজার ও সার্ভার ডিস্কে সংরক্ষিত থাকবে' : 'All modifications persist across browser cache and server storage'}</span>
                   </div>
-                  <button
-                    type="submit"
-                    disabled={isServerSyncing}
-                    className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
-                  >
-                    <Save className="w-4 h-4" />
-                    <span>{isServerSyncing ? 'সংরক্ষণ হচ্ছে...' : 'সেটিংস সম্পূর্ণ সংরক্ষণ করুন (Save All Settings)'}</span>
-                  </button>
+                  <div className="flex items-center gap-3">
+                    {settingsSaved && (
+                      <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                        <Check className="w-4 h-4" />
+                        {language === 'bn' ? 'সংরক্ষিত হয়েছে' : 'Saved'}
+                      </span>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={isServerSyncing}
+                      className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>{isServerSyncing ? (language === 'bn' ? 'সংরক্ষণ হচ্ছে...' : 'Saving...') : (language === 'bn' ? 'সেটিংস সম্পূর্ণ সংরক্ষণ করুন (Save All Settings)' : 'Save All Settings')}</span>
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>

@@ -23,7 +23,8 @@ import {
   StampItemConfig,
   StampSaleRecord,
   StampStockPurchase,
-  CustomerAssistanceRequest
+  CustomerAssistanceRequest,
+  StaffAttendanceRecord
 } from '../types';
 
 export const initialSettings: WebsiteSettings = {
@@ -1302,4 +1303,37 @@ export const initialAssistanceRequests: CustomerAssistanceRequest[] = [
   }
 ];
 
-
+export const initialStaffAttendance: StaffAttendanceRecord[] = [
+  {
+    id: "att_demo_01",
+    staffId: "usr_op_tanvir",
+    staffName: "Tanvir Ahmed",
+    staffNameBn: "তানভীর আহমেদ (কম্পিউটার অপারেটর ও অনলাইন স্পেশালিস্ট)",
+    employeeId: "SE-STAFF-02",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80",
+    designation: "Senior Computer Operator & POS Cashier",
+    shift: "Morning (8:00 AM - 4:00 PM)",
+    date: new Date().toISOString().split('T')[0],
+    checkInTime: "08:15:00",
+    status: "checked_in",
+    counterId: "POS-Counter-1",
+    notes: "Morning shift opened with ৳3,000 cash drawer float",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: "att_demo_02",
+    staffId: "usr_admin",
+    staffName: "Saiful Islam",
+    staffNameBn: "সাইফুল ইসলাম (স্বত্বাধিকারী ও প্রধান অ্যাডমিন)",
+    employeeId: "SE-ADMIN-01",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+    designation: "Founder & Managing Director",
+    shift: "Day & Management Shift",
+    date: new Date().toISOString().split('T')[0],
+    checkInTime: "09:00:00",
+    status: "checked_in",
+    counterId: "Master-Terminal",
+    notes: "Supervisory check-in",
+    createdAt: new Date().toISOString()
+  }
+];

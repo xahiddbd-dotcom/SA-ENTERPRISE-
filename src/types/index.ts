@@ -754,5 +754,21 @@ export interface StampStockPurchase {
   note?: string;
   createdAt: string;
 }
-
-
+export interface StaffAttendanceRecord {
+  id: string;
+  staffId: string;
+  staffName: string;
+  staffNameBn?: string;
+  employeeId: string;
+  avatar?: string;
+  designation?: string;
+  shift?: string;
+  date: string; // YYYY-MM-DD
+  checkInTime: string; // HH:mm:ss or ISO
+  checkOutTime?: string; // HH:mm:ss or ISO
+  status: 'checked_in' | 'checked_out';
+  durationMinutes?: number;
+  counterId?: string; // e.g. 'POS-Counter-1'
+  notes?: string;
+  createdAt: string;
+}
