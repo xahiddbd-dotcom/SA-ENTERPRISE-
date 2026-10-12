@@ -806,7 +806,67 @@ export const initialApplications: Application[] = [];
 
 export const initialExpenses: Expense[] = [];
 
-export const initialPOSSales: POSSale[] = [];
+const defaultTodayDateStr = new Date().toISOString().split('T')[0];
+
+export const initialPOSSales: POSSale[] = [
+  {
+    id: 'pos_sale_init_1',
+    invoiceNumber: 'INV-2026-001',
+    cashierId: 'admin',
+    cashierName: 'Md. Saiful Islam',
+    customerName: 'Md. Rafiqul Islam (Tejgaon College)',
+    customerPhone: '01711223344',
+    items: [
+      { id: 'it_1', name: 'Photocopy (1 Page)', nameBn: 'ফটোকপি (১ পাতা)', type: 'service', price: 3, quantity: 30 },
+      { id: 'it_2', name: 'PVC ID Card Print', nameBn: 'পিভিসি স্মার্ট আইডি কার্ড', type: 'product', price: 100, quantity: 1 }
+    ],
+    subtotal: 190,
+    discount: 10,
+    total: 180,
+    paidAmount: 180,
+    changeAmount: 0,
+    paymentMethod: 'cash_counter',
+    createdAt: `${defaultTodayDateStr}T09:15:00Z`
+  },
+  {
+    id: 'pos_sale_init_2',
+    invoiceNumber: 'INV-2026-002',
+    cashierId: 'usr_staff_shakib',
+    cashierName: 'Shakib Hasan',
+    customerName: 'Salma Begum',
+    customerPhone: '01899887766',
+    items: [
+      { id: 'it_3', name: 'Color Print (1 Page)', nameBn: 'কালার প্রিন্ট (১ পাতা)', type: 'service', price: 15, quantity: 8 },
+      { id: 'it_4', name: 'Lamination (A4)', nameBn: 'লেমিনেশন (A4)', type: 'service', price: 30, quantity: 2 }
+    ],
+    subtotal: 180,
+    discount: 0,
+    total: 180,
+    paidAmount: 180,
+    changeAmount: 0,
+    paymentMethod: 'bkash',
+    createdAt: `${defaultTodayDateStr}T10:30:00Z`
+  },
+  {
+    id: 'pos_sale_init_3',
+    invoiceNumber: 'INV-2026-003',
+    cashierId: 'usr_staff_tanvir',
+    cashierName: 'Tanvir Ahmed',
+    customerName: 'Kamal Hossain',
+    customerPhone: '01911445566',
+    items: [
+      { id: 'it_5', name: 'Online Application Charge', nameBn: 'অনলাইন আবেদন চার্জ', type: 'service', price: 100, quantity: 1 },
+      { id: 'it_6', name: 'Passport Photo (4 Pcs)', nameBn: 'পাসপোর্ট ছবি (৪ কপি)', type: 'service', price: 50, quantity: 1 }
+    ],
+    subtotal: 150,
+    discount: 0,
+    total: 150,
+    paidAmount: 150,
+    changeAmount: 0,
+    paymentMethod: 'cash_counter',
+    createdAt: `${defaultTodayDateStr}T11:45:00Z`
+  }
+];
 
 export const initialHeroSlides: HeroSlide[] = [
   {

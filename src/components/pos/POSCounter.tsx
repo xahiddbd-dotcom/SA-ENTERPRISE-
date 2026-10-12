@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
@@ -23,7 +23,11 @@ import {
   Edit3,
   Check,
   Layers,
-  Sparkles
+  Sparkles,
+  FileText,
+  Calendar,
+  Clock,
+  DollarSign
 } from 'lucide-react';
 
 interface CartItem {
@@ -39,7 +43,7 @@ interface CartItem {
 
 export const POSCounter: React.FC = () => {
   const { language } = useLanguage();
-  const { products, services, createInvoice } = useData();
+  const { products, services, createInvoice, invoices, settings } = useData();
   const { currentUser } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'services' | 'products' | 'custom'>('services');
@@ -50,6 +54,7 @@ export const POSCounter: React.FC = () => {
   const [discountAmount, setDiscountAmount] = useState<number>(0);
   const [paidAmount, setPaidAmount] = useState<string>('');
   const [activeInvoice, setActiveInvoice] = useState<Invoice | null>(null);
+  const [showDailyReportModal, setShowDailyReportModal] = useState<boolean>(false);
 
   // Custom Item Form States
   const [customItemName, setCustomItemName] = useState('');
@@ -200,14 +205,126 @@ export const POSCounter: React.FC = () => {
     setActiveInvoice(newInvoice);
   };
 
+  // Print receipt cleanup listener
+  useEffect(() => {
+    const handleAfterPrint = () => {
+      document.body.classList.remove('printing-pos-daily-report');
+      document.body.classList.remove('printing-pos-invoice');
+    };
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => {
+      window.removeEventListener('afterprint', handleAfterPrint);
+      document.body.classList.remove('printing-pos-daily-report');
+      document.body.classList.remove('printing-pos-invoice');
+    };
+  }, []);
+
+  // Today's Sales Calculation for POS Thermal Daily Report
+  const todayDateObj = new Date();
+  const todayDateIso = todayDateObj.toISOString().split('T')[0];
+  const todayDateFormattedEn = todayDateObj.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
+  const todayDateFormattedBn = todayDateObj.toLocaleDateString('bn-BD', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+  const currentTimeFormatted = todayDateObj.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+
+  const todayPOSInvoices = useMemo(() => {
+    return (invoices || []).filter(inv => {
+      if (!inv.createdAt) return false;
+      return (
+        inv.createdAt.startsWith(todayDateIso) ||
+        new Date(inv.createdAt).toDateString() === todayDateObj.toDateString()
+      );
+    });
+  }, [invoices, todayDateIso]);
+
+  const todayInvoicesCount = todayPOSInvoices.length;
+  const todayGrossSubtotal = todayPOSInvoices.reduce((acc, inv) => acc + (inv.subtotal || 0), 0);
+  const todayTotalDiscount = todayPOSInvoices.reduce((acc, inv) => acc + (inv.discount || 0), 0);
+  const todayNetTotal = todayPOSInvoices.reduce((acc, inv) => acc + (inv.total || 0), 0);
+  const todayPaidTotal = todayPOSInvoices.reduce((acc, inv) => acc + (inv.paidAmount || 0), 0);
+  const todayDueTotal = todayPOSInvoices.reduce((acc, inv) => acc + (inv.dueAmount || 0), 0);
+  const todayItemsCount = todayPOSInvoices.reduce(
+    (acc, inv) => acc + (inv.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 0),
+    0
+  );
+
+  const cashTotal = todayPOSInvoices
+    .filter(i => i.paymentMethod === 'cash' || i.paymentMethod === 'cash_counter')
+    .reduce((acc, i) => acc + i.total, 0);
+  const cashCount = todayPOSInvoices.filter(
+    i => i.paymentMethod === 'cash' || i.paymentMethod === 'cash_counter'
+  ).length;
+
+  const bkashTotal = todayPOSInvoices
+    .filter(i => i.paymentMethod === 'bkash')
+    .reduce((acc, i) => acc + i.total, 0);
+  const bkashCount = todayPOSInvoices.filter(i => i.paymentMethod === 'bkash').length;
+
+  const nagadTotal = todayPOSInvoices
+    .filter(i => i.paymentMethod === 'nagad')
+    .reduce((acc, i) => acc + i.total, 0);
+  const nagadCount = todayPOSInvoices.filter(i => i.paymentMethod === 'nagad').length;
+
+  const cardTotal = todayPOSInvoices
+    .filter(i => i.paymentMethod === 'card' || i.paymentMethod === 'bank')
+    .reduce((acc, i) => acc + i.total, 0);
+  const cardCount = todayPOSInvoices.filter(
+    i => i.paymentMethod === 'card' || i.paymentMethod === 'bank'
+  ).length;
+
+  const todaySoldItems = useMemo(() => {
+    const itemsMap: Record<string, { name: string; nameBn?: string; qty: number; total: number; rate: number }> = {};
+    todayPOSInvoices.forEach(inv => {
+      inv.items?.forEach(it => {
+        const key = it.name;
+        if (!itemsMap[key]) {
+          itemsMap[key] = {
+            name: it.name,
+            nameBn: it.nameBn,
+            qty: 0,
+            total: 0,
+            rate: it.unitPrice || 0
+          };
+        }
+        itemsMap[key].qty += it.quantity || 1;
+        itemsMap[key].total += it.total || ((it.unitPrice || 0) * (it.quantity || 1));
+      });
+    });
+    return Object.values(itemsMap).sort((a, b) => b.total - a.total);
+  }, [todayPOSInvoices]);
+
   const printReceipt = () => {
-    window.print();
+    document.body.classList.add('printing-pos-invoice');
+    setTimeout(() => {
+      window.print();
+    }, 100);
+  };
+
+  const handlePrintDailyReport = (direct = false) => {
+    setShowDailyReportModal(true);
+    if (direct) {
+      document.body.classList.add('printing-pos-daily-report');
+      setTimeout(() => {
+        window.print();
+      }, 150);
+    }
   };
 
   return (
     <div className="p-4 sm:p-6 space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-neutral-800">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-neutral-800">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
             <Calculator className="w-6 h-6" />
@@ -227,8 +344,24 @@ export const POSCounter: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* One-Click Print Daily Report Action Button */}
+          <button
+            type="button"
+            id="pos-one-click-daily-report-btn"
+            onClick={() => handlePrintDailyReport(true)}
+            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-orange-500 hover:brightness-110 active:scale-95 text-neutral-950 font-black text-xs flex items-center gap-2 shadow-lg shadow-amber-950/40 transition-all cursor-pointer border border-amber-300/50"
+            title={language === 'bn' ? 'আজকের থার্মাল সেলস সামারি রিপোর্ট ১-ক্লিকে প্রিন্ট করুন' : 'One-Click Print Today\'s Thermal Sales Report'}
+          >
+            <Printer className="w-4 h-4 text-neutral-950 stroke-[2.5]" />
+            <span>{language === 'bn' ? 'আজকের রিপোর্ট প্রিন্ট' : 'Print Daily Report'}</span>
+            <span className="bg-neutral-950/20 text-neutral-950 px-2 py-0.5 rounded-md text-[10.5px] font-mono font-black border border-black/10">
+              ৳{todayNetTotal}
+            </span>
+          </button>
+
           <StaffTTSControlWidget variant="compact" />
+
           <span className="text-xs px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 font-mono flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>Cashier: <strong className="text-emerald-400">{currentUser?.name || 'Admin'}</strong></span>
@@ -628,6 +761,27 @@ export const POSCounter: React.FC = () => {
             )}
           </div>
 
+          {/* Today's Counter Summary Quick Bar */}
+          <div className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span className="text-neutral-400 text-[11px]">
+                {language === 'bn' ? 'আজকের বিক্রয়:' : 'Today\'s Sales:'}
+              </span>
+              <span className="font-mono font-bold text-amber-400 text-xs">৳{todayNetTotal}</span>
+              <span className="text-[10px] text-neutral-500 font-mono">({todayInvoicesCount} {language === 'bn' ? 'বিল' : 'bills'})</span>
+            </div>
+            <button
+              type="button"
+              id="pos-summary-quick-print-link"
+              onClick={() => handlePrintDailyReport(false)}
+              className="text-[11px] font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 hover:underline cursor-pointer transition-colors"
+            >
+              <Printer className="w-3 h-3" />
+              <span>{language === 'bn' ? 'রিপোর্ট' : 'Report'}</span>
+            </button>
+          </div>
+
           {/* Action Buttons */}
           <div className="grid grid-cols-2 gap-2 pt-1">
             <button
@@ -679,7 +833,7 @@ export const POSCounter: React.FC = () => {
                 <div className="text-[11px] space-y-0.5 border-b border-dashed border-neutral-400 pb-2">
                   <div className="flex justify-between">
                     <span>Invoice: {activeInvoice.invoiceNumber}</span>
-                    <span>{new Date(activeInvoice.createdAt).toLocaleDateString()}</span>
+                    <span>{new Date(activeInvoice.createdAt || Date.now()).toLocaleDateString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Customer: {activeInvoice.customerName}</span>
@@ -724,7 +878,7 @@ export const POSCounter: React.FC = () => {
                     <span>Paid ({activeInvoice.paymentMethod.toUpperCase()}):</span>
                     <span>৳{activeInvoice.paidAmount}</span>
                   </div>
-                  {activeInvoice.dueAmount > 0 && (
+                  {(activeInvoice.dueAmount || 0) > 0 && (
                     <div className="flex justify-between text-rose-600 font-bold">
                       <span>Due:</span>
                       <span>৳{activeInvoice.dueAmount}</span>
@@ -742,7 +896,7 @@ export const POSCounter: React.FC = () => {
               <div className="flex items-center gap-3 pt-2">
                 <button
                   onClick={printReceipt}
-                  className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg"
+                  className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg cursor-pointer"
                 >
                   <Printer className="w-4 h-4" />
                   <span>Print Receipt</span>
@@ -750,9 +904,254 @@ export const POSCounter: React.FC = () => {
 
                 <button
                   onClick={() => { setActiveInvoice(null); clearCart(); }}
-                  className="px-5 py-3 rounded-xl bg-neutral-800 text-neutral-200 text-xs font-semibold hover:bg-neutral-700"
+                  className="px-5 py-3 rounded-xl bg-neutral-800 text-neutral-200 text-xs font-semibold hover:bg-neutral-700 cursor-pointer"
                 >
                   New Sale
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Thermal POS Daily Report Modal (80mm Thermal Printer Formatted) */}
+      {showDailyReportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
+          <div className="bg-neutral-900 border border-neutral-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+            {/* Modal Top Bar */}
+            <div className="p-3.5 bg-neutral-950 border-b border-neutral-800 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
+                  <Printer className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <span>{language === 'bn' ? 'দৈনিক সেলস সামারি রিপোর্ট' : 'POS Daily Sales Report'}</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">
+                      80mm Thermal
+                    </span>
+                  </h3>
+                  <p className="text-[10.5px] text-neutral-400 font-mono">
+                    {todayDateFormattedEn} • {currentTimeFormatted} • {todayInvoicesCount} {language === 'bn' ? 'বিল' : 'Bills'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowDailyReportModal(false);
+                  document.body.classList.remove('printing-pos-daily-report');
+                }}
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Scrollable Thermal Paper Slip Preview */}
+            <div className="p-4 sm:p-6 overflow-y-auto bg-neutral-950/60 flex justify-center">
+              <div
+                id="pos-daily-report-printable-slip"
+                className="bg-white text-black p-4 sm:p-5 rounded shadow-2xl font-mono text-[11px] leading-tight space-y-3 w-[80mm] max-w-[320px] select-text"
+              >
+                {/* Header */}
+                <div className="text-center border-b-2 border-dashed border-black pb-2.5 space-y-0.5">
+                  <h2 className="text-sm font-black tracking-tight uppercase">
+                    {settings.businessName || 'SAIFUL ENTERPRISE'}
+                  </h2>
+                  <p className="text-[10px] font-bold">{settings.businessNameBn || 'সাইফুল এন্টারপ্রাইজ'}</p>
+                  <p className="text-[9px] leading-snug">20/1 Sagar-Saikat Market, Indira Road</p>
+                  <p className="text-[9px] leading-snug">Beside Tejgaon College, Farmgate, Dhaka-1215</p>
+                  <p className="text-[9.5px] font-bold">Mob: {settings.phonePrimary || '01540004966'} | {settings.whatsappNumber || '01517992585'}</p>
+                  <div className="pt-1.5">
+                    <span className="inline-block bg-black text-white text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
+                      DAILY POS SALES SUMMARY
+                    </span>
+                  </div>
+                </div>
+
+                {/* Report Metadata */}
+                <div className="text-[10px] border-b border-dashed border-black pb-2 space-y-0.5 font-medium">
+                  <div className="flex justify-between">
+                    <span>DATE:</span>
+                    <span className="font-bold">{todayDateFormattedEn}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>PRINT TIME:</span>
+                    <span>{currentTimeFormatted}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>CASHIER:</span>
+                    <span className="font-bold">{currentUser?.name || 'Saiful Admin'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>TERMINAL:</span>
+                    <span>POS Counter Station #1</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>REPORT ID:</span>
+                    <span className="font-mono text-[9px]">DSR-{todayDateIso.replace(/-/g, '')}</span>
+                  </div>
+                </div>
+
+                {/* Financial Summary Highlight Box */}
+                <div className="border border-black p-2 bg-neutral-50 space-y-1 text-[10.5px]">
+                  <div className="flex justify-between">
+                    <span>Total Invoices:</span>
+                    <span className="font-bold">{todayInvoicesCount} bills</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Items Sold:</span>
+                    <span className="font-bold">{todayItemsCount} pcs</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Gross Sales:</span>
+                    <span>৳{todayGrossSubtotal}</span>
+                  </div>
+                  {todayTotalDiscount > 0 && (
+                    <div className="flex justify-between text-black">
+                      <span>Total Discount:</span>
+                      <span>-৳{todayTotalDiscount}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-xs font-black border-t border-black pt-1">
+                    <span>NET SALES TOTAL:</span>
+                    <span>৳{todayNetTotal}</span>
+                  </div>
+                  <div className="flex justify-between text-[10px]">
+                    <span>Amount Collected:</span>
+                    <span className="font-bold">৳{todayPaidTotal}</span>
+                  </div>
+                  {todayDueTotal > 0 && (
+                    <div className="flex justify-between text-[10px] font-bold">
+                      <span>Receivable / Due:</span>
+                      <span>৳{todayDueTotal}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Payment Breakdown */}
+                <div className="border-b border-dashed border-black pb-2 space-y-1">
+                  <div className="font-bold text-[10px] uppercase border-b border-dashed border-black pb-0.5">
+                    Payment Breakdown
+                  </div>
+                  <div className="flex justify-between text-[10px]">
+                    <span>Cash Counter ({cashCount}):</span>
+                    <span className="font-bold">৳{cashTotal}</span>
+                  </div>
+                  <div className="flex justify-between text-[10px]">
+                    <span>bKash Mobile ({bkashCount}):</span>
+                    <span className="font-bold">৳{bkashTotal}</span>
+                  </div>
+                  <div className="flex justify-between text-[10px]">
+                    <span>Nagad Mobile ({nagadCount}):</span>
+                    <span className="font-bold">৳{nagadTotal}</span>
+                  </div>
+                  <div className="flex justify-between text-[10px]">
+                    <span>Card / Bank ({cardCount}):</span>
+                    <span className="font-bold">৳{cardTotal}</span>
+                  </div>
+                </div>
+
+                {/* Top Sold Items Itemized List */}
+                <div className="border-b border-dashed border-black pb-2 space-y-1">
+                  <div className="font-bold text-[10px] uppercase border-b border-dashed border-black pb-0.5 flex justify-between">
+                    <span>Sold Items Itemized</span>
+                    <span>Qty / Total</span>
+                  </div>
+                  {todaySoldItems.length === 0 ? (
+                    <div className="text-center text-[10px] py-1 opacity-70">
+                      No items recorded today yet
+                    </div>
+                  ) : (
+                    todaySoldItems.map((item, idx) => (
+                      <div key={idx} className="flex justify-between text-[9.5px]">
+                        <span className="truncate max-w-[170px]">{item.name}</span>
+                        <span>{item.qty} pcs • ৳{item.total}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* Recent Invoices Log */}
+                <div className="border-b border-dashed border-black pb-2 space-y-1">
+                  <div className="font-bold text-[10px] uppercase border-b border-dashed border-black pb-0.5 flex justify-between">
+                    <span>Today's Voucher Log</span>
+                    <span>Method / Total</span>
+                  </div>
+                  {todayPOSInvoices.map((inv, idx) => (
+                    <div key={idx} className="flex justify-between text-[9px]">
+                      <span className="truncate max-w-[150px]">
+                        {inv.invoiceNumber || `INV-${idx+1}`} • {inv.customerName?.split(' ')[0] || 'Cust'}
+                      </span>
+                      <span>
+                        {inv.paymentMethod.toUpperCase()} ৳{inv.total}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Cash Drawer Reconciliation */}
+                <div className="border-b border-dashed border-black pb-2 space-y-0.5 text-[9.5px]">
+                  <div className="font-bold text-[10px] uppercase pb-0.5">Cash Drawer Balance</div>
+                  <div className="flex justify-between">
+                    <span>Base Float / Change:</span>
+                    <span>৳1,000</span>
+                  </div>
+                  <div className="flex justify-between font-bold">
+                    <span>Today Cash Sales:</span>
+                    <span>+৳{cashTotal}</span>
+                  </div>
+                  <div className="flex justify-between font-black text-[10px] border-t border-black pt-0.5">
+                    <span>Expected Drawer Cash:</span>
+                    <span>৳{1000 + cashTotal}</span>
+                  </div>
+                </div>
+
+                {/* Verification & Signatures */}
+                <div className="pt-2 text-[9px] space-y-3">
+                  <div className="flex justify-between pt-4">
+                    <div className="text-center">
+                      <div className="border-t border-black w-24 pt-0.5">Cashier Sign</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="border-t border-black w-24 pt-0.5">Manager Sign</div>
+                    </div>
+                  </div>
+                  <div className="text-center text-[8.5px] opacity-75 border-t border-dashed border-black pt-1 space-y-0.5">
+                    <p>*** শেষ / END OF DAILY POS AUDIT REPORT ***</p>
+                    <p>Generated by Saiful Enterprise POS Terminal</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="p-3.5 bg-neutral-950 border-t border-neutral-800 flex items-center justify-between gap-3">
+              <div className="text-xs text-neutral-400">
+                <span>Thermal Roll: <strong className="text-white">80mm Paper Width</strong></span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  id="pos-thermal-print-now-btn"
+                  onClick={() => {
+                    document.body.classList.add('printing-pos-daily-report');
+                    setTimeout(() => window.print(), 100);
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-neutral-950 font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-emerald-950/40 active:scale-95 transition-all cursor-pointer"
+                >
+                  <Printer className="w-4 h-4 text-neutral-950 stroke-[2.5]" />
+                  <span>{language === 'bn' ? 'প্রিন্ট করুন (Print Thermal)' : 'Print Thermal Slip'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDailyReportModal(false);
+                    document.body.classList.remove('printing-pos-daily-report');
+                  }}
+                  className="px-4 py-2.5 rounded-xl bg-neutral-800 text-neutral-300 hover:bg-neutral-700 text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  {language === 'bn' ? 'বন্ধ করুন' : 'Close'}
                 </button>
               </div>
             </div>

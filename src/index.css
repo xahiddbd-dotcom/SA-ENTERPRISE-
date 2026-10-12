@@ -449,6 +449,70 @@ html.light .bg-radial {
     break-inside: avoid !important;
   }
 
+  /* Full isolation when printing POS Daily Sales Report */
+  body.printing-pos-daily-report * {
+    visibility: hidden !important;
+  }
+
+  body.printing-pos-daily-report #pos-daily-report-printable-slip,
+  body.printing-pos-daily-report #pos-daily-report-printable-slip * {
+    visibility: visible !important;
+  }
+
+  body.printing-pos-daily-report #pos-daily-report-printable-slip {
+    position: absolute !important;
+    left: 50% !important;
+    top: 0 !important;
+    transform: translateX(-50%) !important;
+    width: 80mm !important;
+    max-width: 320px !important;
+    margin: 0 auto !important;
+    padding: 8px 10px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: 'JetBrains Mono', 'Courier New', Courier, monospace, 'Hind Siliguri', sans-serif !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    border: 1px dashed #222222 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    z-index: 9999999 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Full isolation when printing POS Single Thermal Invoice */
+  body.printing-pos-invoice * {
+    visibility: hidden !important;
+  }
+
+  body.printing-pos-invoice #thermal-receipt,
+  body.printing-pos-invoice #thermal-receipt * {
+    visibility: visible !important;
+  }
+
+  body.printing-pos-invoice #thermal-receipt {
+    position: absolute !important;
+    left: 50% !important;
+    top: 0 !important;
+    transform: translateX(-50%) !important;
+    width: 80mm !important;
+    max-width: 320px !important;
+    margin: 0 auto !important;
+    padding: 8px 10px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: 'JetBrains Mono', 'Courier New', Courier, monospace, 'Hind Siliguri', sans-serif !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    border: 1px dashed #222222 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    z-index: 9999999 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
   /* Modal Backdrop removal during print */
   .receipt-modal-backdrop {
     position: static !important;
