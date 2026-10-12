@@ -10,7 +10,6 @@ import { Hero } from './components/public/Hero';
 import { TejgaonSpecial } from './components/public/TejgaonSpecial';
 import { ServicesSection } from './components/public/ServicesSection';
 import { ShopSection } from './components/public/ShopSection';
-import { ProductSlider } from './components/public/ProductSlider';
 import { TeamSection } from './components/public/TeamSection';
 import { ApplicationTracker } from './components/public/ApplicationTracker';
 import { UserProfile } from './components/public/UserProfile';
@@ -209,18 +208,7 @@ const MainLayout: React.FC = () => {
                 if (serviceId) handleSelectService(serviceId);
               }}
             />
-            <ServicesSection
-              onOpenTrackerWithId={handleOpenTrackerWithId}
-              initialServiceId={selectedServiceId}
-              onServiceSelect={handleSelectService}
-            />
-            {/* Featured Product Showcase Slider */}
-            <ProductSlider
-              openCart={() => setIsCartOpen(true)}
-              onViewAllProducts={() => setActiveTab('shop')}
-            />
             <TrustSection />
-            <ContactSection />
           </>
         )}
 

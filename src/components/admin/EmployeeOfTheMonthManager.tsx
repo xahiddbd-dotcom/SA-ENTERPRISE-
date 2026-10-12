@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { triggerThanosSnap } from '../common/ThanosSnapEffect';
-import { EmployeeOfTheMonthCard } from '../public/EmployeeOfTheMonthCard';
+import { EmployeeOfTheMonthCard, VideoTributeModal } from '../public/EmployeeOfTheMonthCard';
+import { parseVideoSource } from '../../utils/videoUtils';
 import {
   Award,
   Save,
@@ -16,7 +17,18 @@ import {
   RefreshCw,
   Eye,
   Sliders,
-  Check
+  Check,
+  Upload,
+  Video,
+  Youtube,
+  Link,
+  Play,
+  ExternalLink,
+  Film,
+  FileVideo,
+  Music,
+  AlertCircle,
+  Share2
 } from 'lucide-react';
 
 const AVATAR_PRESETS = [
@@ -68,6 +80,30 @@ export const EmployeeOfTheMonthManager: React.FC = () => {
   const [roleBn, setRoleBn] = useState<string>(currentConfig.roleBn || '');
   const [photo, setPhoto] = useState<string>(currentConfig.photo || '');
   const [videoUrl, setVideoUrl] = useState<string>(currentConfig.videoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-young-man-working-with-headphones-40082-large.mp4');
+  
+  // Dedicated Video Source Tabs: 'youtube' | 'facebook' | 'upload' | 'preset'
+  const [videoSourceTab, setVideoSourceTab] = useState<'youtube' | 'facebook' | 'upload' | 'preset'>(() => {
+    const v = currentConfig.videoUrl || '';
+    if (v.includes('youtube.com') || v.includes('youtu.be')) return 'youtube';
+    if (v.includes('facebook.com') || v.includes('fb.watch')) return 'facebook';
+    if (v.startsWith('data:') || v.startsWith('blob:')) return 'upload';
+    return 'youtube';
+  });
+
+  const [youtubeInput, setYoutubeInput] = useState<string>(() => {
+    const v = currentConfig.videoUrl || '';
+    return (v.includes('youtube.com') || v.includes('youtu.be')) ? v : 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+  });
+
+  const [facebookInput, setFacebookInput] = useState<string>(() => {
+    const v = currentConfig.videoUrl || '';
+    return (v.includes('facebook.com') || v.includes('fb.watch')) ? v : '';
+  });
+
+  const [uploadedFileName, setUploadedFileName] = useState<string>(currentConfig.uploadedVideoName || '');
+  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+  const [isTestModalMuted, setIsTestModalMuted] = useState(false);
+
   const [comment, setComment] = useState<string>(currentConfig.comment || '');
   const [commentBn, setCommentBn] = useState<string>(currentConfig.commentBn || '');
   const [month, setMonth] = useState<string>(currentConfig.month || 'March 2026');
@@ -90,6 +126,7 @@ export const EmployeeOfTheMonthManager: React.FC = () => {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    const parsed = parseVideoSource(videoUrl);
     updateSettings({
       employeeOfTheMonth: {
         enabled,
@@ -99,6 +136,10 @@ export const EmployeeOfTheMonthManager: React.FC = () => {
         roleBn: roleBn.trim(),
         photo: photo.trim(),
         videoUrl: videoUrl.trim(),
+        videoType: parsed.type,
+        youtubeUrl: parsed.type === 'youtube' ? videoUrl.trim() : youtubeInput.trim(),
+        facebookUrl: parsed.type === 'facebook' ? videoUrl.trim() : facebookInput.trim(),
+        uploadedVideoName: uploadedFileName,
         comment: comment.trim(),
         commentBn: commentBn.trim(),
         month: month.trim(),
@@ -344,23 +385,379 @@ export const EmployeeOfTheMonthManager: React.FC = () => {
             </div>
           </div>
 
-          {/* Video URL Field */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-300">
-              {language === 'bn' ? 'কর্মীর ভিডিও লিংক (Video URL - ছবিতে ক্লিক করলে প্লে হবে)' : 'Employee Video URL (Plays on photo click)'}
-            </label>
-            <input
-              type="url"
-              value={videoUrl}
-              onChange={e => setVideoUrl(e.target.value)}
-              placeholder="https://assets.mixkit.co/... or MP4 link"
-              className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-neutral-100 font-mono focus:outline-none focus:border-amber-500"
-            />
-            <p className="text-[10px] text-neutral-400">
-              {language === 'bn'
-                ? 'ছবিতে ক্লিক করলে একটি ব্লার ব্যাকগ্রাউন্ড মোডাল এবং দুই পাশে AI রোবট শুভেচ্ছা অ্যানিমেশনসহ এই ভিডিওটি প্লে হবে।'
-                : 'Clicking photo opens a frosted blur backdrop with 2 cheering AI robots and plays this video.'}
-            </p>
+          {/* Dedicated Video Settings Section: YouTube, Facebook, File Upload & Presets */}
+          <div className="space-y-4 p-5 rounded-3xl bg-neutral-950/90 border-2 border-amber-500/30 shadow-xl">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center">
+                  <Video className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-1.5">
+                    <span>
+                      {language === 'bn'
+                        ? 'কর্মীর সম্মাননা ভিডিও সেটিংস (Video Settings)'
+                        : 'Employee Tribute Video Settings'}
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                      🎬 New
+                    </span>
+                  </h4>
+                  <p className="text-[11px] text-neutral-400">
+                    {language === 'bn'
+                      ? 'কর্মীর ছবিতে ক্লিক করলে পেজ ব্লার হয়ে ফুলস্ক্রিনে এই ভিডিও প্লে হবে এবং দুই পাশে রোবট শুভেচ্ছা জানাবে।'
+                      : 'Plays fullscreen with blurred backdrop and dual AI robot cheering animations.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Instant Test Modal Trigger */}
+              <button
+                type="button"
+                onClick={() => setIsTestModalOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-sky-500/20 hover:from-amber-500/30 hover:to-sky-500/30 border border-amber-400/40 text-amber-300 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md active:scale-95"
+              >
+                <Play className="w-3.5 h-3.5 fill-amber-300" />
+                <span>{language === 'bn' ? 'প্লেয়ার ও রোবট টেস্ট' : 'Test Player & Robots'}</span>
+              </button>
+            </div>
+
+            {/* Source Tab Selector */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 rounded-2xl bg-neutral-900 border border-neutral-800 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => {
+                  setVideoSourceTab('youtube');
+                  if (youtubeInput) setVideoUrl(youtubeInput);
+                }}
+                className={`py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
+                  videoSourceTab === 'youtube'
+                    ? 'bg-red-600 text-white shadow-lg shadow-red-950/60'
+                    : 'text-neutral-400 hover:text-white hover:bg-neutral-800/60'
+                }`}
+              >
+                <Youtube className="w-4 h-4" />
+                <span>YouTube</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setVideoSourceTab('facebook');
+                  if (facebookInput) setVideoUrl(facebookInput);
+                }}
+                className={`py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
+                  videoSourceTab === 'facebook'
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-950/60'
+                    : 'text-neutral-400 hover:text-white hover:bg-neutral-800/60'
+                }`}
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Facebook</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setVideoSourceTab('upload')}
+                className={`py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
+                  videoSourceTab === 'upload'
+                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-950/60'
+                    : 'text-neutral-400 hover:text-white hover:bg-neutral-800/60'
+                }`}
+              >
+                <Upload className="w-4 h-4" />
+                <span>{language === 'bn' ? 'ফাইল আপলোড' : 'Upload Video'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setVideoSourceTab('preset')}
+                className={`py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
+                  videoSourceTab === 'preset'
+                    ? 'bg-amber-500 text-neutral-950 shadow-lg shadow-amber-950/60 font-black'
+                    : 'text-neutral-400 hover:text-white hover:bg-neutral-800/60'
+                }`}
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>{language === 'bn' ? 'রেডিমেড প্রিসেট' : 'Presets'}</span>
+              </button>
+            </div>
+
+            {/* TAB 1: YOUTUBE VIDEO */}
+            {videoSourceTab === 'youtube' && (
+              <div className="space-y-3 p-3.5 rounded-2xl bg-neutral-900/80 border border-neutral-800 animate-in fade-in">
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-200 mb-1 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Youtube className="w-3.5 h-3.5 text-red-500" />
+                      <span>{language === 'bn' ? 'ইউটিউব ভিডিও লিঙ্ক (YouTube Video Link)' : 'YouTube Video Link'}</span>
+                    </span>
+                    <span className="text-[10px] text-neutral-400">
+                      Shorts / Standard / youtu.be সমর্থিত
+                    </span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="url"
+                      value={youtubeInput}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setYoutubeInput(val);
+                        setVideoUrl(val);
+                      }}
+                      placeholder="https://www.youtube.com/watch?v=... বা https://youtu.be/..."
+                      className="w-full pl-9 pr-4 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-red-500"
+                    />
+                    <Youtube className="w-4 h-4 text-red-500 absolute left-3 top-3" />
+                  </div>
+                </div>
+
+                {/* Parsed YouTube Status & Thumbnail Preview */}
+                {(() => {
+                  const parsed = parseVideoSource(youtubeInput);
+                  if (parsed.type === 'youtube' && parsed.youtubeId) {
+                    return (
+                      <div className="flex items-center gap-3 p-2.5 rounded-xl bg-red-950/40 border border-red-500/30">
+                        <img
+                          src={parsed.thumbnailUrl}
+                          alt="YouTube Thumbnail"
+                          className="w-20 h-14 object-cover rounded-lg border border-red-500/40 shrink-0"
+                        />
+                        <div className="text-xs space-y-0.5">
+                          <span className="font-bold text-emerald-400 flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            {language === 'bn' ? 'সঠিক ইউটিউব ভিডিও চিহ্নিত হয়েছে!' : 'Valid YouTube Video Identified'}
+                          </span>
+                          <span className="text-[11px] text-neutral-300 block font-mono">
+                            Video ID: <span className="text-red-300 font-bold">{parsed.youtubeId}</span>
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="p-2 text-[11px] text-amber-300/80 bg-amber-950/30 border border-amber-500/20 rounded-xl flex items-center gap-2">
+                      <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>{language === 'bn' ? 'ইউটিউবের যেকোনো সাধারণ ভিডিও, শর্টস বা শেয়ার লিঙ্ক দিন।' : 'Enter any standard YouTube, Shorts, or youtu.be link.'}</span>
+                    </div>
+                  );
+                })()}
+
+                {/* Quick Examples */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] text-neutral-400">{language === 'bn' ? 'দ্রুত ডেমো লিঙ্ক:' : 'Quick Demo Links:'}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const demo = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+                      setYoutubeInput(demo);
+                      setVideoUrl(demo);
+                    }}
+                    className="px-2 py-0.5 rounded text-[10px] bg-red-900/40 text-red-300 border border-red-500/30 hover:bg-red-800/40"
+                  >
+                    Demo 1 (Global Hit)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const demo = 'https://www.youtube.com/watch?v=jNQXAC9IVRw';
+                      setYoutubeInput(demo);
+                      setVideoUrl(demo);
+                    }}
+                    className="px-2 py-0.5 rounded text-[10px] bg-red-900/40 text-red-300 border border-red-500/30 hover:bg-red-800/40"
+                  >
+                    Demo 2 (YouTube Classic)
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: FACEBOOK VIDEO */}
+            {videoSourceTab === 'facebook' && (
+              <div className="space-y-3 p-3.5 rounded-2xl bg-neutral-900/80 border border-neutral-800 animate-in fade-in">
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-200 mb-1 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Share2 className="w-3.5 h-3.5 text-blue-500" />
+                      <span>{language === 'bn' ? 'ফেসবুক ভিডিও লিঙ্ক (Facebook Video Link)' : 'Facebook Video Link'}</span>
+                    </span>
+                    <span className="text-[10px] text-neutral-400">
+                      fb.watch / facebook.com
+                    </span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="url"
+                      value={facebookInput}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setFacebookInput(val);
+                        setVideoUrl(val);
+                      }}
+                      placeholder="https://www.facebook.com/.../videos/... বা https://fb.watch/..."
+                      className="w-full pl-9 pr-4 py-2.5 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-blue-500"
+                    />
+                    <Share2 className="w-4 h-4 text-blue-500 absolute left-3 top-3" />
+                  </div>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-blue-950/40 border border-blue-500/30 text-[11px] text-blue-200 space-y-1">
+                  <span className="font-bold block text-blue-300">
+                    💡 {language === 'bn' ? 'ফেসবুক লিঙ্ক কীভাবে পাবেন?' : 'How to get Facebook video link?'}
+                  </span>
+                  <p className="text-neutral-300 leading-relaxed text-[11px]">
+                    {language === 'bn'
+                      ? 'ফেসবুকে ভিডিওটি ওপেন করে "Share" বাটনে ক্লিক করুন, এরপর "Copy Link" নির্বাচন করে এখানে পেস্ট করুন।'
+                      : 'Open the video on Facebook, click Share -> Copy Link, and paste it here. Public videos play automatically.'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: FILE UPLOAD */}
+            {videoSourceTab === 'upload' && (
+              <div className="space-y-3 p-3.5 rounded-2xl bg-neutral-900/80 border border-neutral-800 animate-in fade-in">
+                <label className="block text-xs font-semibold text-neutral-200">
+                  {language === 'bn' ? 'কম্পিউটার বা মোবাইল থেকে ভিডিও আপলোড করুন' : 'Upload Video from Computer or Phone'}
+                </label>
+
+                {/* Drag & Drop Upload Zone */}
+                <label className="relative border-2 border-dashed border-emerald-500/40 hover:border-emerald-400 bg-neutral-950/80 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group hover:bg-neutral-900">
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                    className="hidden"
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        if (file.size > 80 * 1024 * 1024) {
+                          alert(language === 'bn' ? 'ভিডিও ফাইল সাইজ ৮০MB এর কম হতে হবে।' : 'File size must be under 80MB.');
+                          return;
+                        }
+                        setUploadedFileName(file.name);
+                        const reader = new FileReader();
+                        reader.onload = ev => {
+                          const result = ev.target?.result as string;
+                          if (result) {
+                            setVideoUrl(result);
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Upload className="w-6 h-6" />
+                  </div>
+                  <div className="text-center space-y-0.5">
+                    <span className="text-xs font-bold text-white block">
+                      {uploadedFileName ? `✅ নির্বাচিত: ${uploadedFileName}` : (language === 'bn' ? 'ভিডিও ফাইল নির্বাচন করতে ক্লিক করুন' : 'Click to select video file')}
+                    </span>
+                    <span className="text-[10px] text-neutral-400 block">
+                      MP4, WebM, MOV ফরম্যাট সমর্থিত (সর্বোচ্চ ৮০MB)
+                    </span>
+                  </div>
+                </label>
+
+                {uploadedFileName && (
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-xs">
+                    <div className="flex items-center gap-2 text-emerald-300">
+                      <FileVideo className="w-4 h-4 text-emerald-400" />
+                      <span className="font-semibold truncate max-w-xs">{uploadedFileName}</span>
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      Ready
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 4: CURATED PRESETS */}
+            {videoSourceTab === 'preset' && (
+              <div className="space-y-3 p-3.5 rounded-2xl bg-neutral-900/80 border border-neutral-800 animate-in fade-in">
+                <span className="text-xs font-semibold text-neutral-200 block">
+                  {language === 'bn' ? 'রেডিমেড প্রফেশনাল সম্মাননা ভিডিও প্রিসেট:' : 'Curated Professional Tribute Video Presets:'}
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {[
+                    {
+                      title: 'Workstation Focus & Headphones',
+                      titleBn: 'কম্পিউটার ওয়ার্কস্টেশন ও হেডফোন ফোকাস',
+                      url: 'https://assets.mixkit.co/videos/preview/mixkit-young-man-working-with-headphones-40082-large.mp4',
+                      tag: 'Best Operator'
+                    },
+                    {
+                      title: 'Speed Typing & Keyboards',
+                      titleBn: 'দ্রুত টাইপিং ও কিবোর্ড একিউরেসি',
+                      url: 'https://assets.mixkit.co/videos/preview/mixkit-hands-typing-on-a-laptop-keyboard-41221-large.mp4',
+                      tag: 'Master Typing'
+                    },
+                    {
+                      title: 'Digital Graphic Design & Creative',
+                      titleBn: 'গ্রাফিক ডিজাইন ও ক্রিয়েটিভ স্কিল',
+                      url: 'https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-996-large.mp4',
+                      tag: 'Designer'
+                    },
+                    {
+                      title: 'Customer Service & Desk Support',
+                      titleBn: 'কাস্টমার সার্ভিস ও আন্তরিক সেবা',
+                      url: 'https://assets.mixkit.co/videos/preview/mixkit-hands-holding-a-smartphone-with-a-green-screen-42984-large.mp4',
+                      tag: 'Customer Star'
+                    }
+                  ].map((p, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => setVideoUrl(p.url)}
+                      className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
+                        videoUrl === p.url
+                          ? 'bg-amber-500/20 border-amber-400 text-amber-200 shadow-md'
+                          : 'bg-neutral-950 border-neutral-800 text-neutral-300 hover:border-neutral-700'
+                      }`}
+                    >
+                      <div className="text-left space-y-0.5">
+                        <span className="text-xs font-bold block">{language === 'bn' ? p.titleBn : p.title}</span>
+                        <span className="text-[10px] text-amber-400 font-mono">🏷️ {p.tag}</span>
+                      </div>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                        videoUrl === p.url ? 'bg-amber-400 text-neutral-950' : 'bg-neutral-800 text-neutral-400'
+                      }`}>
+                        {videoUrl === p.url ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Play className="w-2.5 h-2.5" />}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Video Status Bar & Live Test Trigger */}
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-neutral-900 border border-neutral-800">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs text-neutral-300">
+                  {language === 'bn' ? 'বর্তমান সোর্স:' : 'Active Video:'}{' '}
+                  <span className="font-bold text-amber-300 font-mono">
+                    {(() => {
+                      const p = parseVideoSource(videoUrl);
+                      if (p.type === 'youtube') return 'YouTube Embed';
+                      if (p.type === 'facebook') return 'Facebook Video Embed';
+                      if (p.type === 'upload') return 'Uploaded Local File';
+                      return 'Direct HTML5 MP4';
+                    })()}
+                  </span>
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsTestModalOpen(true)}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:brightness-110 text-neutral-950 font-black text-xs flex items-center gap-2 shadow-lg shadow-amber-950 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <Play className="w-3.5 h-3.5 fill-neutral-950" />
+                <span>{language === 'bn' ? '🎬 ফুলস্ক্রিন প্লেয়ার ও রোবট টেস্ট' : '🎬 Test Player & AI Robots'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Comments & Remarks (তার ব্যাপারে মন্তব্য) */}
@@ -443,6 +840,22 @@ export const EmployeeOfTheMonthManager: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Admin Live Fullscreen Video & AI Robots Test Modal */}
+      {isTestModalOpen && (
+        <VideoTributeModal
+          isOpen={isTestModalOpen}
+          onClose={() => setIsTestModalOpen(false)}
+          videoUrl={videoUrl}
+          name={name || 'কর্মীর নাম'}
+          role={role || 'পদবী'}
+          month={month || 'মার্চ ২০২৬'}
+          comment={comment || commentBn || 'অসাধারণ পারফরম্যান্স ও গ্রাহক সেবা'}
+          isMuted={isTestModalMuted}
+          setIsMuted={setIsTestModalMuted}
+          language={language}
+        />
+      )}
     </div>
   );
 };

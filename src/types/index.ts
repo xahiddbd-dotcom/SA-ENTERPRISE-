@@ -531,6 +531,11 @@ export interface WebsiteSettings {
     roleBn: string;
     photo: string;
     videoUrl?: string;
+    videoType?: 'youtube' | 'facebook' | 'upload' | 'direct';
+    youtubeUrl?: string;
+    facebookUrl?: string;
+    uploadedVideoName?: string;
+    videoTitle?: string;
     comment: string;
     commentBn: string;
     month: string;

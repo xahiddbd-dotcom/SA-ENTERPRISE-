@@ -318,8 +318,8 @@ export const HeroWallpaperModal: React.FC<HeroWallpaperModalProps> = ({
             onClick={() => setActiveTab('presets')}
             className={`pb-2.5 px-3 border-b-2 transition-all flex items-center gap-1.5 ${
               activeTab === 'presets'
-                ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold'
-                : 'border-transparent text-slate-500 dark:text-neutral-400 hover:text-slate-800 dark:hover:text-neutral-200'
+                ? 'border-emerald-500 text-emerald-700 dark:text-emerald-400 font-extrabold'
+                : 'border-transparent text-slate-700 dark:text-neutral-400 font-bold hover:text-slate-950 dark:hover:text-neutral-200'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -331,8 +331,8 @@ export const HeroWallpaperModal: React.FC<HeroWallpaperModalProps> = ({
             onClick={() => setActiveTab('add_custom')}
             className={`pb-2.5 px-3 border-b-2 transition-all flex items-center gap-1.5 ${
               activeTab === 'add_custom'
-                ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold'
-                : 'border-transparent text-slate-500 dark:text-neutral-400 hover:text-slate-800 dark:hover:text-neutral-200'
+                ? 'border-emerald-500 text-emerald-700 dark:text-emerald-400 font-extrabold'
+                : 'border-transparent text-slate-700 dark:text-neutral-400 font-bold hover:text-slate-950 dark:hover:text-neutral-200'
             }`}
           >
             <Plus className="w-3.5 h-3.5" />
@@ -344,8 +344,8 @@ export const HeroWallpaperModal: React.FC<HeroWallpaperModalProps> = ({
             onClick={() => setActiveTab('settings')}
             className={`pb-2.5 px-3 border-b-2 transition-all flex items-center gap-1.5 ${
               activeTab === 'settings'
-                ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold'
-                : 'border-transparent text-slate-500 dark:text-neutral-400 hover:text-slate-800 dark:hover:text-neutral-200'
+                ? 'border-emerald-500 text-emerald-700 dark:text-emerald-400 font-extrabold'
+                : 'border-transparent text-slate-700 dark:text-neutral-400 font-bold hover:text-slate-950 dark:hover:text-neutral-200'
             }`}
           >
             <Sliders className="w-3.5 h-3.5" />

@@ -136,7 +136,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
                     ? 'bg-emerald-600 text-white shadow-md'
                     : isDark
                     ? 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    : 'bg-white border-2 border-slate-300 text-slate-900 font-bold hover:bg-slate-100'
                 }`}
               >
                 {t('all_gsm')}
@@ -152,7 +152,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
                       ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950/20'
                       : isDark
                       ? 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      : 'bg-white border-2 border-slate-300 text-slate-900 font-bold hover:bg-slate-100'
                   }`}
                 >
                   {option.label}
@@ -163,7 +163,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
 
           {/* Search & Category sub bar */}
           <div className={`flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t ${
-            isDark ? 'border-neutral-800' : 'border-slate-100'
+            isDark ? 'border-neutral-800' : 'border-slate-200'
           }`}>
             <div className="flex items-center gap-2 w-full sm:w-auto">
               {['all', 'paper', 'photo_paper', 'supplies'].map(catKey => {
@@ -177,10 +177,10 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
                   <button
                     key={catKey}
                     onClick={() => setSelectedCategory(catKey)}
-                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                       selectedCategory === catKey
-                        ? (isDark ? 'bg-neutral-700 text-white font-semibold' : 'bg-slate-900 text-white font-semibold shadow-xs')
-                        : (isDark ? 'text-neutral-400 hover:text-neutral-200' : 'text-slate-600 hover:text-slate-950')
+                        ? (isDark ? 'bg-neutral-700 text-white font-bold' : 'bg-slate-900 text-white font-black shadow-xs')
+                        : (isDark ? 'text-neutral-400 hover:text-neutral-200' : 'bg-white border border-slate-300 text-slate-800 hover:text-slate-950 hover:bg-slate-100')
                     }`}
                   >
                     {label}

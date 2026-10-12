@@ -3,7 +3,8 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { triggerThanosSnap } from '../common/ThanosSnapEffect';
-import { Award, Star, Sparkles, Quote, Heart, Play, X, Bot, Volume2, VolumeX, Sparkle } from 'lucide-react';
+import { Award, Star, Sparkles, Quote, Heart, Play, X, Bot, Volume2, VolumeX, Sparkle, ExternalLink } from 'lucide-react';
+import { parseVideoSource } from '../../utils/videoUtils';
 
 interface EmployeeOfTheMonthCardProps {
   variant?: 'featured' | 'compact' | 'badge';
@@ -253,7 +254,7 @@ export const EmployeeOfTheMonthCard: React.FC<EmployeeOfTheMonthCardProps> = ({
 // FULLSCREEN BLURRED BACKGROUND VIDEO TRIBUTE MODAL
 // WITH DUAL AI ROBOT CHEERLEADERS ANIMATION
 // ----------------------------------------------------
-interface VideoTributeModalProps {
+export interface VideoTributeModalProps {
   isOpen: boolean;
   onClose: () => void;
   videoUrl: string;
@@ -266,7 +267,7 @@ interface VideoTributeModalProps {
   language: string;
 }
 
-const VideoTributeModal: React.FC<VideoTributeModalProps> = ({
+export const VideoTributeModal: React.FC<VideoTributeModalProps> = ({
   isOpen,
   onClose,
   videoUrl,
@@ -279,6 +280,7 @@ const VideoTributeModal: React.FC<VideoTributeModalProps> = ({
   language
 }) => {
   if (!isOpen) return null;
+  const parsed = parseVideoSource(videoUrl, { autoplay: true, muted: isMuted });
 
   return (
     <div
@@ -394,15 +396,30 @@ const VideoTributeModal: React.FC<VideoTributeModalProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Mute/Unmute Toggle */}
-              <button
-                type="button"
-                onClick={() => setIsMuted(!isMuted)}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
-                title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
-              >
-                {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
-              </button>
+              {/* External Link button if YouTube / Facebook */}
+              {parsed.originalUrl && (parsed.type === 'youtube' || parsed.type === 'facebook') && (
+                <a
+                  href={parsed.originalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all"
+                  title="Open in new tab"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              )}
+
+              {/* Mute/Unmute Toggle (only for HTML5 video) */}
+              {(parsed.type === 'direct' || parsed.type === 'upload') && (
+                <button
+                  type="button"
+                  onClick={() => setIsMuted(!isMuted)}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
+                  title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
+                >
+                  {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+                </button>
+              )}
 
               {/* Close Button */}
               <button
@@ -418,15 +435,33 @@ const VideoTributeModal: React.FC<VideoTributeModalProps> = ({
 
           {/* Video Container (Responsive 16:9 Aspect Ratio) */}
           <div className="relative aspect-video bg-black overflow-hidden flex items-center justify-center">
-            <video
-              src={videoUrl}
-              autoPlay
-              loop
-              controls
-              muted={isMuted}
-              playsInline
-              className="w-full h-full object-cover"
-            />
+            {parsed.type === 'youtube' && parsed.embedUrl ? (
+              <iframe
+                src={parsed.embedUrl}
+                title={`${name} Tribute Video`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="w-full h-full border-0"
+              />
+            ) : parsed.type === 'facebook' && parsed.embedUrl ? (
+              <iframe
+                src={parsed.embedUrl}
+                title={`${name} Facebook Tribute Video`}
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                allowFullScreen
+                className="w-full h-full border-0"
+              />
+            ) : (
+              <video
+                src={parsed.originalUrl || videoUrl}
+                autoPlay
+                loop
+                controls
+                muted={isMuted}
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
 
           {/* Video Modal Bottom Info Banner */}

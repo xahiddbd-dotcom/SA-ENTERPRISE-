@@ -1202,16 +1202,16 @@ export const UserProfile: React.FC<UserProfileProps> = ({
                     className="bg-transparent text-neutral-300 focus:outline-none cursor-pointer text-xs font-semibold"
                     aria-label="Sort Orders"
                   >
-                    <option value="newest" className="bg-neutral-900 text-white">
+                    <option value="newest">
                       {language === 'bn' ? 'সর্বশেষ আগে' : 'Newest'}
                     </option>
-                    <option value="oldest" className="bg-neutral-900 text-white">
+                    <option value="oldest">
                       {language === 'bn' ? 'পুরাতন আগে' : 'Oldest'}
                     </option>
-                    <option value="amount_high" className="bg-neutral-900 text-white">
+                    <option value="amount_high">
                       {language === 'bn' ? 'মূল্য: বেশি ➔ কম' : 'Amount: High ➔ Low'}
                     </option>
-                    <option value="amount_low" className="bg-neutral-900 text-white">
+                    <option value="amount_low">
                       {language === 'bn' ? 'মূল্য: কম ➔ বেশি' : 'Amount: Low ➔ High'}
                     </option>
                   </select>

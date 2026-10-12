@@ -23,6 +23,7 @@ export interface AdminThemeConfig {
   accentText: string;
   accentBg: string;
   accentBadge: string;
+  badgeBg?: string;
   primaryGradient: string;
   buttonClass: string;
   activeSidebarItem: string;
@@ -155,25 +156,25 @@ export const ADMIN_THEMES: Record<AdminThemeKey, AdminThemeConfig> = {
   nordic_light: {
     id: 'nordic_light',
     name: 'Nordic Clean (High-Contrast Light)',
-    nameBn: 'নরডিক লাইট (পরিচ্ছন্ন সাদা ও স্লেট)',
-    dotColor: '#4f46e5',
-    headerBg: 'bg-white/95',
+    nameBn: 'নরডিক লাইট (ডিপ কনট্রাস্ট ও পরিচ্ছন্ন সাদা)',
+    dotColor: '#059669',
+    headerBg: 'bg-white',
     sidebarBg: 'bg-white',
     mainBg: 'bg-slate-100',
     cardBg: 'bg-white',
     cardBgSecondary: 'bg-slate-50',
-    borderColor: 'border-slate-200',
-    textPrimary: 'text-slate-900',
-    textSecondary: 'text-slate-700',
-    textMuted: 'text-slate-500',
-    accentText: 'text-indigo-600',
-    accentBg: 'bg-indigo-50',
-    accentBadge: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-    primaryGradient: 'bg-gradient-to-r from-indigo-600 to-emerald-600',
-    buttonClass: 'bg-indigo-600 hover:bg-indigo-700 text-white font-bold',
-    activeSidebarItem: 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-200',
-    inactiveSidebarItem: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-    inputBg: 'bg-white border-slate-300 text-slate-900 focus:border-indigo-600',
+    borderColor: 'border-slate-300',
+    textPrimary: 'text-slate-950 font-bold',
+    textSecondary: 'text-slate-900 font-semibold',
+    textMuted: 'text-slate-700 font-medium',
+    accentText: 'text-emerald-700 font-bold',
+    accentBg: 'bg-emerald-50',
+    accentBadge: 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold',
+    primaryGradient: 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700',
+    buttonClass: 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold',
+    activeSidebarItem: 'bg-emerald-600 text-white font-black shadow-md shadow-emerald-200',
+    inactiveSidebarItem: 'text-slate-800 hover:bg-slate-200 hover:text-slate-950 font-bold',
+    inputBg: 'bg-white border-slate-300 text-slate-950 font-semibold focus:border-emerald-600',
     shadowColor: 'shadow-slate-300'
   }
 };

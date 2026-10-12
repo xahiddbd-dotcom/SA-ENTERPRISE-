@@ -365,30 +365,30 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenAut
                       deliveryType === 'pickup'
                         ? isDark
                           ? 'bg-emerald-950/70 border-emerald-500 text-emerald-400'
-                          : 'bg-emerald-50 border-emerald-500 text-emerald-800'
+                          : 'bg-emerald-100 border-2 border-emerald-600 text-emerald-950 font-black shadow-xs'
                         : isDark
                         ? 'bg-neutral-950 border-neutral-800 text-neutral-400'
-                        : 'bg-slate-50 border-slate-200 text-slate-600'
+                        : 'bg-white border-2 border-slate-300 text-slate-900 font-bold hover:bg-slate-100'
                     }`}
                   >
-                    <Store className="w-4 h-4 text-emerald-500" />
+                    <Store className="w-4 h-4 text-emerald-600" />
                     <span>{language === 'bn' ? 'দোকান থেকে নেওয়া (৳০)' : 'Shop Pickup (৳0)'}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setDeliveryType('delivery')}
-                    className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                    className={`p-2.5 rounded-xl border-2 text-xs font-bold flex items-center justify-center gap-2 transition-all ${
                       deliveryType === 'delivery'
                         ? isDark
                           ? 'bg-emerald-950/70 border-emerald-500 text-emerald-400'
-                          : 'bg-emerald-50 border-emerald-500 text-emerald-800'
+                          : 'bg-emerald-100 border-2 border-emerald-600 text-emerald-950 font-black shadow-xs'
                         : isDark
                         ? 'bg-neutral-950 border-neutral-800 text-neutral-400'
-                        : 'bg-slate-50 border-slate-200 text-slate-600'
+                        : 'bg-white border-2 border-slate-300 text-slate-900 font-bold hover:bg-slate-100'
                     }`}
                   >
-                    <Truck className="w-4 h-4 text-emerald-500" />
+                    <Truck className="w-4 h-4 text-emerald-600" />
                     <span>{language === 'bn' ? 'হোম ডেলিভারি (৳৬০)' : 'Home Delivery (৳60)'}</span>
                   </button>
                 </div>
@@ -462,12 +462,12 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenAut
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('bkash')}
-                    className={`py-2 px-1 rounded-xl border text-xs font-bold text-center transition-all ${
+                    className={`py-2.5 px-1 rounded-xl border-2 text-xs font-bold text-center transition-all ${
                       paymentMethod === 'bkash'
-                        ? 'bg-pink-950/60 border-pink-500 text-pink-300'
+                        ? 'bg-pink-100 border-pink-500 text-pink-900 font-black shadow-xs'
                         : isDark
                         ? 'bg-neutral-900 border-neutral-800 text-neutral-400'
-                        : 'bg-white border-slate-200 text-slate-600'
+                        : 'bg-white border-slate-300 text-slate-900 font-bold hover:bg-slate-100'
                     }`}
                   >
                     bKash
@@ -475,12 +475,12 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenAut
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('nagad')}
-                    className={`py-2 px-1 rounded-xl border text-xs font-bold text-center transition-all ${
+                    className={`py-2.5 px-1 rounded-xl border-2 text-xs font-bold text-center transition-all ${
                       paymentMethod === 'nagad'
-                        ? 'bg-orange-950/60 border-orange-500 text-orange-300'
+                        ? 'bg-orange-100 border-orange-500 text-orange-900 font-black shadow-xs'
                         : isDark
                         ? 'bg-neutral-900 border-neutral-800 text-neutral-400'
-                        : 'bg-white border-slate-200 text-slate-600'
+                        : 'bg-white border-slate-300 text-slate-900 font-bold hover:bg-slate-100'
                     }`}
                   >
                     Nagad
@@ -488,14 +488,14 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenAut
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('cod')}
-                    className={`py-2 px-1 rounded-xl border text-xs font-bold text-center transition-all ${
+                    className={`py-2.5 px-1 rounded-xl border-2 text-xs font-bold text-center transition-all ${
                       paymentMethod === 'cod'
                         ? isDark
                           ? 'bg-emerald-950/60 border-emerald-500 text-emerald-300'
-                          : 'bg-emerald-50 border-emerald-500 text-emerald-800'
+                          : 'bg-emerald-100 border-emerald-600 text-emerald-950 font-black shadow-xs'
                         : isDark
                         ? 'bg-neutral-900 border-neutral-800 text-neutral-400'
-                        : 'bg-white border-slate-200 text-slate-600'
+                        : 'bg-white border-slate-300 text-slate-900 font-bold hover:bg-slate-100'
                     }`}
                   >
                     Cash

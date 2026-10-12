@@ -183,7 +183,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
   // Admin Theme state
   const [adminTheme, setAdminTheme] = useState<AdminThemeKey>(() => {
     const saved = localStorage.getItem('se_admin_theme_choice');
-    return (saved && (saved in ADMIN_THEMES)) ? (saved as AdminThemeKey) : 'emerald';
+    return (saved && (saved in ADMIN_THEMES)) ? (saved as AdminThemeKey) : (themeMode === 'light' ? 'nordic_light' : 'emerald');
   });
 
   const handleThemeChange = (newTheme: AdminThemeKey) => {
@@ -191,7 +191,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
     localStorage.setItem('se_admin_theme_choice', newTheme);
   };
 
-  const currentThemeConfig = ADMIN_THEMES[adminTheme] || ADMIN_THEMES.emerald;
+  // When global themeMode is toggled to light, prioritize deep high-contrast nordic_light if emerald was default
+  const effectiveThemeKey: AdminThemeKey = (themeMode === 'light' && adminTheme === 'emerald')
+    ? 'nordic_light'
+    : adminTheme;
+
+  const currentThemeConfig = ADMIN_THEMES[effectiveThemeKey] || (themeMode === 'light' ? ADMIN_THEMES.nordic_light : ADMIN_THEMES.emerald);
 
   // Timeline Inspection Modal for Applications
   const [selectedAppForTimeline, setSelectedAppForTimeline] = useState<Application | null>(null);
@@ -630,11 +635,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
     },
     {
       id: 'employee_of_month' as AdminMenuKey,
-      labelBn: 'মাসের সেরা কর্মী',
-      labelEn: 'Employee of Month',
+      labelBn: 'মাসের সেরা কর্মী ও ভিডিও CMS',
+      labelEn: 'Employee of Month & Video',
       icon: Award,
       categoryBn: 'টিম',
-      descBn: 'মাসের সেরা কর্মীর ছবি, মন্তব্য ও থ্যানোস স্ন্যাপ নিয়ন্ত্রণ'
+      descBn: 'কর্মীর ছবি, ইউটিউব ও ফেসবুক ভিডিও লিংক বা ফাইল আপলোড নিয়ন্ত্রণ'
     },
     {
       id: 'hero_slides' as AdminMenuKey,
@@ -694,7 +699,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                 <span className="font-extrabold text-sm sm:text-base text-white leading-none">
                   Saiful Enterprise
                 </span>
-                <span className={`px-2 py-0.5 rounded-full ${currentThemeConfig.badgeBg} border ${currentThemeConfig.borderColor} text-[10px] font-mono font-bold uppercase tracking-wider`}>
+                <span className={`px-2 py-0.5 rounded-full ${currentThemeConfig.badgeBg || currentThemeConfig.accentBadge} border ${currentThemeConfig.borderColor} text-[10px] font-mono font-bold uppercase tracking-wider`}>
                   {currentThemeConfig.name} CMS
                 </span>
               </div>
@@ -709,7 +714,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
           <div className="hidden md:flex items-center gap-2">
             <button
               onClick={() => navigateToMenu('pos')}
-              className={`px-3 py-1.5 rounded-xl ${currentThemeConfig.badgeBg} border ${currentThemeConfig.borderColor} text-xs font-bold flex items-center gap-1.5 shadow-md transition-all active:scale-95`}
+              className={`px-3 py-1.5 rounded-xl ${currentThemeConfig.badgeBg || currentThemeConfig.accentBadge} border ${currentThemeConfig.borderColor} text-xs font-bold flex items-center gap-1.5 shadow-md transition-all active:scale-95`}
             >
               <Calculator className="w-3.5 h-3.5" />
               <span>{language === 'bn' ? 'ক্যাশ কাউন্টার (POS)' : 'POS Terminal'}</span>
