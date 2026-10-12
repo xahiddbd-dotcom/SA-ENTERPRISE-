@@ -59,16 +59,16 @@ export const initialSettings: WebsiteSettings = {
   minOrderAmount: 100,
   maintenanceMode: false,
 
-  // Background Texture & Wallpaper Defaults
+  // Background Texture & Wallpaper Defaults (iPhone Water Droplets Theme)
   backgroundType: 'combo',
-  texturePattern: 'grid',
-  textureOpacity: 15,
-  wallpaperPreset: 'dark_modern_geometric',
+  texturePattern: 'water_ripples',
+  textureOpacity: 35,
+  wallpaperPreset: 'ios_water_droplets',
   customWallpaperUrl: '',
-  wallpaperOpacity: 25,
-  wallpaperBlur: 3,
+  wallpaperOpacity: 35,
+  wallpaperBlur: 1,
   wallpaperFixed: true,
-  backgroundOverlayTint: 'dark',
+  backgroundOverlayTint: 'water_glass',
 
   // Dahua DH-IPC-H5AS 5MP Indoor Pan & Tilt WiFi Camera
   cctvCamera: {
@@ -808,6 +808,19 @@ export const initialExpenses: Expense[] = [];
 export const initialPOSSales: POSSale[] = [];
 
 export const initialHeroSlides: HeroSlide[] = [
+  {
+    id: "slide_ios_water",
+    type: "photo",
+    src: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=1920&auto=format&fit=crop",
+    tagEn: "iOS Water Edition",
+    tagBn: "আইফোন ওয়াটার এডিশন",
+    titleEn: "Crystal Pure Water Droplets Experience",
+    titleBn: "আইফোন ওয়াটার ও গ্লাস ক্ল্যারিটি থিম",
+    descriptionEn: "Crystal clear water droplets, fluid glass aesthetics, fast and light in Day & Night mode.",
+    descriptionBn: "পরিচ্ছন্ন স্ফটিক পানির ফোঁটা, গ্লাস ফ্রস্টেড ডিজাইন ও দ্রুতগতির লাইটওয়েট অভিজ্ঞতা।",
+    accentColor: "sky",
+    order: 0
+  },
   {
     id: "slide_1",
     type: "photo",

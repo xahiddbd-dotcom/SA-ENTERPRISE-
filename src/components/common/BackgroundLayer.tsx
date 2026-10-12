@@ -4,6 +4,18 @@ import { useTheme } from '../../context/ThemeContext';
 import { BackgroundPatternType, BackgroundWallpaperPreset, BackgroundOverlayTint } from '../../types';
 
 export const WALLPAPER_PRESETS: Record<Exclude<BackgroundWallpaperPreset, 'none' | 'custom'>, { name: string; nameBn: string; url: string; category: string }> = {
+  ios_water_droplets: {
+    name: 'iPhone Classic Water Droplets',
+    nameBn: 'আইফোন ক্লাসিক পানির ফোঁটা',
+    url: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=2000&q=80',
+    category: 'Water'
+  },
+  ios_water_deep: {
+    name: 'Deep Oceanic Aqua Droplets',
+    nameBn: 'ডিপ ওশান অ্যাকুয়া ড্রপলেট',
+    url: 'https://images.unsplash.com/photo-1508873696983-2df5293cb395?auto=format&fit=crop&w=2000&q=80',
+    category: 'Water'
+  },
   dark_modern_geometric: {
     name: 'Obsidian Geometric 3D',
     nameBn: 'অ্যাবস্ট্রাক্ট জ্যামিতিক ডার্ক',
@@ -37,6 +49,11 @@ export const WALLPAPER_PRESETS: Record<Exclude<BackgroundWallpaperPreset, 'none'
 };
 
 export const PATTERN_PRESETS: Record<Exclude<BackgroundPatternType, 'none'>, { name: string; nameBn: string; desc: string }> = {
+  water_ripples: {
+    name: 'iPhone Water Droplets Matrix',
+    nameBn: 'আইফোন পানির ফোঁটা ও রিং তরঙ্গের রিদম',
+    desc: 'Pure crisp water condensation droplets & subtle concentric ripples'
+  },
   grid: {
     name: 'Blueprint Tech Grid',
     nameBn: 'টেকনিক্যাল ব্লুপ্রিন্ট গ্রিড',
@@ -75,6 +92,7 @@ export const PATTERN_PRESETS: Record<Exclude<BackgroundPatternType, 'none'>, { n
 };
 
 export const TINT_PRESETS: Record<BackgroundOverlayTint, { name: string; bgClass: string; hex: string }> = {
+  water_glass: { name: 'Aqua Glass Clarity', bgClass: 'bg-[#02101e]/75', hex: '#02101e' },
   dark: { name: 'Deep Charcoal (Default)', bgClass: 'bg-neutral-950/85', hex: '#0a0a0a' },
   emerald: { name: 'Emerald Forest Dark', bgClass: 'bg-[#04140e]/90', hex: '#04140e' },
   navy: { name: 'Midnight Deep Navy', bgClass: 'bg-[#050f1f]/90', hex: '#050f1f' },
@@ -187,6 +205,31 @@ export const BackgroundLayer: React.FC = () => {
           className="absolute inset-0 transition-opacity duration-500"
           style={{ opacity: textureOpacity }}
         >
+          {texturePattern === 'water_ripples' && (
+            <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="bg-water-droplets" width="80" height="80" patternUnits="userSpaceOnUse">
+                  {/* Water Droplet 1 (Large with highlight) */}
+                  <ellipse cx="20" cy="20" rx="9" ry="8.5" fill={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.7)'} stroke={isDark ? 'rgba(56,189,248,0.25)' : 'rgba(14,165,233,0.35)'} strokeWidth="0.8" />
+                  <ellipse cx="17.5" cy="17" rx="3.5" ry="2.5" fill={isDark ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.9)'} />
+                  
+                  {/* Concentric subtle liquid ripples around droplet 1 */}
+                  <circle cx="20" cy="20" r="16" fill="none" stroke={isDark ? 'rgba(56,189,248,0.1)' : 'rgba(14,165,233,0.15)'} strokeWidth="0.6" strokeDasharray="2 3" />
+                  <circle cx="20" cy="20" r="24" fill="none" stroke={isDark ? 'rgba(56,189,248,0.06)' : 'rgba(14,165,233,0.08)'} strokeWidth="0.5" />
+
+                  {/* Water Droplet 2 (Medium) */}
+                  <circle cx="62" cy="52" r="5" fill={isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.65)'} stroke={isDark ? 'rgba(14,165,233,0.22)' : 'rgba(2,132,199,0.3)'} strokeWidth="0.75" />
+                  <ellipse cx="60.5" cy="50.5" rx="1.8" ry="1.2" fill={isDark ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.85)'} />
+
+                  {/* Water Droplet 3 (Micro droplet) */}
+                  <circle cx="50" cy="18" r="2.5" fill={isDark ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.8)'} stroke={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(14,165,233,0.3)'} strokeWidth="0.5" />
+                  <circle cx="28" cy="65" r="3" fill={isDark ? 'rgba(56,189,248,0.18)' : 'rgba(255,255,255,0.75)'} stroke={isDark ? 'rgba(255,255,255,0.18)' : 'rgba(14,165,233,0.25)'} strokeWidth="0.5" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#bg-water-droplets)" />
+            </svg>
+          )}
+
           {texturePattern === 'grid' && (
             <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <defs>

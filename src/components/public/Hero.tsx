@@ -49,7 +49,7 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
         onCloseWallpaperModalExternally={() => setOpenWallpaperStudio(false)}
       />
 
-      <div className="container mx-auto px-4 relative z-20">
+      <div className="container mx-auto px-4 max-w-6xl relative z-20">
         {/* Top Location & Trust Kicker */}
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm font-medium mb-6 text-center">
           <span className={isDark ? 'text-emerald-400 font-semibold' : 'text-emerald-700 font-semibold'}>
@@ -80,17 +80,22 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
           </button>
         </div>
 
-        {/* Main Headline Container with Card Shape behind text */}
+        {/* Main Headline Container with Glassy Transparent Effect & 1000px Width */}
         <div
-          className={`max-w-4xl mx-auto rounded-3xl p-6 sm:p-10 text-center relative overflow-hidden backdrop-blur-xl border transition-all duration-300 ${
+          id="hero-headline-card"
+          className={`w-full max-w-[1000px] mx-auto rounded-3xl p-6 sm:p-10 text-center relative overflow-hidden backdrop-blur-2xl backdrop-saturate-150 border transition-all duration-300 ${
             isDark
-              ? 'bg-neutral-950/75 border-neutral-800/80 shadow-2xl shadow-black/70'
-              : 'bg-white/90 border-slate-200/90 shadow-xl shadow-slate-200/60'
+              ? 'bg-neutral-950/45 border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.5),inset_0_1px_1px_0_rgba(255,255,255,0.15)] ring-1 ring-white/5'
+              : 'bg-white/55 border-white/70 shadow-[0_8px_32px_0_rgba(31,38,135,0.08),inset_0_1px_1px_0_rgba(255,255,255,0.85)] ring-1 ring-slate-900/5'
           }`}
+          style={{ maxWidth: '1000px' }}
         >
+          {/* Specular glass reflection sheen across top edge */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+
           {/* Subtle ambient decorative gradient background inside the card */}
           <div
-            className="absolute inset-0 pointer-events-none opacity-25"
+            className="absolute inset-0 pointer-events-none opacity-20"
             style={{
               background: 'radial-gradient(circle at 10% 10%, rgba(16,185,129,0.25) 0%, transparent 50%), radial-gradient(circle at 90% 90%, rgba(20,184,166,0.2) 0%, transparent 50%)'
             }}

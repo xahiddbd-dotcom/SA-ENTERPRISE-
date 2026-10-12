@@ -453,9 +453,9 @@ export interface SectionSEO {
   canonicalUrl?: string;
 }
 
-export type BackgroundPatternType = 'none' | 'dots' | 'grid' | 'circuit' | 'diagonal_stripes' | 'hexagons' | 'paper_grain' | 'mesh_glow';
-export type BackgroundWallpaperPreset = 'none' | 'cyber_workspace' | 'printing_press' | 'digital_matrix' | 'dark_modern_geometric' | 'tech_glow' | 'custom';
-export type BackgroundOverlayTint = 'dark' | 'emerald' | 'navy' | 'slate' | 'pure_black';
+export type BackgroundPatternType = 'none' | 'dots' | 'grid' | 'circuit' | 'diagonal_stripes' | 'hexagons' | 'paper_grain' | 'mesh_glow' | 'water_ripples';
+export type BackgroundWallpaperPreset = 'none' | 'ios_water_droplets' | 'ios_water_deep' | 'cyber_workspace' | 'printing_press' | 'digital_matrix' | 'dark_modern_geometric' | 'tech_glow' | 'custom';
+export type BackgroundOverlayTint = 'dark' | 'emerald' | 'navy' | 'slate' | 'pure_black' | 'water_glass';
 
 export interface WebsiteSettings {
   businessName: string;

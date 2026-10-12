@@ -71,71 +71,73 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header
       id="main-header"
-      className={`sticky top-0 z-40 backdrop-blur-md border-b transition-colors duration-200 ${
-        isDark ? 'bg-neutral-950/90 border-neutral-800' : 'bg-white/95 border-slate-200 shadow-xs'
+      className={`sticky top-0 z-40 backdrop-blur-xl backdrop-saturate-150 border-b transition-colors duration-200 ${
+        isDark
+          ? 'bg-neutral-950/75 border-sky-500/15 shadow-[0_4px_24px_rgba(0,0,0,0.5)]'
+          : 'bg-white/80 border-sky-200/50 shadow-[0_4px_24px_rgba(14,165,233,0.06)]'
       }`}
     >
       {/* Top micro bar for direct contact & fast access */}
       <div
-        className={`border-b text-xs py-1.5 px-4 hidden md:block transition-colors ${
+        className={`border-b text-[11px] h-[35px] max-h-[35px] px-4 hidden md:flex items-center transition-colors overflow-hidden select-none ${
           isDark
-            ? 'bg-neutral-900 border-neutral-800/80 text-neutral-400'
-            : 'bg-slate-50 border-slate-200 text-slate-600'
+            ? 'bg-neutral-900/80 border-neutral-800/80 text-neutral-400'
+            : 'bg-sky-50/70 border-sky-100 text-slate-600'
         }`}
       >
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Live Open/Closed Pulse Beacon Pill with Glow */}
-            <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs transition-all duration-300 border ${
+        <div className="container mx-auto flex items-center justify-between h-full">
+          <div className="flex items-center gap-2.5">
+            {/* Live Open/Closed Pulse Beacon (clean text, no shape enclosure) */}
+            <div className={`inline-flex items-center gap-1.5 text-[11px] leading-tight transition-colors ${
               settings.isShopOpen !== false
-                ? 'bg-emerald-500/10 dark:bg-emerald-950/40 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 shadow-xs shadow-emerald-500/10 hover:border-emerald-400'
-                : 'bg-rose-500/10 dark:bg-rose-950/40 border-rose-500/30 text-rose-700 dark:text-rose-400'
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-rose-600 dark:text-rose-400'
             }`}>
-              <span className="relative flex h-2 w-2 shrink-0">
+              <span className="relative flex h-1.5 w-1.5 shrink-0">
                 {settings.isShopOpen !== false && (
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 )}
-                <span className={`relative inline-flex rounded-full h-2 w-2 ${
-                  settings.isShopOpen !== false ? 'bg-emerald-500 shadow-xs shadow-emerald-500/50' : 'bg-rose-500'
+                <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${
+                  settings.isShopOpen !== false ? 'bg-emerald-500' : 'bg-rose-500'
                 }`} />
               </span>
-              <span className="font-bold tracking-tight">
+              <span className="font-semibold tracking-tight">
                 {settings.isShopOpen !== false
-                  ? (language === 'bn' ? 'দোকান খোলা আছে' : 'Shop Open Now')
-                  : (language === 'bn' ? 'দোকান সাময়িক বন্ধ' : 'Currently Closed')}
+                  ? (language === 'bn' ? 'খোলা আছে' : 'Shop Open')
+                  : (language === 'bn' ? 'বন্ধ' : 'Closed')}
               </span>
               <span className="opacity-40">•</span>
-              <span className="text-[11px] opacity-80 font-mono">
+              <span className="text-[10.5px] opacity-80 font-mono">
                 {language === 'bn' ? settings.openingHoursBn : settings.openingHours}
               </span>
             </div>
 
             <span className={isDark ? 'text-neutral-700' : 'text-slate-300'}>|</span>
 
-            {/* Interactive Location Badge with Pin Icon and Tooltip Glow */}
+            {/* Interactive Location Badge with Pin Icon (clean text link, no shape enclosure) */}
             <a
               href={settings.googleMapUrl || 'https://maps.google.com/?q=Tejgaon+College+Indira+Road+Dhaka'}
               target="_blank"
               rel="noreferrer"
               title={language === 'bn' ? 'গুগল ম্যাপে আমাদের লোকেশন দেখুন' : 'View our location on Google Maps'}
-              className={`group flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs truncate max-w-sm transition-all duration-200 border border-transparent hover:border-slate-300 dark:hover:border-neutral-700 hover:bg-white/80 dark:hover:bg-neutral-800/60 ${
+              className={`group flex items-center gap-1 text-[11px] leading-tight truncate max-w-sm transition-colors hover:text-emerald-500 ${
                 isDark ? 'text-neutral-300 hover:text-white' : 'text-slate-700 hover:text-slate-900'
               }`}
             >
-              <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0 group-hover:scale-110 group-hover:text-emerald-400 transition-transform" />
+              <MapPin className="w-3 h-3 text-emerald-500 shrink-0 group-hover:scale-110 group-hover:text-emerald-400 transition-transform" />
               <span className="truncate">
                 {language === 'bn' ? settings.addressBn : settings.address}
               </span>
             </a>
           </div>
 
-          <div className="flex items-center gap-4 font-medium">
+          <div className="flex items-center gap-3 font-medium text-[11px]">
             <a
               id="header-call-link"
               href={`tel:${settings.phonePrimary}`}
               className="flex items-center gap-1 hover:text-emerald-500 transition-colors"
             >
-              <Phone className="w-3.5 h-3.5 text-emerald-500" />
+              <Phone className="w-3 h-3 text-emerald-500" />
               <span>{settings.phonePrimary}</span>
             </a>
             <a
@@ -145,18 +147,9 @@ export const Header: React.FC<HeaderProps> = ({
               rel="noreferrer"
               className="flex items-center gap-1 hover:text-emerald-500 transition-colors"
             >
-              <MessageSquare className="w-3.5 h-3.5 text-emerald-500" />
-              <span>{settings.whatsappNumber} (bKash/WhatsApp)</span>
+              <MessageSquare className="w-3 h-3 text-emerald-500" />
+              <span>{settings.whatsappNumber}</span>
             </a>
-
-            <button
-              onClick={() => setAssistanceModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-600/30 transition-all font-semibold"
-              title="Request Staff Assistance (Live Voice Alert)"
-            >
-              <Headphones className="w-3.5 h-3.5" />
-              <span>{language === 'bn' ? 'সহায়তা ডাকুন 🛎️' : 'Call Staff 🛎️'}</span>
-            </button>
           </div>
         </div>
       </div>
@@ -176,7 +169,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className={`font-bold text-lg leading-tight tracking-tight flex items-center gap-1.5 ${
               isDark ? 'text-white' : 'text-slate-900'
             }`}>
-              <span className="matrix-glow-brand font-black tracking-tight drop-shadow-xs">{language === 'bn' ? settings.businessNameBn : settings.businessName}</span>
+              <span className="font-black tracking-tight">{language === 'bn' ? settings.businessNameBn : settings.businessName}</span>
             </div>
             <div className={`text-[11px] truncate max-w-[200px] sm:max-w-xs ${
               isDark ? 'text-neutral-400' : 'text-slate-500 font-medium'
@@ -186,10 +179,12 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Desktop Navigation Links */}
+        {/* Desktop Navigation Links (iOS Glass Capsule) */}
         <nav
-          className={`hidden lg:flex items-center gap-1 p-1 rounded-xl border transition-colors ${
-            isDark ? 'bg-neutral-900/60 border-neutral-800' : 'bg-slate-100 border-slate-200/90'
+          className={`hidden lg:flex items-center gap-1 p-1 rounded-2xl border transition-all ${
+            isDark
+              ? 'bg-neutral-900/70 border-white/10 backdrop-blur-md shadow-inner'
+              : 'bg-white/80 border-slate-200/80 backdrop-blur-md shadow-xs'
           }`}
         >
           {navLinks.map(link => {

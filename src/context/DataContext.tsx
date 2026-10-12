@@ -216,6 +216,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+        // If user had older default dark geometric, upgrade smoothly to new iPhone Water Droplets theme
+        if (parsed.wallpaperPreset === 'dark_modern_geometric' && !parsed.customWallpaperUrl) {
+          parsed.wallpaperPreset = 'ios_water_droplets';
+          parsed.texturePattern = 'water_ripples';
+          parsed.backgroundOverlayTint = 'water_glass';
+          parsed.textureOpacity = 35;
+          parsed.wallpaperOpacity = 35;
+        }
         return { ...initialSettings, ...parsed };
       } catch (e) {
         console.error('Error parsing settings:', e);

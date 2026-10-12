@@ -29,6 +29,26 @@ interface HeroWallpaperModalProps {
 // 10 Curated Premium HD Wallpapers tailored for Saiful Enterprise
 export const PRESET_HERO_WALLPAPERS = [
   {
+    id: 'wp_ios_water',
+    titleBn: 'আইফোন ক্লাসিক পানির ফোঁটা (iOS Water Edition)',
+    titleEn: 'iPhone Classic Water Droplets (iOS Edition)',
+    tagBn: 'আইফোন ওয়াটার',
+    tagEn: 'iOS Water Edition',
+    src: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1920&q=80',
+    accent: 'sky',
+    category: 'Water'
+  },
+  {
+    id: 'wp_ios_deep_aqua',
+    titleBn: 'ডিপ ওশান গ্লাস অ্যাকুয়া ড্রপস',
+    titleEn: 'Deep Oceanic Aqua Glass Droplets',
+    tagBn: 'ডিপ অ্যাকুয়া',
+    tagEn: 'Deep Aqua',
+    src: 'https://images.unsplash.com/photo-1508873696983-2df5293cb395?auto=format&fit=crop&w=1920&q=80',
+    accent: 'teal',
+    category: 'Water'
+  },
+  {
     id: 'wp_counter',
     titleBn: 'লাইভ ডিজিটাল কাউন্টার ও সাইবার ডেস্ক',
     titleEn: 'Live Digital Counter & Cyber Desk',
