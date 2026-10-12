@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { HeroBackgroundSlider } from './HeroBackgroundSlider';
 import {
   Printer,
@@ -29,6 +30,7 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
   const { language, t } = useLanguage();
   const { settings, heroSlides } = useData();
   const { isDark } = useTheme();
+  const { isAdmin, isSuperAdmin } = useAuth();
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [openWallpaperStudio, setOpenWallpaperStudio] = useState(false);
 
@@ -63,21 +65,25 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
           <span className={isDark ? 'text-teal-400 font-semibold' : 'text-teal-700 font-semibold'}>
             {language === 'bn' ? '১৫+ বছরের আস্থার প্রতীক' : '15+ Years of Service'}
           </span>
-          <span className={isDark ? 'text-neutral-600' : 'text-slate-300'}>·</span>
-          <button
-            type="button"
-            id="hero-wallpaper-trigger-top"
-            onClick={() => setOpenWallpaperStudio(true)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md border transition-all active:scale-95 shadow-xs cursor-pointer ${
-              isDark
-                ? 'bg-neutral-900/90 border-emerald-500/40 text-emerald-300 hover:bg-neutral-800 hover:text-white'
-                : 'bg-white/95 border-emerald-500/40 text-emerald-800 hover:bg-slate-50'
-            }`}
-            title={language === 'bn' ? 'ওয়ালপেপার পরিবর্তন বা নতুন যোগ করুন' : 'Change or add wallpaper'}
-          >
-            <ImageIcon className="w-3.5 h-3.5 text-emerald-500" />
-            <span>{language === 'bn' ? 'ওয়ালপেপার যোগ / পরিবর্তন' : 'Add / Change Wallpaper'}</span>
-          </button>
+          {(isAdmin || isSuperAdmin) && (
+            <>
+              <span className={isDark ? 'text-neutral-600' : 'text-slate-300'}>·</span>
+              <button
+                type="button"
+                id="hero-wallpaper-trigger-top"
+                onClick={() => setOpenWallpaperStudio(true)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md border transition-all active:scale-95 shadow-xs cursor-pointer ${
+                  isDark
+                    ? 'bg-neutral-900/90 border-emerald-500/40 text-emerald-300 hover:bg-neutral-800 hover:text-white'
+                    : 'bg-white/95 border-emerald-500/40 text-emerald-800 hover:bg-slate-50'
+                }`}
+                title={language === 'bn' ? 'অ্যাডমিন প্যানেল: ওয়ালপেপার পরিবর্তন বা নতুন যোগ করুন' : 'Admin: Change or add wallpaper'}
+              >
+                <ImageIcon className="w-3.5 h-3.5 text-emerald-500" />
+                <span>{language === 'bn' ? 'ওয়ালপেপার যোগ / পরিবর্তন' : 'Add / Change Wallpaper'}</span>
+              </button>
+            </>
+          )}
         </div>
 
         {/* Main Headline Container with Glassy Transparent Effect & 1000px Width */}

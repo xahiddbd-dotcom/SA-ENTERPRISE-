@@ -530,6 +530,7 @@ export interface WebsiteSettings {
     role: string;
     roleBn: string;
     photo: string;
+    videoUrl?: string;
     comment: string;
     commentBn: string;
     month: string;

@@ -71,18 +71,18 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header
       id="main-header"
-      className={`sticky top-0 z-40 backdrop-blur-xl backdrop-saturate-150 border-b transition-colors duration-200 ${
+      className={`sticky top-0 z-40 backdrop-blur-2xl backdrop-saturate-180 border-b transition-all duration-300 ${
         isDark
-          ? 'bg-neutral-950/75 border-sky-500/15 shadow-[0_4px_24px_rgba(0,0,0,0.5)]'
-          : 'bg-white/80 border-sky-200/50 shadow-[0_4px_24px_rgba(14,165,233,0.06)]'
+          ? 'bg-white/80 border-white/60 text-slate-900 shadow-[0_8px_32px_0_rgba(255,255,255,0.2),inset_0_1px_2px_0_rgba(255,255,255,0.9)]'
+          : 'bg-black/75 border-white/15 text-white shadow-[0_8px_32px_0_rgba(0,0,0,0.5),inset_0_1px_2px_0_rgba(255,255,255,0.15)]'
       }`}
     >
       {/* Top micro bar for direct contact & fast access */}
       <div
         className={`border-b text-[11px] h-[35px] max-h-[35px] px-4 hidden md:flex items-center transition-colors overflow-hidden select-none ${
           isDark
-            ? 'bg-neutral-900/80 border-neutral-800/80 text-neutral-400'
-            : 'bg-sky-50/70 border-sky-100 text-slate-600'
+            ? 'bg-slate-900/5 border-slate-900/10 text-slate-700'
+            : 'bg-white/5 border-white/10 text-white/80'
         }`}
       >
         <div className="container mx-auto flex items-center justify-between h-full">
@@ -112,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
 
-            <span className={isDark ? 'text-neutral-700' : 'text-slate-300'}>|</span>
+            <span className={isDark ? 'text-slate-300' : 'text-white/30'}>|</span>
 
             {/* Interactive Location Badge with Pin Icon (clean text link, no shape enclosure) */}
             <a
@@ -120,11 +120,11 @@ export const Header: React.FC<HeaderProps> = ({
               target="_blank"
               rel="noreferrer"
               title={language === 'bn' ? 'গুগল ম্যাপে আমাদের লোকেশন দেখুন' : 'View our location on Google Maps'}
-              className={`group flex items-center gap-1 text-[11px] leading-tight truncate max-w-sm transition-colors hover:text-emerald-500 ${
-                isDark ? 'text-neutral-300 hover:text-white' : 'text-slate-700 hover:text-slate-900'
+              className={`group flex items-center gap-1 text-[11px] leading-tight truncate max-w-sm transition-colors ${
+                isDark ? 'text-slate-700 hover:text-slate-950' : 'text-white/80 hover:text-white'
               }`}
             >
-              <MapPin className="w-3 h-3 text-emerald-500 shrink-0 group-hover:scale-110 group-hover:text-emerald-400 transition-transform" />
+              <MapPin className="w-3 h-3 text-sky-400 shrink-0 group-hover:scale-110 transition-transform" />
               <span className="truncate">
                 {language === 'bn' ? settings.addressBn : settings.address}
               </span>
@@ -167,12 +167,12 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
           <div>
             <div className={`font-bold text-lg leading-tight tracking-tight flex items-center gap-1.5 ${
-              isDark ? 'text-white' : 'text-slate-900'
+              isDark ? 'text-slate-900' : 'text-white'
             }`}>
               <span className="font-black tracking-tight">{language === 'bn' ? settings.businessNameBn : settings.businessName}</span>
             </div>
             <div className={`text-[11px] truncate max-w-[200px] sm:max-w-xs ${
-              isDark ? 'text-neutral-400' : 'text-slate-500 font-medium'
+              isDark ? 'text-slate-600 font-medium' : 'text-white/70'
             }`}>
               {language === 'bn' ? 'কম্পিউটার • প্রিন্ট • অনলাইন আবেদন' : 'Digital Services & Online Applications'}
             </div>
@@ -181,10 +181,10 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Desktop Navigation Links (iOS Glass Capsule) */}
         <nav
-          className={`hidden lg:flex items-center gap-1 p-1 rounded-2xl border transition-all ${
+          className={`hidden lg:flex items-center gap-1 p-1 rounded-full border transition-all ${
             isDark
-              ? 'bg-neutral-900/70 border-white/10 backdrop-blur-md shadow-inner'
-              : 'bg-white/80 border-slate-200/80 backdrop-blur-md shadow-xs'
+              ? 'bg-slate-900/10 border-slate-900/10 backdrop-blur-md shadow-inner'
+              : 'bg-white/10 border-white/15 backdrop-blur-md shadow-inner'
           }`}
         >
           {navLinks.map(link => {
@@ -199,12 +199,12 @@ export const Header: React.FC<HeaderProps> = ({
                   e.preventDefault();
                   handleNavClick(link.id);
                 }}
-                className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-emerald-600 text-white shadow-xs font-semibold'
+                    ? 'bg-sky-500 text-white shadow-md font-bold'
                     : isDark
-                    ? 'text-neutral-300 hover:text-white hover:bg-neutral-800/60'
-                    : 'text-slate-700 hover:text-slate-950 hover:bg-white hover:shadow-xs'
+                    ? 'text-slate-800 hover:text-slate-950 hover:bg-slate-900/10'
+                    : 'text-white/80 hover:text-white hover:bg-white/15'
                 }`}
               >
                 <Icon
@@ -212,8 +212,8 @@ export const Header: React.FC<HeaderProps> = ({
                     isActive
                       ? 'text-white'
                       : isDark
-                      ? 'text-neutral-400 group-hover:text-emerald-400'
-                      : 'text-slate-500 group-hover:text-emerald-600'
+                      ? 'text-slate-600 group-hover:text-slate-900'
+                      : 'text-white/70 group-hover:text-white'
                   }`}
                 />
                 <span className="whitespace-nowrap">{link.label}</span>
@@ -224,47 +224,47 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right side actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Global Search button */}
+          {/* Global Search button (iOS Water Droplet Style) */}
           <button
             id="global-search-trigger"
             onClick={openSearchModal}
-            className={`p-2 rounded-lg border transition-colors shadow-xs ${
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 shadow-md ${
               isDark
-                ? 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700'
-                : 'bg-white border-slate-200 text-slate-700 hover:text-slate-950 hover:border-slate-300 hover:bg-slate-50'
+                ? 'bg-white/85 text-slate-900 border border-white/60 shadow-[0_4px_14px_rgba(255,255,255,0.25),inset_0_1px_2px_rgba(255,255,255,0.9)] hover:bg-white hover:scale-105'
+                : 'bg-black/60 text-white border border-white/20 shadow-[0_4px_14px_rgba(0,0,0,0.35),inset_0_1px_2px_rgba(255,255,255,0.35)] hover:bg-black/80 hover:scale-105'
             }`}
             title="Search"
           >
             <Search className="w-4 h-4" />
           </button>
 
-          {/* Bilingual Language Switcher */}
+          {/* Bilingual Language Switcher (iOS Water Droplet Style) */}
           <button
             id="lang-toggle-btn"
             onClick={toggleLanguage}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-colors shadow-xs ${
+            className={`h-9 px-3.5 rounded-full flex items-center gap-1.5 text-xs font-semibold transition-all duration-300 active:scale-95 shadow-md ${
               isDark
-                ? 'bg-neutral-900 border-neutral-800 text-neutral-200 hover:border-emerald-500/50 hover:text-emerald-400'
-                : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-500 hover:text-emerald-700 hover:bg-slate-50'
+                ? 'bg-white/85 text-slate-900 border border-white/60 shadow-[0_4px_14px_rgba(255,255,255,0.25),inset_0_1px_2px_rgba(255,255,255,0.9)] hover:bg-white hover:scale-105'
+                : 'bg-black/60 text-white border border-white/20 shadow-[0_4px_14px_rgba(0,0,0,0.35),inset_0_1px_2px_rgba(255,255,255,0.35)] hover:bg-black/80 hover:scale-105'
             }`}
             title="Switch Language / ভাষা পরিবর্তন করুন"
           >
-            <Globe className="w-3.5 h-3.5 text-emerald-500" />
-            <span>{language === 'bn' ? 'বাংলা' : 'EN'}</span>
-            <span className={isDark ? 'text-neutral-500 text-[10px]' : 'text-slate-300 text-[10px]'}>|</span>
-            <span className={isDark ? 'text-neutral-400 text-[11px]' : 'text-slate-500 text-[11px]'}>
+            <Globe className="w-3.5 h-3.5 text-sky-400" />
+            <span className="font-bold">{language === 'bn' ? 'বাংলা' : 'EN'}</span>
+            <span className="opacity-40 text-[10px]">|</span>
+            <span className="opacity-70 text-[11px] font-mono">
               {language === 'bn' ? 'EN' : 'বাং'}
             </span>
           </button>
 
-          {/* Dark / Light Mode Toggle Button */}
+          {/* Dark / Light Mode Toggle Button (iOS Water Droplet Style) */}
           <button
             id="theme-mode-toggle-btn"
             onClick={toggleTheme}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition-all active:scale-95 shadow-xs ${
+            className={`h-9 px-3.5 rounded-full flex items-center gap-1.5 text-xs font-bold transition-all duration-300 active:scale-95 shadow-md ${
               isDark
-                ? 'bg-neutral-900 border-neutral-800 text-neutral-200 hover:border-amber-500/50 hover:text-amber-400'
-                : 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100 hover:border-amber-300'
+                ? 'bg-white/90 text-slate-900 border border-white/70 shadow-[0_4px_14px_rgba(255,255,255,0.3),inset_0_1px_2px_rgba(255,255,255,0.95)] hover:bg-white hover:scale-105'
+                : 'bg-black/65 text-amber-300 border border-amber-400/30 shadow-[0_4px_14px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.35)] hover:bg-black/85 hover:scale-105'
             }`}
             title={
               themeMode === 'dark'
@@ -274,31 +274,31 @@ export const Header: React.FC<HeaderProps> = ({
           >
             {themeMode === 'dark' ? (
               <>
-                <Sun className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">{language === 'bn' ? 'লাইট' : 'Light'}</span>
+                <Sun className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                <span className="hidden sm:inline font-bold">{language === 'bn' ? 'লাইট' : 'Light'}</span>
               </>
             ) : (
               <>
-                <Moon className="w-3.5 h-3.5 text-indigo-500" />
-                <span className="hidden sm:inline">{language === 'bn' ? 'ডার্ক' : 'Dark'}</span>
+                <Moon className="w-3.5 h-3.5 text-sky-300 fill-sky-300" />
+                <span className="hidden sm:inline font-bold">{language === 'bn' ? 'ডার্ক' : 'Dark'}</span>
               </>
             )}
           </button>
 
-          {/* Shopping Cart button */}
+          {/* Shopping Cart button (iOS Water Droplet Style) */}
           <button
             id="header-cart-btn"
             onClick={openCart}
-            className={`relative p-2 rounded-lg border transition-colors shadow-xs ${
+            className={`relative w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 shadow-md ${
               isDark
-                ? 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white hover:border-emerald-500/50'
-                : 'bg-white border-slate-200 text-slate-700 hover:text-emerald-700 hover:border-emerald-400 hover:bg-slate-50'
+                ? 'bg-white/85 text-slate-900 border border-white/60 shadow-[0_4px_14px_rgba(255,255,255,0.25),inset_0_1px_2px_rgba(255,255,255,0.9)] hover:bg-white hover:scale-105'
+                : 'bg-black/60 text-white border border-white/20 shadow-[0_4px_14px_rgba(0,0,0,0.35),inset_0_1px_2px_rgba(255,255,255,0.35)] hover:bg-black/80 hover:scale-105'
             }`}
             title="Cart"
           >
             <ShoppingBag className="w-4 h-4" />
             {cartItemCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse shadow-xs">
+              <span className="absolute -top-1 -right-1 bg-sky-500 text-white text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-md border border-white">
                 {cartItemCount}
               </span>
             )}
@@ -340,31 +340,30 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   id="user-menu-trigger"
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs sm:text-sm transition-all shadow-xs ${
+                  className={`h-9 px-3.5 rounded-full flex items-center gap-2 text-xs sm:text-sm font-semibold transition-all duration-300 active:scale-95 shadow-md ${
                     isDark
-                      ? 'bg-neutral-900 border-neutral-700 text-neutral-200 hover:border-emerald-500'
-                      : 'bg-white border-slate-200 text-slate-800 hover:border-emerald-500 shadow-xs'
+                      ? 'bg-white/85 text-slate-900 border border-white/60 shadow-[0_4px_14px_rgba(255,255,255,0.25),inset_0_1px_2px_rgba(255,255,255,0.9)] hover:bg-white hover:scale-105'
+                      : 'bg-black/60 text-white border border-white/20 shadow-[0_4px_14px_rgba(0,0,0,0.35),inset_0_1px_2px_rgba(255,255,255,0.35)] hover:bg-black/80 hover:scale-105'
                   }`}
                 >
-                  <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-sky-500 flex items-center justify-center text-white text-[11px] font-bold shrink-0">
                     {currentUser?.name?.charAt(0) || 'U'}
                   </div>
                   <span className="hidden sm:inline font-medium max-w-[110px] truncate">
                     {currentUser?.name}
                   </span>
-                  <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
+                  <ChevronDown className="w-3.5 h-3.5 opacity-70" />
                 </button>
-
                 {userDropdownOpen && (
                   <div
-                    className={`absolute right-0 mt-2 w-60 border rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 ${
-                      isDark ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-slate-200'
+                    className={`absolute right-0 mt-2 w-60 border rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 backdrop-blur-xl ${
+                      isDark ? 'bg-white/95 border-slate-200 text-slate-900 shadow-2xl' : 'bg-black/90 border-white/20 text-white shadow-2xl'
                     }`}
                     onClick={() => setUserDropdownOpen(false)}
                   >
-                    <div className={`px-4 py-2.5 border-b ${isDark ? 'border-neutral-800 bg-neutral-950/60' : 'border-slate-100 bg-slate-50'}`}>
-                      <p className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{currentUser?.name}</p>
-                      <p className={`text-[11px] truncate ${isDark ? 'text-neutral-400' : 'text-slate-500'}`}>{currentUser?.email || currentUser?.phone}</p>
+                    <div className={`px-4 py-2.5 border-b ${isDark ? 'border-slate-100 bg-slate-50' : 'border-white/10 bg-white/5'}`}>
+                      <p className={`text-xs font-bold truncate ${isDark ? 'text-slate-900' : 'text-white'}`}>{currentUser?.name}</p>
+                      <p className={`text-[11px] truncate ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{currentUser?.email || currentUser?.phone}</p>
                       <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 border border-emerald-500/30 capitalize font-medium">
                         {currentUser?.role === 'customer' ? (language === 'bn' ? 'সম্মানিত গ্রাহক' : 'Customer Account') : currentUser?.role.replace('_', ' ')}
                       </span>
@@ -374,7 +373,7 @@ export const Header: React.FC<HeaderProps> = ({
                       id="dropdown-profile-orders-link"
                       onClick={() => handleNavClick('profile')}
                       className={`w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold flex items-center gap-2 ${
-                        isDark ? 'text-emerald-400 hover:bg-neutral-800' : 'text-emerald-700 hover:bg-emerald-50'
+                        isDark ? 'text-emerald-700 hover:bg-emerald-50' : 'text-emerald-400 hover:bg-white/10'
                       }`}
                     >
                       <User className="w-4 h-4 text-emerald-500" />
@@ -385,7 +384,7 @@ export const Header: React.FC<HeaderProps> = ({
                       id="dropdown-applications-link"
                       onClick={() => handleNavClick('tracker')}
                       className={`w-full text-left px-4 py-2 text-xs sm:text-sm flex items-center gap-2 ${
-                        isDark ? 'text-neutral-300 hover:bg-neutral-800 hover:text-emerald-400' : 'text-slate-700 hover:bg-slate-50 hover:text-emerald-700'
+                        isDark ? 'text-slate-700 hover:bg-slate-50 hover:text-emerald-700' : 'text-slate-300 hover:bg-white/10 hover:text-emerald-400'
                       }`}
                     >
                       <FileCheck className="w-4 h-4 text-emerald-500" />
@@ -396,7 +395,7 @@ export const Header: React.FC<HeaderProps> = ({
                       id="dropdown-cart-link"
                       onClick={openCart}
                       className={`w-full text-left px-4 py-2 text-xs sm:text-sm flex items-center gap-2 ${
-                        isDark ? 'text-neutral-300 hover:bg-neutral-800 hover:text-emerald-400' : 'text-slate-700 hover:bg-slate-50 hover:text-emerald-700'
+                        isDark ? 'text-slate-700 hover:bg-slate-50 hover:text-emerald-700' : 'text-slate-300 hover:bg-white/10 hover:text-emerald-400'
                       }`}
                     >
                       <ShoppingBag className="w-4 h-4 text-emerald-500" />
@@ -408,7 +407,7 @@ export const Header: React.FC<HeaderProps> = ({
                         id="dropdown-admin-link"
                         onClick={() => handleNavClick('admin')}
                         className={`w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold flex items-center gap-2 border-t mt-1 pt-2 ${
-                          isDark ? 'text-emerald-400 border-neutral-800/80 hover:bg-emerald-950/40' : 'text-emerald-700 border-slate-100 hover:bg-emerald-50'
+                          isDark ? 'text-emerald-700 border-slate-100 hover:bg-emerald-50' : 'text-emerald-400 border-white/10 hover:bg-white/10'
                         }`}
                       >
                         <Shield className="w-4 h-4 text-emerald-500" />
@@ -421,7 +420,7 @@ export const Header: React.FC<HeaderProps> = ({
                         id="dropdown-staff-link"
                         onClick={() => handleNavClick('pos')}
                         className={`w-full text-left px-4 py-2 text-xs sm:text-sm flex items-center gap-2 ${
-                          isDark ? 'text-teal-400 hover:bg-neutral-800' : 'text-teal-700 hover:bg-teal-50'
+                          isDark ? 'text-teal-700 hover:bg-teal-50' : 'text-teal-400 hover:bg-white/10'
                         }`}
                       >
                         <FileCheck className="w-4 h-4 text-teal-500" />
@@ -429,13 +428,13 @@ export const Header: React.FC<HeaderProps> = ({
                       </button>
                     )}
 
-                    <div className={`border-t my-1 ${isDark ? 'border-neutral-800' : 'border-slate-100'}`}></div>
+                    <div className={`border-t my-1 ${isDark ? 'border-slate-100' : 'border-white/10'}`}></div>
 
                     <button
                       id="dropdown-logout-btn"
                       onClick={logout}
                       className={`w-full text-left px-4 py-2 text-xs sm:text-sm flex items-center gap-2 ${
-                        isDark ? 'text-rose-400 hover:bg-rose-950/30' : 'text-rose-600 hover:bg-rose-50'
+                        isDark ? 'text-rose-600 hover:bg-rose-50' : 'text-rose-400 hover:bg-rose-950/30'
                       }`}
                     >
                       <LogOut className="w-4 h-4" />
@@ -447,28 +446,32 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           ) : (
             <div className="flex items-center gap-1.5">
-              {/* Unified Customer / Buyer Account Button */}
+              {/* Unified Customer / Buyer Account Button (iOS Water Capsule Style) */}
               <button
                 id="customer-account-btn"
                 onClick={() => openAuthModal('login')}
-                className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-xs font-bold text-white shadow-md shadow-emerald-950/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                className={`h-9 px-4 rounded-full flex items-center gap-1.5 text-xs font-bold transition-all duration-300 active:scale-95 shadow-md ${
+                  isDark
+                    ? 'bg-white/90 text-slate-900 border border-white/70 shadow-[0_4px_14px_rgba(255,255,255,0.3),inset_0_1px_2px_rgba(255,255,255,0.95)] hover:bg-white hover:scale-105'
+                    : 'bg-black/65 text-white border border-white/20 shadow-[0_4px_14px_rgba(0,0,0,0.35),inset_0_1px_2px_rgba(255,255,255,0.35)] hover:bg-black/85 hover:scale-105'
+                }`}
                 title="Customer Login / Sign Up"
               >
-                <User className="w-3.5 h-3.5" />
+                <User className="w-3.5 h-3.5 text-sky-400" />
                 <span className="hidden sm:inline">{language === 'bn' ? 'লগইন / সাইন-আপ' : 'Login / Sign Up'}</span>
                 <span className="sm:hidden">{language === 'bn' ? 'লগইন' : 'Login'}</span>
               </button>
             </div>
           )}
 
-          {/* Mobile hamburger menu toggle */}
+          {/* Mobile hamburger menu toggle (iOS Water Capsule Style) */}
           <button
             id="mobile-menu-toggle"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`lg:hidden p-2 rounded-lg border transition-colors ${
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 shadow-md ${
               isDark
-                ? 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white'
-                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-xs'
+                ? 'bg-white/85 text-slate-900 border border-white/60 shadow-[0_4px_14px_rgba(255,255,255,0.25),inset_0_1px_2px_rgba(255,255,255,0.9)] hover:bg-white hover:scale-105'
+                : 'bg-black/60 text-white border border-white/20 shadow-[0_4px_14px_rgba(0,0,0,0.35),inset_0_1px_2px_rgba(255,255,255,0.35)] hover:bg-black/80 hover:scale-105'
             }`}
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

@@ -67,6 +67,7 @@ export const EmployeeOfTheMonthManager: React.FC = () => {
   const [role, setRole] = useState<string>(currentConfig.role || '');
   const [roleBn, setRoleBn] = useState<string>(currentConfig.roleBn || '');
   const [photo, setPhoto] = useState<string>(currentConfig.photo || '');
+  const [videoUrl, setVideoUrl] = useState<string>(currentConfig.videoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-young-man-working-with-headphones-40082-large.mp4');
   const [comment, setComment] = useState<string>(currentConfig.comment || '');
   const [commentBn, setCommentBn] = useState<string>(currentConfig.commentBn || '');
   const [month, setMonth] = useState<string>(currentConfig.month || 'March 2026');
@@ -97,6 +98,7 @@ export const EmployeeOfTheMonthManager: React.FC = () => {
         role: role.trim(),
         roleBn: roleBn.trim(),
         photo: photo.trim(),
+        videoUrl: videoUrl.trim(),
         comment: comment.trim(),
         commentBn: commentBn.trim(),
         month: month.trim(),
@@ -340,6 +342,25 @@ export const EmployeeOfTheMonthManager: React.FC = () => {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Video URL Field */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-neutral-300">
+              {language === 'bn' ? 'কর্মীর ভিডিও লিংক (Video URL - ছবিতে ক্লিক করলে প্লে হবে)' : 'Employee Video URL (Plays on photo click)'}
+            </label>
+            <input
+              type="url"
+              value={videoUrl}
+              onChange={e => setVideoUrl(e.target.value)}
+              placeholder="https://assets.mixkit.co/... or MP4 link"
+              className="w-full px-3.5 py-2 bg-neutral-950 border border-neutral-700 rounded-xl text-xs text-neutral-100 font-mono focus:outline-none focus:border-amber-500"
+            />
+            <p className="text-[10px] text-neutral-400">
+              {language === 'bn'
+                ? 'ছবিতে ক্লিক করলে একটি ব্লার ব্যাকগ্রাউন্ড মোডাল এবং দুই পাশে AI রোবট শুভেচ্ছা অ্যানিমেশনসহ এই ভিডিওটি প্লে হবে।'
+                : 'Clicking photo opens a frosted blur backdrop with 2 cheering AI robots and plays this video.'}
+            </p>
           </div>
 
           {/* Comments & Remarks (তার ব্যাপারে মন্তব্য) */}

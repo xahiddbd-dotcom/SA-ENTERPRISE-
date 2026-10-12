@@ -64,9 +64,23 @@ html.light body {
 }
 
 html.light #main-header {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  background-color: rgba(0, 0, 0, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+}
+
+html.light #main-header .text-slate-900,
+html.light #main-header .text-slate-800,
+html.light #main-header .text-slate-700 {
+  color: #f8fafc !important;
+}
+
+html.light #main-header .text-slate-600,
+html.light #main-header .text-slate-500 {
+  color: #cbd5e1 !important;
 }
 
 html.light #main-footer {
@@ -396,4 +410,75 @@ html.light .bg-radial {
 .ios-droplet-specular:hover::before {
   left: 200%;
   transition: 0.85s ease-in-out;
+}
+
+/* iPhone Water Icon / Capsule Button Style */
+.ios-water-btn {
+  position: relative;
+  border-radius: 9999px;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+/* Light / Day mood: Black transparent header water buttons */
+html.light .ios-water-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+html.light .ios-water-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.35), inset 0 1px 2px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Dark / Night mood: White transparent header water buttons */
+.dark .ios-water-btn {
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  color: #0f172a;
+  box-shadow: 0 4px 14px 0 rgba(255, 255, 255, 0.15), inset 0 1px 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.dark .ios-water-btn:hover {
+  background: rgba(0, 0, 0, 0.15);
+  border-color: rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.12), inset 0 1px 2px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* AI Robot Cheering Animations */
+@keyframes robotWave {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  20%, 60% {
+    transform: rotate(18deg);
+  }
+  40%, 80% {
+    transform: rotate(-10deg);
+  }
+}
+
+@keyframes robotFloat {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.02);
+  }
+}
+
+.animate-robot-wave {
+  transform-origin: bottom center;
+  animation: robotWave 1.6s ease-in-out infinite;
+}
+
+.animate-robot-float {
+  animation: robotFloat 3s ease-in-out infinite;
 }
