@@ -530,9 +530,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       fetch('/api/database/patch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [key]: value }),
-        keepalive: true
-      }).catch(err => console.warn(`Auto-sync error for ${key}:`, err));
+        body: JSON.stringify({ [key]: value })
+      }).catch(err => console.warn(`Auto-sync note for ${key}:`, err?.message || err));
     };
 
     if (immediate) {
@@ -578,13 +577,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await fetch('/api/database', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(fullDb),
-        keepalive: true
+        body: JSON.stringify(fullDb)
       });
       setIsServerSyncing(false);
       return res.ok;
-    } catch (e) {
-      console.error('Failed to sync full database to server:', e);
+    } catch (e: any) {
+      console.warn('Server database sync note (local browser storage active):', e?.message || e);
       setIsServerSyncing(false);
       return false;
     }

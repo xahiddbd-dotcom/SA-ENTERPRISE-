@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
-import { DataProvider } from './context/DataContext';
+import { DataProvider, useData } from './context/DataContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NoticeBar } from './components/common/NoticeBar';
 import { Header } from './components/common/Header';
@@ -29,13 +29,29 @@ import { ThanosSnapEffect } from './components/common/ThanosSnapEffect';
 import { EmployeeOfTheMonthCard } from './components/public/EmployeeOfTheMonthCard';
 import { PageProofHeader } from './components/common/PageProofHeader';
 import { parseCurrentRoute, updateBrowserUrl } from './utils/navigation';
-import { Shield, Lock } from 'lucide-react';
+import { Shield, Lock, AlertTriangle } from 'lucide-react';
 import { TTSNotificationProvider } from './context/TTSNotificationContext';
 import { CustomerAssistanceButton } from './components/public/CustomerAssistanceButton';
 import { StaffTTSControlWidget } from './components/common/StaffTTSControlWidget';
+import { SystemOutageScreen } from './components/public/SystemOutageScreen';
 
 const MainLayout: React.FC = () => {
   const { currentUser, isAuthenticated, isAdmin, isSuperAdmin, isStaffOrAdmin, logout } = useAuth();
+  const { settings, updateSettings } = useData();
+
+  // Emergency Admin Bypass session state
+  const [adminBypass, setAdminBypass] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('se_emergency_admin_bypass') === 'true' ||
+             localStorage.getItem('se_emergency_admin_bypass') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const systemMode = settings.systemStatusMode || (settings.maintenanceMode ? 'maintenance' : 'online');
+  const isOutageActive = systemMode !== 'online';
+  const isPrivilegedAdmin = isAuthenticated && (isAdmin || isSuperAdmin);
 
   // Read initial route from URL parameters, path, or hash on initial page load
   const [activeTab, setActiveTabState] = useState<string>(() => {
@@ -128,6 +144,24 @@ const MainLayout: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // If Emergency Killswitch / Outage is active and visitor is not an authenticated Admin nor bypassed:
+  if (isOutageActive && !isPrivilegedAdmin && !adminBypass) {
+    return (
+      <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans">
+        <SystemOutageScreen
+          settings={settings}
+          onAdminBypassSuccess={() => {
+            setAdminBypass(true);
+            setActiveTab('admin');
+          }}
+          onNavigateToAdmin={() => {
+            setActiveTab('admin');
+          }}
+        />
+      </div>
+    );
+  }
+
   // If Admin CMS is active and authenticated as Admin, render the dedicated standalone Full CMS workspace
   if (activeTab === 'admin' && isAuthenticated && (isSuperAdmin || isAdmin)) {
     return (
@@ -164,6 +198,45 @@ const MainLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-neutral-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-neutral-950 relative transition-colors duration-200">
+      {/* Persistent Emergency Outage Banner for Authenticated Admin / Bypassed Session */}
+      {isOutageActive && (
+        <div className="bg-gradient-to-r from-red-600 to-rose-600 text-white text-xs font-bold px-4 py-2.5 flex items-center justify-between sticky top-0 z-[100] shadow-2xl flex-wrap gap-2 animate-pulse border-b border-red-400">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0 animate-bounce" />
+            <span>
+              জরুরি সতর্কতা: সাইটটি বর্তমানে [{systemMode.toUpperCase()}] মোডে রয়েছে। সাধারণ ভিজিটরদের প্রবেশাধিকার বন্ধ। (অ্যাডমিন ওভাররাইড সক্রিয়)
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {activeTab !== 'admin' && (
+              <button
+                type="button"
+                onClick={() => setActiveTab('admin')}
+                className="px-2.5 py-1 rounded-lg bg-black/40 hover:bg-black/60 text-white text-xs font-bold transition-colors cursor-pointer"
+              >
+                কন্ট্রোল প্যানেল
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                const updated = {
+                  ...settings,
+                  systemStatusMode: 'online' as const,
+                  maintenanceMode: false,
+                  systemLastModifiedAt: new Date().toISOString()
+                };
+                updateSettings(updated);
+                localStorage.setItem('se_settings', JSON.stringify(updated));
+              }}
+              className="px-3.5 py-1 rounded-lg bg-white text-red-600 hover:bg-neutral-100 font-black text-xs shadow-md transition-colors cursor-pointer"
+            >
+              ১-ক্লিকে সাইট চালু করুন (Restore Online)
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Dynamic Background Pattern & Wallpaper System */}
       <BackgroundLayer />
 

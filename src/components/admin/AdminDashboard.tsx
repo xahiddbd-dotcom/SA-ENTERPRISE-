@@ -83,8 +83,17 @@ import {
   Building2,
   QrCode,
   Volume2,
-  HelpCircle
+  HelpCircle,
+  AlertTriangle,
+  Power,
+  ServerCrash,
+  KeyRound,
+  ShieldAlert,
+  Wrench
 } from 'lucide-react';
+import { SystemStatusMode } from '../../types';
+import { EmergencyShutdownConfirmModal } from './EmergencyShutdownConfirmModal';
+import { EmergencyKillswitchPanel } from './EmergencyKillswitchPanel';
 import {
   buildAdminSectionUrl,
   copyToClipboard,
@@ -162,7 +171,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
     customers, addCustomer, updateCustomer, deleteCustomer, toggleBlockCustomer,
     heroSlides,
     settings, updateSettings,
-    syncFullDatabaseToServer, isServerSyncing
+    syncFullDatabaseToServer, isServerSyncing,
+    logActivity
   } = useData();
   const { currentUser, logout, isAdmin, isSuperAdmin } = useAuth();
 
@@ -299,8 +309,49 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
   };
 
   // Settings sub-tab state
-  type SettingsTabKey = 'profile' | 'contacts' | 'delivery' | 'notice' | 'themes' | 'hardware' | 'system';
+  type SettingsTabKey = 'profile' | 'contacts' | 'delivery' | 'notice' | 'themes' | 'hardware' | 'system' | 'killswitch';
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsTabKey>('profile');
+
+  // Emergency System Killswitch Modal State
+  const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
+  const [targetEmergencyMode, setTargetEmergencyMode] = useState<SystemStatusMode>('maintenance');
+
+  const handleOpenKillswitchModal = (mode: SystemStatusMode) => {
+    setTargetEmergencyMode(mode);
+    setIsEmergencyModalOpen(true);
+  };
+
+  const handleConfirmEmergencyMode = (payload: {
+    mode: SystemStatusMode;
+    reason?: string;
+    reasonBn?: string;
+    estimatedResume?: string;
+    estimatedResumeBn?: string;
+  }) => {
+    const isOnline = payload.mode === 'online';
+    const updated = {
+      ...settings,
+      ...settingsForm,
+      systemStatusMode: payload.mode,
+      maintenanceMode: !isOnline,
+      systemStatusReason: payload.reason || settings.systemStatusReason,
+      systemStatusReasonBn: payload.reasonBn || settings.systemStatusReasonBn,
+      systemStatusEstimatedResume: payload.estimatedResume || settings.systemStatusEstimatedResume,
+      systemStatusEstimatedResumeBn: payload.estimatedResumeBn || settings.systemStatusEstimatedResumeBn,
+      systemLastModifiedAt: new Date().toISOString(),
+      systemLastModifiedBy: currentUser?.name || 'Administrator'
+    };
+    updateSettings(updated);
+    setSettingsForm(updated);
+    localStorage.setItem('se_settings', JSON.stringify(updated));
+    syncFullDatabaseToServer();
+    logActivity(
+      'Emergency Killswitch Changed',
+      `System mode set to ${payload.mode} by ${currentUser?.name || 'Administrator'}`
+    );
+    setSettingsSaved(true);
+    setTimeout(() => setSettingsSaved(false), 3000);
+  };
 
   // Settings form local state
   const [settingsForm, setSettingsForm] = useState(settings);
@@ -767,6 +818,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
           descBn: 'দোকানের নাম, ঠিকানা, মোবাইল ও সামাজিক যোগাযোগ লিঙ্ক'
         },
         {
+          id: 'settings' as AdminMenuKey,
+          subTab: 'killswitch' as SettingsTabKey,
+          labelBn: 'জরুরি শাটডাউন ও কিলসুইচ',
+          labelEn: 'Emergency Killswitch',
+          icon: AlertTriangle,
+          badge: settings.systemStatusMode && settings.systemStatusMode !== 'online' ? 'LOCKED' : undefined,
+          badgeColor: 'bg-rose-950 text-rose-300 border border-rose-500/40 animate-pulse font-bold',
+          categoryBn: 'সিকিউরিটি',
+          descBn: 'সাইট সাময়িক বন্ধ, 503 এরর বা টার্মিনেট করুন'
+        },
+        {
           id: 'backup' as AdminMenuKey,
           labelBn: 'ডাটাবেজ ব্যাকআপ ও রিস্টোর',
           labelEn: 'Database Backup',
@@ -776,7 +838,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
         }
       ]
     }
-  ], [services.length, lowStockCount, products.length, pendingAppsCount, applications.length, orders.length, customers.length, staff.length, heroSlides.length]);
+  ], [services.length, lowStockCount, products.length, pendingAppsCount, applications.length, orders.length, customers.length, staff.length, heroSlides.length, settings.systemStatusMode]);
 
   // Flattened items for backward compatibility
   const navigationMenuItems = useMemo(() => {
@@ -1131,10 +1193,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                             const isActive = activeMenu === item.id;
                             const isCopied = copiedLinkSection === item.id;
                             return (
-                              <div key={item.id} className="group relative flex items-center">
+                              <div key={`${item.id}-${(item as any).subTab || ''}`} className="group relative flex items-center">
                                 <button
-                                  id={`admin-nav-${item.id}`}
-                                  onClick={() => navigateToMenu(item.id)}
+                                  id={`admin-nav-${item.id}-${(item as any).subTab || ''}`}
+                                  onClick={() => {
+                                    if ((item as any).subTab) {
+                                      setSettingsSubTab((item as any).subTab);
+                                    }
+                                    navigateToMenu(item.id);
+                                  }}
                                   className={`w-full flex items-center justify-between pl-3 pr-2 py-2 rounded-xl transition-all relative ${
                                     isActive
                                       ? `${currentThemeConfig.activeSidebarItem} shadow-sm ring-1 ring-emerald-500/30`
@@ -1190,9 +1257,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
           {/* Bottom Store Status Badge */}
           <div className="p-3 bg-neutral-950 rounded-2xl border border-neutral-800 text-[11px] text-neutral-400 space-y-1 mt-6">
             <div className="flex items-center justify-between">
-              <span className="text-white font-semibold">Tejgaon Branch</span>
-              <span className="px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono uppercase font-bold">
-                Online
+              <span className="text-white font-semibold">{language === 'bn' ? 'স্টোর স্ট্যাটাস' : 'Store Status'}</span>
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold border ${
+                settings.systemStatusMode === 'online' || !settings.systemStatusMode
+                  ? 'bg-emerald-950 text-emerald-400 border-emerald-500/30'
+                  : 'bg-rose-950 text-rose-300 border-rose-500/40 animate-pulse'
+              }`}>
+                {settings.systemStatusMode || 'Online'}
               </span>
             </div>
             <p className="text-[10px] text-neutral-500">Beside Tejgaon College, Indira Road</p>
@@ -1201,6 +1272,57 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
 
         {/* Main Content Workspace */}
         <main className="flex-1 p-4 sm:p-8 overflow-y-auto max-w-7xl">
+          {/* Emergency Killswitch Top Sticky Warning Banner */}
+          {settings.systemStatusMode && settings.systemStatusMode !== 'online' && (
+            <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-red-950/90 via-rose-950/80 to-amber-950/90 border-2 border-red-500/60 shadow-2xl shadow-red-950/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-pulse">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-red-600/30 text-red-400 border border-red-500/40 shrink-0">
+                  <AlertTriangle className="w-5 h-5 animate-bounce" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-full bg-red-500 text-neutral-950 font-black text-[10px] uppercase tracking-wider font-mono">
+                      {settings.systemStatusMode.toUpperCase()} LOCK ACTIVE
+                    </span>
+                    <h4 className="text-sm font-extrabold text-white">
+                      {language === 'bn' ? 'জরুরি সতর্কতা: সাধারণ ভিজিটরদের জন্য সাইট বন্ধ আছে!' : 'CRITICAL ALERT: Storefront Access is Temporarily Halted!'}
+                    </h4>
+                  </div>
+                  <p className="text-xs text-neutral-300 mt-0.5">
+                    {language === 'bn'
+                      ? `বর্তমান মোড: ${
+                          settings.systemStatusMode === 'maintenance'
+                            ? 'সাময়িক রক্ষণাবেক্ষণ'
+                            : settings.systemStatusMode === 'server_error'
+                            ? '৫০৩ সার্ভার ত্রুটি'
+                            : 'টার্মিনেশন'
+                        }। সাধারণ গ্রাহকরা সাইট দেখতে পাচ্ছেন না।`
+                      : `Mode: ${settings.systemStatusMode}. Public visitors cannot view services or submit orders.`}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveMenu('settings');
+                    setSettingsSubTab('killswitch');
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-200 text-xs font-bold border border-neutral-700 cursor-pointer"
+                >
+                  {language === 'bn' ? 'কিলসুইচ সেটিংস' : 'Killswitch Settings'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOpenKillswitchModal('online')}
+                  className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg transition-all cursor-pointer"
+                >
+                  {language === 'bn' ? '১-ক্লিকে অনলাইন করুন' : 'Restore Online'}
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Top Workspace Breadcrumb & Context Navigation */}
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-neutral-900/80 border border-neutral-800 shadow-lg backdrop-blur-md">
             <div className="flex items-center gap-2 text-xs flex-wrap">
@@ -2355,7 +2477,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                   { id: 'delivery' as SettingsTabKey, labelBn: 'ডেলিভারি চার্জ ও শর্তাবলী', labelEn: 'Delivery Rates', icon: Truck },
                   { id: 'notice' as SettingsTabKey, labelBn: 'টপ নোটিশ বার ও ঘোষণা', labelEn: 'Notice Banner', icon: Bell },
                   { id: 'themes' as SettingsTabKey, labelBn: 'অ্যাডমিন ভিজ্যুয়াল থিম', labelEn: 'Admin Themes', icon: Palette },
-                  { id: 'hardware' as SettingsTabKey, labelBn: 'পস ও ক্লাউড সিঙ্ক', labelEn: 'Hardware & Sync', icon: Database }
+                  { id: 'hardware' as SettingsTabKey, labelBn: 'পস ও ক্লাউড সিঙ্ক', labelEn: 'Hardware & Sync', icon: Database },
+                  {
+                    id: 'killswitch' as SettingsTabKey,
+                    labelBn: 'জরুরি কিলসুইচ ও সার্ভার কন্ট্রোল',
+                    labelEn: 'Emergency Killswitch',
+                    icon: AlertTriangle,
+                    badge: settings.systemStatusMode && settings.systemStatusMode !== 'online' ? 'ACTIVE' : undefined
+                  }
                 ].map(tab => {
                   const Icon = tab.icon;
                   const isActive = settingsSubTab === tab.id || (tab.id === 'hardware' && settingsSubTab === 'system');
@@ -2366,12 +2495,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                       onClick={() => setSettingsSubTab(tab.id)}
                       className={`px-3.5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 shrink-0 transition-all ${
                         isActive
-                          ? 'bg-neutral-800 text-white shadow-md border border-neutral-700 ring-1 ring-emerald-500/40'
+                          ? tab.id === 'killswitch'
+                            ? 'bg-rose-950 text-rose-200 shadow-md border border-rose-500/50 ring-1 ring-rose-500/50'
+                            : 'bg-neutral-800 text-white shadow-md border border-neutral-700 ring-1 ring-emerald-500/40'
+                          : tab.id === 'killswitch' && settings.systemStatusMode && settings.systemStatusMode !== 'online'
+                          ? 'bg-rose-950/60 text-rose-300 border border-rose-500/40 animate-pulse'
                           : 'bg-neutral-900/60 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40 border border-transparent'
                       }`}
                     >
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : 'text-neutral-400'}`} />
+                      <Icon className={`w-4 h-4 ${
+                        isActive
+                          ? tab.id === 'killswitch' ? 'text-rose-400' : 'text-emerald-400'
+                          : tab.id === 'killswitch' ? 'text-rose-400' : 'text-neutral-400'
+                      }`} />
                       <span>{language === 'bn' ? tab.labelBn : tab.labelEn}</span>
+                      {tab.badge && (
+                        <span className="px-1.5 py-0.2 rounded-full bg-rose-600 text-white font-mono text-[9px] font-black uppercase">
+                          {tab.badge}
+                        </span>
+                      )}
                     </button>
                   );
                 })}
@@ -3105,6 +3247,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                   </div>
                 )}
 
+                {/* TAB 7: EMERGENCY KILLSWITCH & OUTAGE CONTROLS */}
+                {settingsSubTab === 'killswitch' && (
+                  <EmergencyKillswitchPanel
+                    settings={settings}
+                    onOpenConfirmModal={handleOpenKillswitchModal}
+                    onUpdateSettings={(updated) => {
+                      const merged = { ...settings, ...settingsForm, ...updated };
+                      updateSettings(merged);
+                      setSettingsForm(merged);
+                      localStorage.setItem('se_settings', JSON.stringify(merged));
+                      syncFullDatabaseToServer();
+                    }}
+                    currentUser={currentUser || undefined}
+                  />
+                )}
+
                 {/* Global Settings Save Footer Bar */}
                 <div className="p-4 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-between flex-wrap gap-3 shadow-xl">
                   <div className="flex items-center gap-2 text-xs text-neutral-400">
@@ -3782,6 +3940,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
           </div>
         </div>
       )}
+
+      {/* Emergency Shutdown & Killswitch Security Confirmation Modal */}
+      <EmergencyShutdownConfirmModal
+        isOpen={isEmergencyModalOpen}
+        onClose={() => setIsEmergencyModalOpen(false)}
+        targetMode={targetEmergencyMode}
+        settings={settings}
+        onConfirm={handleConfirmEmergencyMode}
+      />
     </div>
   );
 };

@@ -457,6 +457,8 @@ export type BackgroundPatternType = 'none' | 'dots' | 'grid' | 'circuit' | 'diag
 export type BackgroundWallpaperPreset = 'none' | 'ios_water_droplets' | 'ios_water_deep' | 'cyber_workspace' | 'printing_press' | 'digital_matrix' | 'dark_modern_geometric' | 'tech_glow' | 'custom';
 export type BackgroundOverlayTint = 'dark' | 'emerald' | 'navy' | 'slate' | 'pure_black' | 'water_glass';
 
+export type SystemStatusMode = 'online' | 'maintenance' | 'server_error' | 'terminated';
+
 export interface WebsiteSettings {
   businessName: string;
   businessNameBn: string;
@@ -489,6 +491,19 @@ export interface WebsiteSettings {
   deliveryChargeOutsideDhaka: number;
   minOrderAmount: number;
   maintenanceMode: boolean;
+
+  // Emergency System Outage, Maintenance & Killswitch Controls
+  systemStatusMode?: SystemStatusMode;
+  systemStatusReason?: string;
+  systemStatusReasonBn?: string;
+  systemStatusEstimatedResume?: string;
+  systemStatusEstimatedResumeBn?: string;
+  systemSecurityPassword?: string; // Default: 'saiful2026'
+  systemTerminationNotice?: string;
+  systemTerminationNoticeBn?: string;
+  systemOutageCode?: string; // e.g. "HTTP 503 Service Unavailable"
+  systemLastModifiedBy?: string;
+  systemLastModifiedAt?: string;
 
   // Background Texture & Wallpaper Settings
   backgroundType?: 'default' | 'texture' | 'wallpaper' | 'combo';

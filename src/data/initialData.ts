@@ -59,6 +59,17 @@ export const initialSettings: WebsiteSettings = {
   deliveryChargeOutsideDhaka: 120,
   minOrderAmount: 100,
   maintenanceMode: false,
+  systemStatusMode: 'online',
+  systemStatusReason: 'We are currently performing scheduled maintenance and server performance upgrades.',
+  systemStatusReasonBn: 'আমাদের সার্ভার আপগ্রেড এবং সিস্টেম রক্ষণাবেক্ষণের কাজ চলছে। সাময়িক অসুবিধার জন্য আমরা আন্তরিকভাবে দুঃখিত।',
+  systemStatusEstimatedResume: '30 Minutes',
+  systemStatusEstimatedResumeBn: '৩০ মিনিটের মধ্যে',
+  systemSecurityPassword: 'saiful2026',
+  systemTerminationNotice: 'Website access and digital services have been temporarily halted or terminated by administration.',
+  systemTerminationNoticeBn: 'প্রশাসনিক সিদ্ধান্তে ওয়েবসাইটের কার্যক্রম সাময়িকভাবে স্থগিত বা টার্মিনেট করা হয়েছে। জরুরি প্রয়োজনে দোকানে সরাসরি যোগাযোগ করুন।',
+  systemOutageCode: 'HTTP 503 Service Unavailable',
+  systemLastModifiedBy: 'Saiful Islam (System Admin)',
+  systemLastModifiedAt: '2026-10-15T12:00:00.000Z',
 
   // Background Texture & Wallpaper Defaults (iPhone Water Droplets Theme)
   backgroundType: 'combo',
