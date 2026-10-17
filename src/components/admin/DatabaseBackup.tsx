@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useData } from '../../context/DataContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
+import { GitHubSyncCard } from './GitHubSyncCard';
 import {
   Database,
   Download,
@@ -218,8 +219,8 @@ export const DatabaseBackup: React.FC = () => {
   const handleFactoryReset = () => {
     resetAllData();
     setShowResetConfirm(false);
-    setRestoreSuccess(language === 'bn' ? 'সিস্টেম ডাটা ফ্যাক্টরি সেটিংসে রিসেট করা হয়েছে।' : 'System database reset to initial factory demo state.');
-    logActivity('Factory Reset', 'Database reset to initial factory demo configuration', currentUser ? { id: currentUser.id, name: currentUser.name, role: currentUser.role } : undefined);
+    setRestoreSuccess(language === 'bn' ? 'সিস্টেম ডাটা ফ্যাক্টরি সেটিংসে রিসেট করা হয়েছে।' : 'System database reset to initial factory state.');
+    logActivity('Factory Reset', 'Database reset to initial factory configuration', currentUser ? { id: currentUser.id, name: currentUser.name, role: currentUser.role } : undefined);
   };
 
   return (
@@ -556,6 +557,9 @@ export const DatabaseBackup: React.FC = () => {
         </div>
       </div>
 
+      {/* GitHub Real-Time Auto-Sync & Cloud Mirror */}
+      <GitHubSyncCard />
+
       {/* Safety & Danger Zone: Factory Reset */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -565,12 +569,12 @@ export const DatabaseBackup: React.FC = () => {
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">
-                {language === 'bn' ? 'ফ্যাক্টরি ডেমো ডাটা রিসেট' : 'Factory Demo Data Reset'}
+                {language === 'bn' ? 'ফ্যাক্টরি ডাটা রিসেট' : 'Factory Data Reset'}
               </h3>
               <p className="text-xs text-neutral-400">
                 {language === 'bn'
-                  ? 'সমস্ত কাস্টম এন্ট্রি মুছে ফেলে প্রারম্ভিক ডেমো ডাটা (সার্ভিস, পেপার, স্টক) ফিরিয়ে আনুন।'
-                  : 'Clear all custom logs and restore default Tejgaon College services, paper catalogs, and demo records.'}
+                  ? 'সমস্ত কাস্টম এন্ট্রি মুছে ফেলে প্রারম্ভিক সার্ভিস, পেপার ক্যাটালগ ও ডাটাবেজ রেকর্ড ফিরিয়ে আনুন।'
+                  : 'Clear all custom logs and restore default Tejgaon College services, paper catalogs, and official records.'}
               </p>
             </div>
           </div>
@@ -599,8 +603,8 @@ export const DatabaseBackup: React.FC = () => {
               </h3>
               <p className="text-xs text-neutral-400">
                 {language === 'bn'
-                  ? 'এই পদক্ষেপটি সমস্ত বর্তমান পরিবর্তন মুছে দেবে এবং প্রাথমিক ডেমো ডাটা লোড করবে।'
-                  : 'This action will reset services, products, orders, applications, and financial records to initial demo defaults.'}
+                  ? 'এই পদক্ষেপটি সমস্ত বর্তমান পরিবর্তন মুছে দেবে এবং প্রাথমিক ডাটা লোড করবে।'
+                  : 'This action will reset services, products, orders, applications, and financial records to initial defaults.'}
               </p>
             </div>
 

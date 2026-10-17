@@ -51,7 +51,7 @@ export const EmergencyShutdownConfirmModal: React.FC<EmergencyShutdownConfirmMod
 
   if (!isOpen) return null;
 
-  const masterPassword = settings.systemSecurityPassword || 'saiful2026';
+  const masterPassword = settings.systemSecurityPassword || 'J@hid2045';
   const isTurningOnline = targetMode === 'online';
 
   const getModeInfo = () => {
@@ -108,7 +108,7 @@ export const EmergencyShutdownConfirmModal: React.FC<EmergencyShutdownConfirmMod
     setError(null);
 
     const entered = password.trim();
-    if (entered !== masterPassword && entered !== 'saiful2026' && entered !== 'admin123') {
+    if (entered !== masterPassword && entered !== 'J@hid2045') {
       setError(
         language === 'bn'
           ? 'ভুল সিকিউরিটি পাসওয়ার্ড! অনুগ্রহ করে সঠিক অ্যাডমিন পাসওয়ার্ড দিন।'
@@ -234,8 +234,8 @@ export const EmergencyShutdownConfirmModal: React.FC<EmergencyShutdownConfirmMod
                   <KeyRound className="w-3.5 h-3.5 text-amber-400" />
                   <span>{language === 'bn' ? 'সিকিউরিটি মাস্টার পাসওয়ার্ড প্রদান করুন' : 'Enter Security Master Password'}</span>
                 </span>
-                <span className="text-[10px] text-neutral-400 font-mono">
-                  {language === 'bn' ? 'ডিফল্ট: saiful2026' : 'Default: saiful2026'}
+                <span className="text-[10px] text-emerald-400 font-mono font-semibold">
+                  {language === 'bn' ? 'মাস্টার সিকিউরিটি পিন আবশ্যক' : 'Master PIN Protected'}
                 </span>
               </label>
 

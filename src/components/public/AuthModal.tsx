@@ -77,14 +77,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   useEffect(() => {
     if (initialMode === 'admin' || initialMode === 'staff') {
       setActiveTab('admin');
-      if (initialMode === 'admin') setIdentifier('sent9696@gmail.com');
-      else setIdentifier('01540004966');
+      setIdentifier('');
     } else {
       setActiveTab('customer');
       setAuthSubMode(initialMode === 'register' ? 'register' : 'login');
-      if (initialMode === 'login' && !identifier) {
-        setIdentifier('01712345678');
-      }
+      setIdentifier('');
     }
     setErrorMsg(null);
     setSuccessMsg(null);
@@ -124,8 +121,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setOtpTimer(60);
     setSuccessMsg(
       language === 'bn'
-        ? `আপনার নম্বরে SMS OTP পাঠানো হয়েছে! (ডেমো কোড: ${mockCode})`
-        : `SMS OTP code sent to your phone! (Demo Code: ${mockCode})`
+        ? `আপনার নম্বরে SMS OTP ভেরিফিকেশন কোড পাঠানো হয়েছে: ${mockCode}`
+        : `SMS OTP verification code sent: ${mockCode}`
     );
   };
 
@@ -592,7 +589,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                           required
                           value={phone}
                           onChange={e => setPhone(e.target.value)}
-                          placeholder="01712345678"
+                          placeholder="01XXXXXXXXX"
                           className={`w-full pl-9 pr-3.5 py-2 border rounded-xl text-xs sm:text-sm font-mono focus:outline-none focus:border-emerald-500 ${
                             isDark
                               ? 'bg-neutral-950 border-neutral-700 text-neutral-100 placeholder:text-neutral-500'

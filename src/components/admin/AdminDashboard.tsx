@@ -94,6 +94,7 @@ import {
 import { SystemStatusMode } from '../../types';
 import { EmergencyShutdownConfirmModal } from './EmergencyShutdownConfirmModal';
 import { EmergencyKillswitchPanel } from './EmergencyKillswitchPanel';
+import { GitHubSyncCard } from './GitHubSyncCard';
 import {
   buildAdminSectionUrl,
   copyToClipboard,
@@ -344,7 +345,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
     updateSettings(updated);
     setSettingsForm(updated);
     localStorage.setItem('se_settings', JSON.stringify(updated));
-    syncFullDatabaseToServer();
+    syncFullDatabaseToServer().catch(() => {});
     logActivity(
       'Emergency Killswitch Changed',
       `System mode set to ${payload.mode} by ${currentUser?.name || 'Administrator'}`
@@ -3244,6 +3245,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                         </button>
                       </div>
                     </div>
+
+                    {/* GitHub Live Auto-Sync Integration */}
+                    <GitHubSyncCard />
                   </div>
                 )}
 
@@ -3257,7 +3261,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitToStore, i
                       updateSettings(merged);
                       setSettingsForm(merged);
                       localStorage.setItem('se_settings', JSON.stringify(merged));
-                      syncFullDatabaseToServer();
+                      syncFullDatabaseToServer().catch(() => {});
                     }}
                     currentUser={currentUser || undefined}
                   />

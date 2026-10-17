@@ -1,6 +1,1549 @@
 {
   "settings": {
-    "businessName": "Saiful Enterprise"
+    "businessName": "Saiful Enterprise",
+    "businessNameBn": "সাইফুল এন্টারপ্রাইজ",
+    "tagline": "Computer, Photocopy, Printing, Online Application & Digital Service Center",
+    "taglineBn": "আপনার বিশ্বস্ত ডিজিটাল সার্ভিস, কম্পিউটার ও অনলাইন আবেদন সেন্টার",
+    "phonePrimary": "01540004966",
+    "phoneSecondary": "01517992585",
+    "whatsappNumber": "01517992585",
+    "bkashNumber": "01517992585",
+    "nagadNumber": "01517992585",
+    "email": "saifulenterprise.dhaka@gmail.com",
+    "address": "20/1, Sagar-Saikat Market, Shop No. 02, Indira Road, Beside Tejgaon College, Farmgate, Dhaka-1215",
+    "addressBn": "২০/১, সাগর-সৈকত মার্কেট, দোকান নং ০২, ইন্দিরা রোড, তেজগাঁও কলেজের পাশে, ফার্মগেট, ঢাকা-১২১৫",
+    "openingHours": "Saturday - Thursday: 8:30 AM - 10:30 PM, Friday: 2:30 PM - 10:00 PM",
+    "openingHoursBn": "শনিবার - বৃহস্পতিবার: সকাল ৮:৩০ - রাত ১০:৩০, শুক্রবার: দুপুর ২:৩০ - রাত ১০:০০",
+    "isShopOpen": true,
+    "heroIntervalSeconds": 35,
+    "heroBackgroundOpacity": 50,
+    "noticeBanner": "🔥 বিশেষ সেবা: তেজগাঁও কলেজ ভর্তি ও সেমিস্টার ফি জমা, বিএমইটি (BMET) ও পুলিশ ক্লিয়ারেন্স আবেদন চলছে।",
+    "noticeBannerBn": "🔥 বিশেষ সেবা: তেজগাঁও কলেজ ভর্তি ও সেমিস্টার ফি জমা, বিএমইটি (BMET) ও পুলিশ ক্লিয়ারেন্স আবেদন চলছে।",
+    "showNoticeBanner": true,
+    "tejgaonCollegeHighlight": "Official Student Assistance Point for Tejgaon College - Right Next Door!",
+    "tejgaonCollegeHighlightBn": "তেজগাঁও কলেজের পাশে আমাদের দোকান থেকে দ্রুততম সময়ে ভর্তি ফরম ও ফি প্রদান করুন।",
+    "facebookUrl": "https://facebook.com",
+    "whatsappUrl": "https://wa.me/8801517992585",
+    "googleMapUrl": "https://maps.google.com/?q=Tejgaon+College+Indira+Road+Dhaka",
+    "currencySymbol": "৳",
+    "taxRate": 0,
+    "deliveryChargeInsideDhaka": 60,
+    "deliveryChargeOutsideDhaka": 120,
+    "minOrderAmount": 100,
+    "maintenanceMode": false,
+    "systemStatusMode": "online",
+    "systemStatusReason": "We are currently performing scheduled maintenance and server performance upgrades.",
+    "systemStatusReasonBn": "আমাদের সার্ভার আপগ্রেড এবং সিস্টেম রক্ষণাবেক্ষণের কাজ চলছে। সাময়িক অসুবিধার জন্য আমরা আন্তরিকভাবে দুঃখিত।",
+    "systemStatusEstimatedResume": "30 Minutes",
+    "systemStatusEstimatedResumeBn": "৩০ মিনিটের মধ্যে",
+    "systemSecurityPassword": "saiful2026",
+    "systemTerminationNotice": "Website access and digital services have been temporarily halted or terminated by administration.",
+    "systemTerminationNoticeBn": "প্রশাসনিক সিদ্ধান্তে ওয়েবসাইটের কার্যক্রম সাময়িকভাবে স্থগিত বা টার্মিনেট করা হয়েছে। জরুরি প্রয়োজনে দোকানে সরাসরি যোগাযোগ করুন।",
+    "systemOutageCode": "HTTP 503 Service Unavailable",
+    "systemLastModifiedBy": "Saiful Islam (System Admin)",
+    "systemLastModifiedAt": "2026-10-15T12:00:00.000Z",
+    "backgroundType": "combo",
+    "texturePattern": "water_ripples",
+    "textureOpacity": 35,
+    "wallpaperPreset": "ios_water_droplets",
+    "customWallpaperUrl": "",
+    "wallpaperOpacity": 35,
+    "wallpaperBlur": 3,
+    "wallpaperFixed": true,
+    "backgroundOverlayTint": "water_glass",
+    "cctvCamera": {
+      "model": "Dahua DH-IPC-H5AS 5MP Indoor Pan & Tilt WiFi Camera",
+      "locationName": "Saiful Enterprise - Indira Road Counter & Workstation",
+      "locationNameBn": "সাইফুল এন্টারপ্রাইজ - ইন্দিরা রোড প্রধান কাউন্টার ও সেবা কেন্দ্র",
+      "streamUrl": "",
+      "webrtcUrl": "",
+      "rtspUrl": "rtsp://admin:saiful9696@192.168.1.108:554/cam/realmonitor?channel=1&subtype=0",
+      "p2pCloudId": "9L05B77PAC82491",
+      "ipAddress": "192.168.1.108",
+      "port": 554,
+      "enabled": true,
+      "allowPublicLiveView": true,
+      "ptzSupported": true,
+      "resolution": "5MP 3K QHD (2880 × 1620)",
+      "fps": 25
+    },
+    "staffTtsSettings": {
+      "enabled": true,
+      "chimeEnabled": true,
+      "volume": 0.9,
+      "rate": 0.95,
+      "pitch": 1,
+      "language": "bn",
+      "announceNewOrders": true,
+      "announceAssistanceRequests": true,
+      "repeatUnattendedIntervalMinutes": 2
+    },
+    "employeeOfTheMonth": {
+      "enabled": true,
+      "name": "Saiful Islam",
+      "nameBn": "সাইফুল ইসলাম (স্বত্বাধিকারী ও প্রধান অ্যাডমিন)",
+      "role": "Founder & CEO",
+      "roleBn": "প্রতিষ্ঠাতা ও স্বত্বাধিকারী",
+      "photo": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+      "comment": "Saiful Islam has been selected as Employee of the Month for exceptional performance.",
+      "commentBn": "সাইফুল ইসলাম (স্বত্বাধিকারী ও প্রধান অ্যাডমিন) এই মাসে দায়িত্বশীলতা ও নির্ভুল সেবার জন্য সেরা কর্মী হিসেবে নির্বাচিত হয়েছেন।",
+      "month": "March 2026",
+      "monthBn": "মার্চ ২০২৬",
+      "joinedYear": "২০২২",
+      "rating": 5
+    },
+    "videoBackground": {
+      "enabled": false,
+      "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-996-large.mp4",
+      "opacity": 30,
+      "blur": 2,
+      "playbackRate": 1,
+      "preset": "digital_cyber"
+    }
   },
-  "timestamp": "2026-10-15T21:51:35.870Z"
+  "categories": [
+    {
+      "id": "cat_education",
+      "slug": "education-admission",
+      "name": "Education & Admission Services",
+      "nameBn": "শিক্ষা ও কলেজ ভর্তি সেবা",
+      "description": "Tejgaon College admission, fee payment, NU certificates and online forms",
+      "descriptionBn": "তেজগাঁও কলেজ ভর্তি ও ফি জমা, জাতীয় বিশ্ববিদ্যালয় সার্টিফিকেট ও মার্কশীট আবেদন",
+      "iconName": "GraduationCap",
+      "featured": true,
+      "order": 1
+    },
+    {
+      "id": "cat_defense",
+      "slug": "defense-recruitment",
+      "name": "Defense Recruitment Assistance",
+      "nameBn": "প্রতিরক্ষা বাহিনী অনলাইন আবেদন",
+      "description": "Bangladesh Army, Navy, Air Force, ISSB and Cadet College online application assistance",
+      "descriptionBn": "বাংলাদেশ সেনাবাহিনী, নৌবাহিনী, বিমানবাহিনী, আইএসএসবি ও ক্যাডেট কলেজ আবেদন",
+      "iconName": "ShieldAlert",
+      "featured": true,
+      "order": 2
+    },
+    {
+      "id": "cat_govt",
+      "slug": "govt-services",
+      "name": "Government & Online Services",
+      "nameBn": "সরকারি ও জরুরি অনলাইন সেবা",
+      "description": "BMET registration, Police Clearance, Birth Registration correction, E-Passport assistance",
+      "descriptionBn": "বিএমইটি (BMET) রেজিস্ট্রেশন, পুলিশ ক্লিয়ারেন্স, ই-পাসপোর্ট ও সরকারি চাকরির আবেদন",
+      "iconName": "Building2",
+      "featured": true,
+      "order": 3
+    },
+    {
+      "id": "cat_computer_print",
+      "slug": "computer-printing",
+      "name": "Computer & Printing Services",
+      "nameBn": "কম্পিউটার ও প্রিন্টিং সেবা",
+      "description": "Typing, Color/B&W printing, high-speed photocopy, scanning, PDF conversion & formatting",
+      "descriptionBn": "কম্পিউটার টাইপিং, কালার ও সাদা-কালো প্রিন্ট, ফটোকপি, স্ক্যান, পিডিএফ এডিটিং",
+      "iconName": "Printer",
+      "featured": true,
+      "order": 4
+    },
+    {
+      "id": "cat_photo",
+      "slug": "photo-services",
+      "name": "Photo & Studio Services",
+      "nameBn": "ফটো ও স্টুডিও সার্ভিস",
+      "description": "Instant passport photo, stamp size, photo from old photo, background change, resize",
+      "descriptionBn": "জরুরি পাসপোর্ট ছবি, ছবি থেকে ছবি, ব্যাকগ্রাউন্ড চেঞ্জ, আইডি কার্ড সাইজ প্রিন্ট",
+      "iconName": "Camera",
+      "featured": true,
+      "order": 5
+    },
+    {
+      "id": "cat_physical",
+      "slug": "binding-seal",
+      "name": "Lamination, Binding & Seals",
+      "nameBn": "লেমিনেশন, বাইন্ডিং ও সিল মোহর",
+      "description": "Spiral binding, book binding, hot lamination, computerized rubber seals",
+      "descriptionBn": "স্পাইরাল বাইন্ডিং, বই বাঁধাই, হট লেমিনেশন ও নিখুঁত কম্পিউটারাইজড রাবার সিল",
+      "iconName": "Layers",
+      "featured": false,
+      "order": 6
+    }
+  ],
+  "services": [
+    {
+      "id": "srv_tc_admission",
+      "categoryId": "cat_education",
+      "name": "Tejgaon College Admission Form Fill-up",
+      "nameBn": "তেজগাঁও কলেজ ভর্তি ফরম পূরণ ও সাবমিশন",
+      "description": "Fast, error-free online admission form fill-up for Honors, Degree, HSC & Masters of Tejgaon College with invoice copy.",
+      "descriptionBn": "তেজগাঁও কলেজের অনার্স, ডিগ্রি, এইচএসসি ও মাস্টার্স ভর্তি ফরম নিখুঁতভাবে পূরণ এবং কনফার্মেশন প্রিন্ট।",
+      "price": 100,
+      "startingPrice": true,
+      "estimatedTime": "15 - 30 Minutes",
+      "estimatedTimeBn": "১৫ - ৩০ মিনিট",
+      "requiredDocuments": [
+        "Roll & Registration number",
+        "Passport size photo (Soft copy)",
+        "Mobile number",
+        "SSC/HSC Transcript"
+      ],
+      "requiredDocumentsBn": [
+        "রোল ও রেজিস্ট্রেশন নম্বর",
+        "পাসপোর্ট সাইজ ছবি",
+        "সচল মোবাইল নম্বর",
+        "মার্কশীট/ট্রান্সক্রিপ্ট"
+      ],
+      "instructions": "Please bring your original marksheets and mobile for SMS verification code.",
+      "instructionsBn": "এসএমএস ওটিপি ভেরিফিকেশনের জন্য সচল সিমযুক্ত মোবাইল সাথে রাখুন।",
+      "image": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&auto=format&fit=crop",
+      "isFeatured": true,
+      "isPopular": true,
+      "isActive": true,
+      "order": 1
+    },
+    {
+      "id": "srv_tc_fees",
+      "categoryId": "cat_education",
+      "name": "Tejgaon College Semester & Exam Fee Payment",
+      "nameBn": "তেজগাঁও কলেজ সেমিস্টার ও পরীক্ষার ফি প্রদান",
+      "description": "Instant college fee payment via Sonali e-Sheba/bKash/Nagad student gateway with verified money receipt.",
+      "descriptionBn": "সোনালী ই-সেবা বা ডিজিটাল গেটওয়ের মাধ্যমে দ্রুত কলেজ ফি পেমেন্ট ও ভেরিফাইড মানি রিসিট।",
+      "price": 50,
+      "startingPrice": true,
+      "estimatedTime": "10 Minutes",
+      "estimatedTimeBn": "১০ মিনিট",
+      "requiredDocuments": [
+        "Student ID / College Roll",
+        "Payment Slip / Notice",
+        "Fee amount"
+      ],
+      "requiredDocumentsBn": [
+        "স্টুডেন্ট আইডি / কলেজ রোল",
+        "পেমেন্ট নোটিশ",
+        "নির্দিষ্ট ফি"
+      ],
+      "image": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=800&auto=format&fit=crop",
+      "isFeatured": true,
+      "isPopular": true,
+      "isActive": true,
+      "order": 2
+    },
+    {
+      "id": "srv_nu_services",
+      "categoryId": "cat_education",
+      "name": "National University Certificate & Transcript Apply",
+      "nameBn": "জাতীয় বিশ্ববিদ্যালয় মূল সনদ ও ট্রান্সক্রিপ্ট আবেদন",
+      "description": "Online application processing for Provisional Certificate, Original Certificate, Marksheet & Corrections in NU portal.",
+      "descriptionBn": "জাতীয় বিশ্ববিদ্যালয়ের সাময়িক ও মূল সনদ, নম্বরপত্র উত্তোলন এবং সংশোধনের পূর্ণাঙ্গ অনলাইন আবেদন।",
+      "price": 250,
+      "startingPrice": true,
+      "estimatedTime": "1 - 2 Hours",
+      "estimatedTimeBn": "১ - ২ ঘন্টা",
+      "requiredDocuments": [
+        "Admit Card Copy",
+        "Registration Card",
+        "Marksheet Copy",
+        "National ID (NID)"
+      ],
+      "requiredDocumentsBn": [
+        "প্রবেশপত্র",
+        "রেজিস্ট্রেশন কার্ড",
+        "নম্বরপত্র",
+        "জাতীয় পরিচয়পত্র"
+      ],
+      "image": "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?q=80&w=800&auto=format&fit=crop",
+      "isFeatured": true,
+      "isPopular": false,
+      "isActive": true,
+      "order": 3
+    },
+    {
+      "id": "srv_army_apply",
+      "categoryId": "cat_defense",
+      "name": "Bangladesh Army Recruitment Application",
+      "nameBn": "বাংলাদেশ সেনাবাহিনী সৈনিক ও অফিসার ক্যাডেট আবেদন",
+      "description": "Complete online application assistance with accurate quota, trade selection, photo resize & admit card download.",
+      "descriptionBn": "সৈনিক ও অফিসার ক্যাডেট পদের নিখুঁত ফরম পূরণ, সঠিক ট্রেড নির্বাচন, ছবি-স্বাক্ষর রিসাইজ ও অ্যাডমিট ডাউনলোড।",
+      "price": 200,
+      "startingPrice": true,
+      "estimatedTime": "20 - 30 Minutes",
+      "estimatedTimeBn": "২০ - ৩০ মিনিট",
+      "requiredDocuments": [
+        "SSC/HSC Roll & Reg",
+        "Passport Photo & Signature",
+        "Height/Weight & Guardian NID"
+      ],
+      "requiredDocumentsBn": [
+        "এসএসসি/এইচএসসি তথ্য",
+        "পাসপোর্ট ছবি ও স্বাক্ষর",
+        "উচ্চতা/ওজন ও অভিভাবকের এনআইডি"
+      ],
+      "instructions": "Notice: We only provide technical application fill-up assistance.",
+      "instructionsBn": "সতর্কবার্তা: আমরা কেবল আবেদন ফরম পূরণের কারিগরি সহায়তা প্রদান করি।",
+      "image": "https://images.unsplash.com/photo-1579829366248-204fe8413f31?q=80&w=800&auto=format&fit=crop",
+      "isFeatured": true,
+      "isPopular": true,
+      "isActive": true,
+      "order": 4
+    },
+    {
+      "id": "srv_navy_airforce",
+      "categoryId": "cat_defense",
+      "name": "Navy & Air Force Online Application Assistance",
+      "nameBn": "নৌবাহিনী ও বিমানবাহিনী নাবিক/অফিসার আবেদন",
+      "description": "Assistance with official sailor, airman & officer cadet online application processing.",
+      "descriptionBn": "নৌবাহিনী নাবিক ও বিমানবাহিনী বিমানসেনা ও অফিসার পদের জন্য অনলাইন আবেদন ফরম পূরণ।",
+      "price": 200,
+      "startingPrice": true,
+      "estimatedTime": "20 - 30 Minutes",
+      "estimatedTimeBn": "২০ - ৩০ মিনিট",
+      "requiredDocuments": [
+        "Certificates & Photos",
+        "Signature & NID/Birth Reg"
+      ],
+      "requiredDocumentsBn": [
+        "সনদপত্র ও পাসপোর্ট ছবি",
+        "স্বাক্ষর ও এনআইডি/জন্মনিবন্ধন"
+      ],
+      "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=800&auto=format&fit=crop",
+      "isFeatured": false,
+      "isActive": true,
+      "order": 5
+    },
+    {
+      "id": "srv_bmet_reg",
+      "categoryId": "cat_govt",
+      "name": "BMET Biometric & Ami Probashi Registration",
+      "nameBn": "বিএমইটি (BMET) ও আমি প্রবাসী রেজিস্ট্রেশন",
+      "description": "Biometric appointment, passport profile verification, BMET clearance card online form fill-up for foreign employment.",
+      "descriptionBn": "বিদেশগামী কর্মীদের বিএমইটি ফিঙ্গারপ্রিন্ট অ্যাপয়েন্টমেন্ট, প্রোফাইল তৈরি ও কার্ড আবেদন।",
+      "price": 300,
+      "startingPrice": true,
+      "estimatedTime": "30 - 45 Minutes",
+      "estimatedTimeBn": "৩০ - ৪৫ মিনিট",
+      "requiredDocuments": [
+        "Original Passport",
+        "NID / Birth Certificate",
+        "Active Mobile No"
+      ],
+      "requiredDocumentsBn": [
+        "মূল পাসপোর্ট",
+        "জাতীয় পরিচয়পত্র / জন্ম নিবন্ধন",
+        "সচল মোবাইল নম্বর"
+      ],
+      "image": "https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=800&auto=format&fit=crop",
+      "isFeatured": true,
+      "isPopular": true,
+      "isActive": true,
+      "order": 6
+    },
+    {
+      "id": "srv_police_clearance",
+      "categoryId": "cat_govt",
+      "name": "Online Police Clearance Certificate Application",
+      "nameBn": "অনলাইন পুলিশ ক্লিয়ারেন্স সার্টিফিকেট আবেদন",
+      "description": "Official Police Clearance portal application, 500 BDT treasury chalan automated submission, and real-time tracking.",
+      "descriptionBn": "বাংলাদেশ পুলিশ ক্লিয়ারেন্স সার্টিফিকেট অনলাইন আবেদন, ৫০০ টাকার চালান ফি জমা ও ট্র্যাকিং।",
+      "price": 300,
+      "startingPrice": true,
+      "estimatedTime": "30 - 45 Minutes",
+      "estimatedTimeBn": "৩০ - ৪৫ মিনিট",
+      "requiredDocuments": [
+        "Passport Copy (Attested)",
+        "500 BDT Treasury Chalan",
+        "Ward Commissioner/Chairman Certificate",
+        "NID Copy"
+      ],
+      "requiredDocumentsBn": [
+        "পাসপোর্টের সত্যায়িত কপি",
+        "৫০০ টাকার ট্রেজারি চালান",
+        "কাউন্সিলর/চেয়ারম্যান প্রত্যয়ন",
+        "এনআইডি"
+      ],
+      "image": "https://images.unsplash.com/photo-1450133064473-71024230f91b?q=80&w=800&auto=format&fit=crop",
+      "isFeatured": true,
+      "isPopular": true,
+      "isActive": true,
+      "order": 7
+    },
+    {
+      "id": "srv_typing_bengali_english",
+      "categoryId": "cat_computer_print",
+      "name": "Bangla & English Fast Typing & Document Design",
+      "nameBn": "বাংলা ও ইংরেজি দ্রুত টাইপিং এবং ডকুমেন্ট ডিজাইন",
+      "description": "High-speed professional Bangla (Bijoy/Avro) and English typing, CV/Resume creation, project report formatting.",
+      "descriptionBn": "বাংলা ও ইংরেজি দ্রুত ও নির্ভুল টাইপিং, সিভি/বায়োডাটা তৈরি এবং অফিশিয়াল ডকুমেন্ট ফরম্যাটিং।",
+      "price": 30,
+      "startingPrice": true,
+      "estimatedTime": "15 - 30 Minutes",
+      "estimatedTimeBn": "১৫ - ৩০ মিনিট",
+      "requiredDocuments": [
+        "Draft / Written Copy"
+      ],
+      "requiredDocumentsBn": [
+        "খসড়া কপি বা ফাইল"
+      ],
+      "image": "https://images.unsplash.com/photo-1517842645767-c639042777db?q=80&w=800&auto=format&fit=crop",
+      "isFeatured": false,
+      "isActive": true,
+      "order": 8
+    },
+    {
+      "id": "srv_laser_print_photocopy",
+      "categoryId": "cat_computer_print",
+      "name": "High-Speed Laser Printing & Heavy Duty Photocopy",
+      "nameBn": "হাই-স্পিড লেজার প্রিন্ট ও ফটোকপি (A4/Legal)",
+      "description": "Crystal clear monochrome & laser color prints, book photocopy, thesis printing on 70/80 GSM Paper.",
+      "descriptionBn": "লেজার প্রিন্ট ও বাল্ক ফটোকপি, প্রজেক্ট বুক ও থিসিস প্রিন্ট সাশ্রয়ী মূল্যে।",
+      "price": 3,
+      "startingPrice": true,
+      "estimatedTime": "Instant (5-15 Mins)",
+      "estimatedTimeBn": "তাত্ক্ষণিক (৫-১৫ মিনিট)",
+      "requiredDocuments": [
+        "Pen Drive / PDF / Docx / Hard Copy"
+      ],
+      "requiredDocumentsBn": [
+        "পেনড্রাইভ / পিডিএফ ফাইল / মূল কপি"
+      ],
+      "image": "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?q=80&w=800&auto=format&fit=crop",
+      "isFeatured": true,
+      "isPopular": true,
+      "isActive": true,
+      "order": 9
+    },
+    {
+      "id": "srv_passport_photo",
+      "categoryId": "cat_photo",
+      "name": "5-Minute Urgent Passport & Stamp Size Photo",
+      "nameBn": "জরুরি পাসপোর্ট ও স্ট্যাম্প সাইজ ছবি (৫ মিনিটে)",
+      "description": "DSLR digital studio capture, dress change, background change to white/blue, instant lab-quality glossy photo print.",
+      "descriptionBn": "ডিএসএলআর স্টুডিও ছবি, কোট-টাই/ড্রেস পরিবর্তন, ব্যাকগ্রাউন্ড চেঞ্জ ও ওয়াটারপ্রুফ গ্লসি প্রিন্ট।",
+      "price": 50,
+      "startingPrice": true,
+      "estimatedTime": "5 - 10 Minutes",
+      "estimatedTimeBn": "৫ - ১০ মিনিট",
+      "requiredDocuments": [
+        "Self present for capture OR old photo/softcopy"
+      ],
+      "requiredDocumentsBn": [
+        "সরাসরি ছবি তোলা অথবা পুরনো ছবি"
+      ],
+      "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop",
+      "isFeatured": true,
+      "isPopular": true,
+      "isActive": true,
+      "order": 10
+    },
+    {
+      "id": "srv_spiral_binding_lamination",
+      "categoryId": "cat_physical",
+      "name": "Spiral Binding, Hard Binding & Hot Lamination",
+      "nameBn": "স্পাইরাল বাইন্ডিং, হার্ড কভার ও হট লেমিনেশন",
+      "description": "Durable PVC spiral ring binding, certificate hot pouch lamination, project hard cover with gold embossing.",
+      "descriptionBn": "পিভিসি স্পাইরাল বাইন্ডিং, সার্টিফিকেট ও এনআইডি হট লেমিনেশন এবং হার্ড কভার বাইন্ডিং।",
+      "price": 40,
+      "startingPrice": true,
+      "estimatedTime": "10 - 20 Minutes",
+      "estimatedTimeBn": "১০ - ২০ মিনিট",
+      "requiredDocuments": [
+        "Printed Sheets or Certificate"
+      ],
+      "requiredDocumentsBn": [
+        "প্রিন্ট করা কাগজ বা মূল সনদ"
+      ],
+      "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=800&auto=format&fit=crop",
+      "isFeatured": false,
+      "isActive": true,
+      "order": 11
+    }
+  ],
+  "products": [
+    {
+      "id": "prod_a4_70",
+      "sku": "PAP-DA-A4-70",
+      "name": "Double A Copier Paper A4 70 GSM",
+      "nameBn": "ডাবল এ ফটোকপি পেপার A4 ৭০ জিএসএম",
+      "description": "Premium smooth Thai copy paper for jam-free printing and crystal clear photocopy. 500 sheets per ream.",
+      "descriptionBn": "থাইল্যান্ডের প্রিমিয়াম কোয়ালিটি ডাবল এ ফটোকপি পেপার। জাম-মুক্ত প্রিন্টিং ও দীর্ঘস্থায়ী উজ্জ্বলতা। ৫০০ শিট প্রতি রিম।",
+      "categoryId": "paper_a4",
+      "brand": "Double A",
+      "gsm": 70,
+      "packSize": "1 Ream (500 Sheets)",
+      "packSizeBn": "১ রিম (৫০০ শিট)",
+      "price": 360,
+      "discountPrice": 340,
+      "stock": 120,
+      "lowStockThreshold": 15,
+      "minOrderQty": 1,
+      "images": [
+        "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?q=80&w=800&auto=format&fit=crop"
+      ],
+      "isFeatured": true,
+      "isBestSeller": true,
+      "isActive": true,
+      "specifications": {
+        "Size": "A4 (210 x 297 mm)",
+        "GSM": "70 GSM",
+        "Sheets": "500 Sheets/Ream",
+        "Origin": "Thailand",
+        "Whiteness": "148-152 CIE"
+      }
+    },
+    {
+      "id": "prod_a4_80",
+      "sku": "PAP-DA-A4-80",
+      "name": "Double A Premium Paper A4 80 GSM",
+      "nameBn": "ডাবল এ প্রিমিয়াম পেপার A4 ৮০ জিএসএম",
+      "description": "Extra thick 80 GSM high whiteness paper for professional thesis, legal contracts, and high-impact color laser printing.",
+      "descriptionBn": "অতিরিক্ত পুরু ৮০ জিএসএম কাগজ। থিসিস পেপার, অফিশিয়াল চুক্তিপত্র এবং নিখুঁত কালার লেজার প্রিন্টের জন্য সেরা।",
+      "categoryId": "paper_a4",
+      "brand": "Double A",
+      "gsm": 80,
+      "packSize": "1 Ream (500 Sheets)",
+      "packSizeBn": "১ রিম (৫০০ শিট)",
+      "price": 430,
+      "discountPrice": 410,
+      "stock": 85,
+      "lowStockThreshold": 10,
+      "minOrderQty": 1,
+      "images": [
+        "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=800&auto=format&fit=crop"
+      ],
+      "isFeatured": true,
+      "isBestSeller": true,
+      "isActive": true,
+      "specifications": {
+        "Size": "A4 (210 x 297 mm)",
+        "GSM": "80 GSM",
+        "Sheets": "500 Sheets/Ream",
+        "Origin": "Thailand",
+        "Whiteness": "165 CIE"
+      }
+    },
+    {
+      "id": "prod_paperone_80",
+      "sku": "PAP-PO-A4-80",
+      "name": "PaperOne Digital Copier Paper A4 80 GSM",
+      "nameBn": "পেপার ওয়ান ডিজিটাল ফটোকপি পেপার A4 ৮০ জিএসএম",
+      "description": "ProDigi HD Print technology enhanced paper with fast ink drying and sharp contrast for color inkjet and laser.",
+      "descriptionBn": "প্রোডিজি এইচডি টেকনোলজি সমৃদ্ধ পেপার ওয়ান ৮০ জিএসএম পেপার। দ্রুত শুকায় এবং কালার প্রিন্ট হয় চমৎকার।",
+      "categoryId": "paper_a4",
+      "brand": "PaperOne",
+      "gsm": 80,
+      "packSize": "1 Ream (500 Sheets)",
+      "packSizeBn": "১ রিম (৫০০ শিট)",
+      "price": 420,
+      "discountPrice": 395,
+      "stock": 65,
+      "lowStockThreshold": 10,
+      "minOrderQty": 1,
+      "images": [
+        "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=800&auto=format&fit=crop"
+      ],
+      "isFeatured": true,
+      "isBestSeller": false,
+      "isActive": true,
+      "specifications": {
+        "Size": "A4 (210 x 297 mm)",
+        "GSM": "80 GSM",
+        "Sheets": "500 Sheets/Ream",
+        "Origin": "Indonesia"
+      }
+    },
+    {
+      "id": "prod_legal_80",
+      "sku": "PAP-DA-LEG-80",
+      "name": "Double A Legal Size Paper 80 GSM (8.5 x 14 in)",
+      "nameBn": "ডাবল এ লিগ্যাল সাইজ পেপার ৮০ জিএসএম",
+      "description": "Standard Legal length paper for court documents, deeds, land stamp prints & legal agreements.",
+      "descriptionBn": "কোর্ট এফিডেভিট, জমিজমার দলিল, চুক্তিপত্র ও সরকারি আইনি দলিলের জন্য লিগ্যাল সাইজ প্রিমিয়াম পেপার।",
+      "categoryId": "paper_legal",
+      "brand": "Double A",
+      "gsm": 80,
+      "packSize": "1 Ream (500 Sheets)",
+      "packSizeBn": "১ রিম (৫০০ শিট)",
+      "price": 520,
+      "discountPrice": 490,
+      "stock": 40,
+      "lowStockThreshold": 8,
+      "minOrderQty": 1,
+      "images": [
+        "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=800&auto=format&fit=crop"
+      ],
+      "isFeatured": false,
+      "isBestSeller": false,
+      "isActive": true,
+      "specifications": {
+        "Size": "Legal (8.5 x 14 inches / 216 x 356 mm)",
+        "GSM": "80 GSM",
+        "Sheets": "500 Sheets/Ream"
+      }
+    },
+    {
+      "id": "prod_photo_paper_230",
+      "sku": "STA-PHOTO-230",
+      "name": "High Gloss Waterproof RC Photo Paper A4 230 GSM",
+      "nameBn": "হাই গ্লস ওয়াটারপ্রুফ ফটো পেপার A4 ২৩০ জিএসএম",
+      "description": "Professional resin-coated instant-dry waterproof photo paper for ultra-vivid portraits, studio photos and album prints.",
+      "descriptionBn": "প্রফেশনাল স্টুডিও কোয়ালিটি গ্লসি ফটো পেপার। ছবি থাকে দীর্ঘস্থায়ী ও পানিরোধক। ২০ শিটের প্যাক।",
+      "categoryId": "photo_paper",
+      "brand": "Kodak / Premier",
+      "gsm": 230,
+      "packSize": "1 Pack (20 Sheets)",
+      "packSizeBn": "১ প্যাক (২০ শিট)",
+      "price": 220,
+      "discountPrice": 190,
+      "stock": 50,
+      "lowStockThreshold": 10,
+      "minOrderQty": 1,
+      "images": [
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop"
+      ],
+      "isFeatured": true,
+      "isBestSeller": true,
+      "isActive": true,
+      "specifications": {
+        "Size": "A4 (210 x 297 mm)",
+        "GSM": "230 GSM",
+        "Sheets": "20 Sheets/Pack",
+        "Coating": "Resin Coated Cast Glossy"
+      }
+    },
+    {
+      "id": "prod_lamination_pouch",
+      "sku": "STA-LAM-100MIC",
+      "name": "Premium Hot Lamination Film Pouches A4 (100 Micron)",
+      "nameBn": "প্রিমিয়াম হট লেমিনেশন পাউচ A4 (১০০ মাইক্রন)",
+      "description": "Crystal clear, bubble-free thermal lamination film for NID, certificates, driving license and student ID protection.",
+      "descriptionBn": "১০০ মাইক্রন থার্মাল লেমিনেশন পাউচ। সার্টিফিকেট ও এনআইডিকে আর্দ্রতা ও ধুলাবালি থেকে সুরক্ষিত রাখে। ১০০ শিট।",
+      "categoryId": "lamination_binding",
+      "brand": "GBC / Royal",
+      "packSize": "1 Box (100 Pouches)",
+      "packSizeBn": "১ বক্স (১০০ পাউচ)",
+      "price": 650,
+      "discountPrice": 600,
+      "stock": 35,
+      "lowStockThreshold": 5,
+      "minOrderQty": 1,
+      "images": [
+        "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?q=80&w=800&auto=format&fit=crop"
+      ],
+      "isFeatured": false,
+      "isBestSeller": false,
+      "isActive": true,
+      "specifications": {
+        "Size": "A4 (225 x 310 mm)",
+        "Thickness": "100 Micron",
+        "Quantity": "100 Pouches/Box"
+      }
+    }
+  ],
+  "gsmOptions": [
+    {
+      "id": "gsm_70",
+      "gsm": 70,
+      "label": "70 GSM",
+      "description": "Standard photocopying, office draft printing & everyday college notes."
+    },
+    {
+      "id": "gsm_75",
+      "gsm": 75,
+      "label": "75 GSM",
+      "description": "High-speed laser printing & double-sided smooth photocopying."
+    },
+    {
+      "id": "gsm_80",
+      "gsm": 80,
+      "label": "80 GSM",
+      "description": "Premium executive paper, official project reports, contracts & presentations."
+    },
+    {
+      "id": "gsm_100",
+      "gsm": 100,
+      "label": "100 GSM",
+      "description": "Heavyweight letterheads, certificates, and premium color brochures."
+    },
+    {
+      "id": "gsm_120",
+      "gsm": 120,
+      "label": "120 GSM",
+      "description": "Ultra-premium presentation sheets, covers and graphic art prints."
+    }
+  ],
+  "staff": [
+    {
+      "id": "usr_admin",
+      "name": "Saiful Islam",
+      "nameBn": "সাইফুল ইসলাম (স্বত্বাধিকারী ও প্রধান অ্যাডমিন)",
+      "email": "sent9696@gmail.com",
+      "phone": "01540004966",
+      "role": "super_admin",
+      "employeeId": "SE-ADMIN-01",
+      "designation": "Founder & Managing Director",
+      "designationBn": "প্রতিষ্ঠাতা ও প্রধান স্বত্বাধিকারী",
+      "bio": "Visionary entrepreneur leading Saiful Enterprise since 2018. Expert in digital public services, academic admissions, high-speed press printing, and B2B paper distribution across Dhaka.",
+      "bioBn": "২০১৮ সাল থেকে সাইফুল এন্টারপ্রাইজ পরিচালনা করছেন। ডিজিটাল নাগরিক সেবা, তেজগাঁও কলেজ ভর্তি ফরম, প্রিন্টিং ও পেপার সাপ্লাই ব্যবস্থাপনায় অত্যন্ত অভিজ্ঞ।",
+      "skills": [
+        "Business Operations",
+        "Digital Governance",
+        "Paper Import & B2B Sales",
+        "Client Management"
+      ],
+      "skillsBn": [
+        "ব্যবসায়িক পরিচালনা",
+        "ডিজিটাল সেবা",
+        "কাগজ আমদানি ও সাপ্লাই",
+        "গ্রাহক সেবা"
+      ],
+      "socialLinks": {
+        "phone": "01540004966",
+        "whatsapp": "01540004966",
+        "facebook": "https://facebook.com/saifulenterprise.bd",
+        "linkedin": "https://linkedin.com",
+        "email": "sent9696@gmail.com"
+      },
+      "joiningDate": "2018-01-01",
+      "bloodGroup": "B+",
+      "emergencyContact": "01517992585",
+      "address": "Farmgate, Tejgaon, Dhaka",
+      "isActive": true,
+      "isBlocked": false,
+      "salary": 85000,
+      "shift": "Day & Management Shift",
+      "performanceScore": 99,
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "usr_op_tanvir",
+      "name": "Tanvir Ahmed",
+      "nameBn": "তানভীর আহমেদ (সিনিয়র কম্পিউটার অপারেটর)",
+      "email": "tanvir.se@gmail.com",
+      "phone": "01712-345678",
+      "role": "service_operator",
+      "employeeId": "SE-OP-01",
+      "designation": "Senior Computer & Fast Typing Specialist",
+      "designationBn": "সিনিয়র কম্পিউটার ও দ্রুত টাইপিং অপারেটর",
+      "bio": "Specialist in Bengali/English official typing, legal deeds draft, and urgent online forms.",
+      "bioBn": "বাংলা ও ইংরেজি দ্রুত টাইপিং, কোর্টের হলফনামা ও দলিল কম্পোজে বিশেষ পারদর্শী।",
+      "skills": [
+        "Bijoy & Avro Typing",
+        "MS Word",
+        "Photoshop",
+        "Govt Job Forms"
+      ],
+      "skillsBn": [
+        "বিজয় ও অভ্র টাইপিং",
+        "এমএস ওয়ার্ড",
+        "ফটوشপ",
+        "চাকরির আবেদন"
+      ],
+      "socialLinks": {
+        "phone": "01712345678",
+        "whatsapp": "01712345678"
+      },
+      "joiningDate": "2021-03-15",
+      "bloodGroup": "A+",
+      "emergencyContact": "01712345678",
+      "address": "Indira Road, Farmgate, Dhaka",
+      "isActive": true,
+      "isBlocked": false,
+      "salary": 22000,
+      "shift": "সকাল শিফট (Morning: 8:00 AM - 4:00 PM)",
+      "performanceScore": 96,
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "usr_op_sakib",
+      "name": "Sakib Hasan",
+      "nameBn": "সাকিব হাসান (ফটোকপি ও ডিজিটাল প্রিন্ট)",
+      "email": "sakib.se@gmail.com",
+      "phone": "01823-456789",
+      "role": "service_operator",
+      "employeeId": "SE-OP-02",
+      "designation": "Photocopy & High-Speed Laser Copier Operator",
+      "designationBn": "ফটোকপি ও হাই-স্পিড লেজার প্রিন্টার অপারেটর",
+      "bio": "Expert in Canon/Toshiba digital photocopiers, book binding, and paper maintenance.",
+      "bioBn": "তোশিবা ও ক্যানন হেভি ফটোকপিয়ার পরিচালনা, কালার প্রিন্ট ও বুক বাইন্ডিং বিশেষজ্ঞ।",
+      "skills": [
+        "Heavy Copier",
+        "Paper GSM",
+        "Spiral Binding",
+        "Lamination"
+      ],
+      "skillsBn": [
+        "হেভি ফটোকপিয়ার",
+        "পেপার জিএসএম",
+        "স্পাইরাল বাইন্ডিং",
+        "ল্যামিনেশন"
+      ],
+      "socialLinks": {
+        "phone": "01823456789",
+        "whatsapp": "01823456789"
+      },
+      "joiningDate": "2022-07-01",
+      "bloodGroup": "O+",
+      "emergencyContact": "01823456789",
+      "address": "Tejgaon, Dhaka",
+      "isActive": true,
+      "isBlocked": false,
+      "salary": 20000,
+      "shift": "বিকাল শিফট (Evening: 3:00 PM - 11:00 PM)",
+      "performanceScore": 94,
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "usr_op_rahim",
+      "name": "Abdur Rahim",
+      "nameBn": "আব্দুর রহিম (অনলাইন আবেদন ও কলেজ ভর্তি)",
+      "email": "rahim.se@gmail.com",
+      "phone": "01934-567890",
+      "role": "service_operator",
+      "employeeId": "SE-OP-03",
+      "designation": "Online Admission & Govt Services Specialist",
+      "designationBn": "অনলাইন আবেদন ও তেজগাঁও কলেজ ভর্তি বিশেষজ্ঞ",
+      "bio": "Tejgaon College honors/masters admission forms, army/navy recruitment, and BMET card applications.",
+      "bioBn": "তেজগাঁও কলেজ ভর্তি ফরম, জাতীয় বিশ্ববিদ্যালয় সনদ ও সরকারি চাকরির আবেদনে দক্ষ।",
+      "skills": [
+        "College Admission",
+        "Police Clearance",
+        "BMET Registration",
+        "NU Forms"
+      ],
+      "skillsBn": [
+        "কলেজ ভর্তি",
+        "পুলিশ ক্লিয়ারেন্স",
+        "বিএমইটি বায়োমেট্রিক",
+        "জাতীয় বিশ্ববিদ্যালয়"
+      ],
+      "socialLinks": {
+        "phone": "01934567890",
+        "whatsapp": "01934567890"
+      },
+      "joiningDate": "2023-01-10",
+      "bloodGroup": "B+",
+      "emergencyContact": "01934567890",
+      "address": "Green Road, Dhaka",
+      "isActive": true,
+      "isBlocked": false,
+      "salary": 19500,
+      "shift": "সকাল শিফট (Morning: 9:00 AM - 5:00 PM)",
+      "performanceScore": 95,
+      "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "usr_op_mehedi",
+      "name": "Mehedi Hasan",
+      "nameBn": "মেহেদী হাসান (গ্রাফিক্স ডিজাইন ও ল্যাব ফটো)",
+      "email": "mehedi.se@gmail.com",
+      "phone": "01645-678901",
+      "role": "service_operator",
+      "employeeId": "SE-OP-04",
+      "designation": "Studio Photo Lab & Graphics Designer",
+      "designationBn": "স্টুডিও ফটো ল্যাব ও গ্রাফিক্স ডিজাইনার",
+      "bio": "Passport & visa photo lab printing, retouching, certificate editing, and banner design.",
+      "bioBn": "পাসপোর্ট ও ভিসা ছবি প্রিন্ট, ব্যাকগ্রাউন্ড পরিবর্তন ও জরুরি আইডি কার্ড ল্যামিনেশন।",
+      "skills": [
+        "Adobe Photoshop",
+        "Illustrator",
+        "Photo Color Correction",
+        "ID Card"
+      ],
+      "skillsBn": [
+        "অ্যাডোবি ফটশপ",
+        "ইলাস্ট্রেটর",
+        "ছবি কালার কারেকশন",
+        "আইডি কার্ড"
+      ],
+      "socialLinks": {
+        "phone": "01645678901",
+        "whatsapp": "01645678901"
+      },
+      "joiningDate": "2023-06-01",
+      "bloodGroup": "AB+",
+      "emergencyContact": "01645678901",
+      "address": "Panthapath, Dhaka",
+      "isActive": true,
+      "isBlocked": false,
+      "salary": 21000,
+      "shift": "পূর্ণ দিবস (Full Day: 10:00 AM - 8:00 PM)",
+      "performanceScore": 93,
+      "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "usr_op_tariqul",
+      "name": "Tariqul Islam",
+      "nameBn": "তারিকুল ইসলাম (স্ট্যাম্প ও আইনি দলিল লেখক)",
+      "email": "tariqul.se@gmail.com",
+      "phone": "01734-889900",
+      "role": "service_operator",
+      "employeeId": "SE-OP-05",
+      "designation": "Judicial Stamp & Legal Deed Typing Specialist",
+      "designationBn": "জুডিশিয়াল স্ট্যাম্প ও আইনি দলিল লেখক",
+      "bio": "Judicial non-judicial stamp paper typing, lease agreements, affidavits, and notary drafting.",
+      "bioBn": "জুডিশিয়াল ও নন-জুডিশিয়াল স্ট্যাম্প টাইপিং, নোটারি পাবলিক এফিডেভিট ও ভাড়ানামা প্রস্তুতকারক।",
+      "skills": [
+        "Legal Drafting",
+        "Stamp Paper",
+        "Affidavits",
+        "Power of Attorney"
+      ],
+      "skillsBn": [
+        "আইনি খসড়া",
+        "স্ট্যাম্প পেপার",
+        "হলফনামা",
+        "চুক্তিপত্র"
+      ],
+      "socialLinks": {
+        "phone": "01734889900",
+        "whatsapp": "01734889900"
+      },
+      "joiningDate": "2023-09-01",
+      "bloodGroup": "O+",
+      "emergencyContact": "01734889900",
+      "address": "Tejgaon, Dhaka",
+      "isActive": true,
+      "isBlocked": false,
+      "salary": 21500,
+      "shift": "সকাল শিフト (Morning: 8:30 AM - 4:30 PM)",
+      "performanceScore": 95,
+      "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "usr_op_sohel",
+      "name": "Sohel Rana",
+      "nameBn": "সোহেল রানা (কমার্শিয়াল প্রিন্ট ও বাইন্ডিং)",
+      "email": "sohel.se@gmail.com",
+      "phone": "01856-112233",
+      "role": "service_operator",
+      "employeeId": "SE-OP-06",
+      "designation": "Heavy Printing, Lamination & Binding Specialist",
+      "designationBn": "কমার্শিয়াল প্রিন্টিং, লেমিনেশন ও স্পাইরাল বাইন্ডিং",
+      "bio": "High volume book printing, thesis hard binding, plastic comb spiral binding & PVC card lamination.",
+      "bioBn": "বই প্রিন্ট, থিসিস হার্ড বাইন্ডিং, স্পাইরাল বাইন্ডিং ও পিভিসি কার্ড লেমিনেশন বিশেষজ্ঞ।",
+      "skills": [
+        "Color Press",
+        "Hard Binding",
+        "Lamination",
+        "Spiral Comb"
+      ],
+      "skillsBn": [
+        "কালার প্রেস",
+        "হার্ড বাইন্ডিং",
+        "লেমিনেশন",
+        "স্পাইরাল"
+      ],
+      "socialLinks": {
+        "phone": "01856112233",
+        "whatsapp": "01856112233"
+      },
+      "joiningDate": "2024-02-01",
+      "bloodGroup": "A+",
+      "emergencyContact": "01856112233",
+      "address": "Farmgate, Dhaka",
+      "isActive": true,
+      "isBlocked": false,
+      "salary": 20000,
+      "shift": "সন্ধ্যা শিフト (Evening: 3:00 PM - 10:30 PM)",
+      "performanceScore": 92,
+      "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=400&auto=format&fit=crop&q=80"
+    }
+  ],
+  "customers": [],
+  "orders": [],
+  "applications": [],
+  "expenses": [],
+  "posSales": [],
+  "cart": [],
+  "notifications": [
+    {
+      "id": "notif_1",
+      "title": "New Admission Application Received",
+      "titleBn": "নতুন তেজগাঁও কলেজ ভর্তি আবেদন জমা পড়েছে",
+      "message": "Application APP-2026-0001 submitted by Md. Sakib Al Amin",
+      "messageBn": "মো: সাকিব আল আমিন তেজগাঁও কলেজ ভর্তির আবেদন করেছেন (APP-2026-0001)",
+      "type": "application",
+      "link": "/admin/applications",
+      "isRead": false,
+      "createdAt": "2026-08-14T09:00:00Z"
+    },
+    {
+      "id": "notif_2",
+      "title": "New Online Paper Order",
+      "titleBn": "নতুন পেপার অর্ডার গৃহীত হয়েছে",
+      "message": "Order SE-2026-00001 placed for A4 Paper 70 GSM",
+      "messageBn": "ডাবল এ পেপারের জন্য নতুন অর্ডার SE-2026-00001 গৃহীত হয়েছে",
+      "type": "order",
+      "link": "/admin/orders",
+      "isRead": false,
+      "createdAt": "2026-08-14T10:35:00Z"
+    }
+  ],
+  "activityLogs": [
+    {
+      "id": "act_1791584528047",
+      "userId": "usr_current",
+      "userName": "Saiful Islam",
+      "userRole": "super_admin",
+      "action": "Hero Slide Added",
+      "details": "Added background slide \"সাইবার ম্যাট্রিক্স ও হাই-টেক কোডিং গ্রিড\"",
+      "timestamp": "2026-10-09T22:22:08.047Z"
+    },
+    {
+      "id": "act_1",
+      "userId": "usr_admin",
+      "userName": "Saiful Islam",
+      "userRole": "super_admin",
+      "action": "System Initialized",
+      "details": "Saiful Enterprise digital platform configured with full services & shop catalog",
+      "timestamp": "2026-08-14T08:00:00Z"
+    }
+  ],
+  "heroSlides": [
+    {
+      "id": "slide_1",
+      "type": "photo",
+      "src": "https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1920&auto=format&fit=crop",
+      "tagEn": "Live Digital Counter",
+      "tagBn": "লাইভ ডিজিটাল কাউন্টার",
+      "titleEn": "Computer & Online Services Hub",
+      "titleBn": "কম্পিউটার ও অনলাইন সার্ভিসেস হাব",
+      "descriptionEn": "High-speed typing, admission forms, defense & government recruitment center in Farmgate.",
+      "descriptionBn": "দ্রুত টাইপিং, ভর্তি ফরম, প্রতিরক্ষা বাহিনী ও সরকারি চাকরির আবেদন কেন্দ্র।",
+      "accentColor": "emerald",
+      "order": 1
+    },
+    {
+      "id": "slide_2",
+      "type": "photo",
+      "src": "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1920&auto=format&fit=crop",
+      "tagEn": "Commercial Printing",
+      "tagBn": "কমার্শিয়াল প্রিন্টিং",
+      "titleEn": "Heavy Duty Digital Color & B/W Printing",
+      "titleBn": "হেভি ডিউটি ডিজিটাল কালার ও সাদা-কালো প্রিন্ট",
+      "descriptionEn": "Sharp laser printing, high-speed photocopying, thesis & spiral binding.",
+      "descriptionBn": "হাই-স্পিড ফটোকপি, নির্ভুল লেজার প্রিন্ট, প্রজেক্ট ও থিসিস বুক বাইন্ডিং।",
+      "accentColor": "sky",
+      "order": 2
+    },
+    {
+      "id": "slide_3",
+      "type": "photo",
+      "src": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1920&auto=format&fit=crop",
+      "tagEn": "Tejgaon College Portal",
+      "tagBn": "তেজগাঁও কলেজ পোর্টাল",
+      "titleEn": "Academic Forms, NU Marksheet & Fee Deposit",
+      "titleBn": "কলেজ ভর্তি, জাতীয় বিশ্ববিদ্যালয় মার্কশীট ও ফি জমা",
+      "descriptionEn": "Instant online form submission, admit card download, and verified payment printout.",
+      "descriptionBn": "ভর্তি ফরম পূরণ, প্রবেশপত্র ডাউনলোড এবং নিশ্চায়ন ফি পেমেন্ট স্লিপ প্রিন্ট।",
+      "accentColor": "amber",
+      "order": 3
+    },
+    {
+      "id": "slide_4",
+      "type": "photo",
+      "src": "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?q=80&w=1920&auto=format&fit=crop",
+      "tagEn": "Paper & Supply Depot",
+      "tagBn": "পেপার ও স্টেশনারি ডিপো",
+      "titleEn": "A4, Legal, Double A & Glossy Photo Paper",
+      "titleBn": "A4, লিগ্যাল, ডাবল এ ও গ্লসি ফটো পেপার পাইকারি ও খুচরা",
+      "descriptionEn": "Premium 70-300 GSM paper reams, sticker paper, ID card lamination sheets.",
+      "descriptionBn": "৭০ থেকে ৩০০ জিএসএম পেপার রিম, স্টিকার পেপার, ল্যামিনেশন রোল।",
+      "accentColor": "purple",
+      "order": 4
+    },
+    {
+      "id": "slide_5",
+      "type": "photo",
+      "src": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1920&auto=format&fit=crop",
+      "tagEn": "Instant Studio",
+      "tagBn": "জরুরি স্টুডিও ফটো",
+      "titleEn": "5-Minute Biometric Passport & Visa Photo",
+      "titleBn": "৫ মিনিটে বায়োমেট্রিক পাসপোর্ট ও ভিসা সাইজ ছবি",
+      "descriptionEn": "White/blue background change, digital retouching, and premium lab photo print.",
+      "descriptionBn": "ব্যাকগ্রাউন্ড পরিবর্তন, ফেস রিটাচ এবং প্রিমিয়াম ল্যাব কোয়ালিটি ছবি ডেলিভারি।",
+      "accentColor": "teal",
+      "order": 5
+    },
+    {
+      "type": "photo",
+      "src": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1920&q=80",
+      "tagEn": "Cyber Grid",
+      "tagBn": "সাইবার গ্রিড",
+      "titleEn": "Cyber Matrix Digital Grid Stream",
+      "titleBn": "সাইবার ম্যাট্রিক্স ও হাই-টেক কোডিং গ্রিড",
+      "descriptionEn": "High-speed typing, admission forms, defense & government recruitment center in Farmgate.",
+      "descriptionBn": "দ্রুত টাইপিং, ভর্তি ফরম, প্রতিরক্ষা বাহিনী ও সরকারি চাকরির আবেদন কেন্দ্র।",
+      "accentColor": "teal",
+      "order": 6,
+      "id": "slide_1791584528047"
+    }
+  ],
+  "seoSettings": {
+    "home": {
+      "sectionId": "home",
+      "title": "Saiful Enterprise | Digital Service, Computer & Online Application Center",
+      "titleBn": "সাইফুল এন্টারপ্রাইজ | ডিজিটাল সার্ভিস, কম্পিউটার ও অনলাইন আবেদন সেন্টার",
+      "description": "Saiful Enterprise - Computer, Photocopy, Printing, Online Application & Digital Service Center in Indira Road, Farmgate, Dhaka.",
+      "descriptionBn": "সাইফুল এন্টারপ্রাইজ - কম্পিউটার টাইপিং, কালার ও লেজার প্রিন্ট, ফটোকপি, তেজগাঁও কলেজ ভর্তি ও অনলাইন আবেদন কেন্দ্র। ইন্দিরা রোড, ফার্মগেট, ঢাকা।",
+      "keywords": "Saiful Enterprise, Indira Road computer shop, Farmgate photocopy, Tejgaon college admission, BMET registration, police clearance, online application",
+      "ogTitle": "Saiful Enterprise - Your Trusted Digital & Print Solutions Hub",
+      "ogDescription": "Fast, secure computer printing, college admissions, online job application & passport photo services in Farmgate, Dhaka.",
+      "ogImage": "https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1200&auto=format&fit=crop",
+      "ogType": "website",
+      "canonicalUrl": "https://saifulenterprise.com/"
+    },
+    "services": {
+      "sectionId": "services",
+      "title": "Digital & Online Services Catalog | Saiful Enterprise",
+      "titleBn": "সকল অনলাইন ও কম্পিউটার সেবাসমূহ | সাইফুল এন্টারপ্রাইজ",
+      "description": "Explore full catalog of services: Tejgaon College admission, BMET registration, police clearance, defense application, typing & photo lab.",
+      "descriptionBn": "তেজগাঁও কলেজ ভর্তি সহায়তা, বিএমইটি রেজিস্ট্রেশন, পুলিশ ক্লিয়ারেন্স, সেনা/নৌ/বিমানবাহিনী আবেদন ও প্রিন্টিং সেবা।",
+      "keywords": "Tejgaon college admission help, BMET biometric registration, Bangladesh police clearance online, laser print Farmgate",
+      "ogTitle": "Services Catalog - Saiful Enterprise Farmgate",
+      "ogDescription": "Instant online applications, government portal submissions, laser printing & urgent photo services.",
+      "ogImage": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1200&auto=format&fit=crop",
+      "ogType": "website",
+      "canonicalUrl": "https://saifulenterprise.com/services"
+    },
+    "shop": {
+      "sectionId": "shop",
+      "title": "Paper & Printing Supplies Shop | Saiful Enterprise",
+      "titleBn": "পেপার ও স্টেশনারি অনলাইন শপ | সাইফুল এন্টারপ্রাইজ",
+      "description": "Order wholesale & retail Double A, PaperOne, 70/80 GSM A4, Legal, Glossy Photo Paper & Binding supplies.",
+      "descriptionBn": "ডাবল এ, পেপার ওয়ান, ৭০ ও ৮০ জিএসএম এ৪ পেপার, লিগ্যাল ও প্রিমিয়াম ফটো পেপার অনলাইনে অর্ডার করুন।",
+      "keywords": "Double A paper Dhaka, A4 paper price Farmgate, glossy photo paper, lamination sheets, stationery wholesale",
+      "ogTitle": "Premium Paper & Stationery Depot - Saiful Enterprise",
+      "ogDescription": "Best prices on Double A, 80 GSM paper, photo paper and printing accessories with fast delivery in Dhaka.",
+      "ogImage": "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?q=80&w=1200&auto=format&fit=crop",
+      "ogType": "website",
+      "canonicalUrl": "https://saifulenterprise.com/shop"
+    },
+    "tracker": {
+      "sectionId": "tracker",
+      "title": "Track Application Status Online | Saiful Enterprise",
+      "titleBn": "আবেদনের অগ্রগতি লাইভ ট্র্যাক করুন | সাইফুল এন্টারপ্রাইজ",
+      "description": "Track your online application status, progress milestones and download receipts using your tracking number.",
+      "descriptionBn": "আপনার আবেদন নম্বর বা মোবাইল নম্বর দিয়ে সরকারি আবেদন, ভর্তি ও অন্যান্য সার্ভিসের বর্তমান অগ্রগতি জানুন।",
+      "keywords": "application tracking Saiful Enterprise, check application status, online slip download",
+      "ogTitle": "Application Tracker - Saiful Enterprise",
+      "ogDescription": "Real-time application verification, status check and digital money receipt download.",
+      "ogImage": "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1200&auto=format&fit=crop",
+      "ogType": "website",
+      "canonicalUrl": "https://saifulenterprise.com/tracker"
+    },
+    "about": {
+      "sectionId": "about",
+      "title": "About Us & Expert Team | Saiful Enterprise Farmgate",
+      "titleBn": "আমাদের সম্পর্কে ও টিম পরিচিতি | সাইফুল এন্টারপ্রাইজ",
+      "description": "Serving Farmgate & Tejgaon for over 15 years with dedication, digital technology and trusted customer support.",
+      "descriptionBn": "ফার্মগেট ও ইন্দিরা রোডে ১৫ বছরেরও বেশি সময় ধরে কম্পিউটার সেবা, ডিজিটাল প্রিন্ট ও ছাত্র-ছাত্রীদের সহায়তা।",
+      "keywords": "Saiful Enterprise about us, Saiful Islam proprietor, Farmgate computer shop history",
+      "ogTitle": "About Saiful Enterprise - 15+ Years of Trust",
+      "ogDescription": "Meet the dedicated team behind the most trusted digital center in Farmgate.",
+      "ogImage": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1200&auto=format&fit=crop",
+      "ogType": "website",
+      "canonicalUrl": "https://saifulenterprise.com/about"
+    },
+    "contact": {
+      "sectionId": "contact",
+      "title": "Contact Us & Location | Saiful Enterprise Indira Road",
+      "titleBn": "যোগাযোগ ও দোকানের লোকেশন | সাইফুল এন্টারপ্রাইজ",
+      "description": "Visit us beside Tejgaon College, Indira Road, Farmgate or call/WhatsApp 01517992585.",
+      "descriptionBn": "আমাদের দোকান: ২০/১, সাগর-সৈকত মার্কেট, দোকান নং ০২, ইন্দিরা রোড, তেজগাঁও কলেজের পাশে, ফার্মগেট, ঢাকা।",
+      "keywords": "Saiful Enterprise contact, Indira Road shop number, WhatsApp 01517992585, Tejgaon college map",
+      "ogTitle": "Contact Saiful Enterprise Farmgate",
+      "ogDescription": "Call, WhatsApp or visit our computer & digital solutions center in Indira Road, Dhaka.",
+      "ogImage": "https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1200&auto=format&fit=crop",
+      "ogType": "website",
+      "canonicalUrl": "https://saifulenterprise.com/contact"
+    }
+  },
+  "dailyCounterSales": [
+    {
+      "id": "dcs_init_1",
+      "voucherNo": "VCH-2026-0001",
+      "date": "2026-09-13",
+      "title": "মালিকের ৬০% অংশ (তানভীর আহমেদ - সকাল শিফট)",
+      "category": "cat_inc_operator_share",
+      "amount": 2100,
+      "paymentMethod": "cash",
+      "operatorId": "usr_op_tanvir",
+      "operatorName": "Tanvir Ahmed",
+      "notes": "মোট কাজ: ৳৩,৮০০, খরচ: ৳৩০০, নিট: ৳৩,৫০০ (মালিক ৬০%: ৳২,১০০, কর্মী ৪০%: ৳১,৪০০)",
+      "createdAt": "2026-09-13T14:30:00Z"
+    },
+    {
+      "id": "dcs_init_2",
+      "voucherNo": "VCH-2026-0002",
+      "date": "2026-09-13",
+      "title": "মালিকের ৬০% অংশ (সাকিব হাসান - বিকাল শিফট)",
+      "category": "cat_inc_operator_share",
+      "amount": 2400,
+      "paymentMethod": "cash",
+      "operatorId": "usr_op_sakib",
+      "operatorName": "Sakib Hasan",
+      "notes": "মোট কাজ: ৳৪,৫০০, খরচ: ৳৫০০, নিট: ৳৪,০০০ (মালিক ৬০%: ৳২,৪০০, কর্মী ৪০%: ৳১,৬০০)",
+      "createdAt": "2026-09-13T18:00:00Z"
+    },
+    {
+      "id": "dcs_init_3",
+      "voucherNo": "VCH-2026-0003",
+      "date": "2026-09-13",
+      "title": "মালিকের ৬০% অংশ (আব্দুর রহিম - সকাল শিফট)",
+      "category": "cat_inc_operator_share",
+      "amount": 1500,
+      "paymentMethod": "cash",
+      "operatorId": "usr_op_rahim",
+      "operatorName": "Abdur Rahim",
+      "notes": "মোট কাজ: ৳২,৬০০, খরচ: ৳১০০, নিট: ৳২,৫০০ (মালিক ৬০%: ৳১,৫০০, কর্মী ৪০%: ৳১,০০০)",
+      "createdAt": "2026-09-13T16:15:00Z"
+    }
+  ],
+  "storeExpenses": [
+    {
+      "id": "ser_init_1",
+      "voucherNo": "EXP-2026-0001",
+      "date": "2026-09-13",
+      "title": "কর্মীদের দুপুরের খাবার ও বিকালের চা-নাস্তা",
+      "category": "cat_exp_tea",
+      "amount": 450,
+      "paymentMethod": "cash",
+      "paidTo": "নিউ ঢাকা হোটেল ও চা স্টল",
+      "notes": "অপারেটরদের নিয়মিত আপ্যায়ন খরচ",
+      "createdAt": "2026-09-13T13:00:00Z"
+    }
+  ],
+  "operatorLedgers": [
+    {
+      "id": "odl_init_1",
+      "date": "2026-09-13",
+      "operatorId": "usr_op_tanvir",
+      "operatorName": "Tanvir Ahmed",
+      "operatorAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80",
+      "operatorDesignation": "সিনিয়র কম্পিউটার ও দ্রুত টাইপিং অপারেটর",
+      "operatorPhone": "01712-345678",
+      "counterNo": "কাউন্টার-১ (কম্পিউটার ও টাইপিং)",
+      "shift": "morning",
+      "grossServiceSales": 3800,
+      "operatorExpenses": 300,
+      "netServiceIncome": 3500,
+      "ownerSharePercentage": 60,
+      "ownerShareAmount": 2100,
+      "workerSharePercentage": 40,
+      "workerShareAmount": 1400,
+      "cashDepositedToOwner": 3500,
+      "counterCashInHand": 0,
+      "digitalCollection": 600,
+      "deductionPercentage": 60,
+      "deductionAmount": 2100,
+      "netAfterDeduction": 1400,
+      "pagesPrintedCount": 320,
+      "paperReamsUsed": 1,
+      "syncedToShopLedger": true,
+      "shopLedgerSaleId": "dcs_init_1",
+      "status": "settled",
+      "notes": "কোর্টের ৩টি এফিডেভিট টাইপিং এবং ৩০টি অনলাইন চাকরির আবেদন।"
+    },
+    {
+      "id": "odl_init_2",
+      "date": "2026-09-13",
+      "operatorId": "usr_op_sakib",
+      "operatorName": "Sakib Hasan",
+      "operatorAvatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80",
+      "operatorDesignation": "ফটোকপি ও হাই-স্পিড লেজার প্রিন্টার অপারেটর",
+      "operatorPhone": "01823-456789",
+      "counterNo": "কাউন্টার-২ (ফটোকপি ও প্রিন্টিং)",
+      "shift": "evening",
+      "grossServiceSales": 4500,
+      "operatorExpenses": 500,
+      "netServiceIncome": 4000,
+      "ownerSharePercentage": 60,
+      "ownerShareAmount": 2400,
+      "workerSharePercentage": 40,
+      "workerShareAmount": 1600,
+      "cashDepositedToOwner": 4000,
+      "counterCashInHand": 0,
+      "digitalCollection": 800,
+      "deductionPercentage": 60,
+      "deductionAmount": 2400,
+      "netAfterDeduction": 1600,
+      "pagesPrintedCount": 1250,
+      "paperReamsUsed": 3,
+      "syncedToShopLedger": true,
+      "shopLedgerSaleId": "dcs_init_2",
+      "status": "settled",
+      "notes": "তেজগাঁও কলেজ ছাত্রদের লেকচার শিট প্রিন্ট ও কালার কভার ল্যামিনেশন।"
+    },
+    {
+      "id": "odl_init_3",
+      "date": "2026-09-13",
+      "operatorId": "usr_op_rahim",
+      "operatorName": "Abdur Rahim",
+      "operatorAvatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=80",
+      "operatorDesignation": "অনলাইন আবেদন ও তেজগাঁও কলেজ ভর্তি বিশেষজ্ঞ",
+      "operatorPhone": "01934-567890",
+      "counterNo": "কাউন্টার-৩ (অনলাইন ফর্ম ও আবেদন)",
+      "shift": "morning",
+      "grossServiceSales": 2600,
+      "operatorExpenses": 100,
+      "netServiceIncome": 2500,
+      "ownerSharePercentage": 60,
+      "ownerShareAmount": 1500,
+      "workerSharePercentage": 40,
+      "workerShareAmount": 1000,
+      "cashDepositedToOwner": 2500,
+      "counterCashInHand": 0,
+      "digitalCollection": 1200,
+      "deductionPercentage": 60,
+      "deductionAmount": 1500,
+      "netAfterDeduction": 1000,
+      "pagesPrintedCount": 95,
+      "paperReamsUsed": 0.5,
+      "syncedToShopLedger": true,
+      "shopLedgerSaleId": "dcs_init_3",
+      "status": "settled",
+      "notes": "তেজগাঁও কলেজ অনার্স প্রথম বর্ষ ভর্তি ফর্ম ও এনইউ রেজিস্ট্রেশন।"
+    }
+  ],
+  "cashReconciliations": [],
+  "ledgerSettings": {
+    "defaultOpeningCash": 3500,
+    "defaultDeductionPercentage": 60,
+    "shopShareLabel": "দোকান শেয়ার (Shop Share - 60%)",
+    "operatorShareLabel": "অপারেটর কমিশন (Operator Commission - 40%)",
+    "enableVoucherNumbering": true,
+    "voucherPrefix": "VCH-2026-",
+    "currencySymbol": "৳",
+    "autoReconciliation": true,
+    "businessNameBn": "সাইফুল এন্টারপ্রাইজ",
+    "addressBn": "২০/১, সাগর-সৈকত মার্কেট, ইন্দিরা রোড, ফার্মগেট, ঢাকা",
+    "phonePrimary": "01540004966",
+    "customCategories": [
+      {
+        "id": "cat_inc_operator_share",
+        "name": "Operator 60% Owner Share",
+        "nameBn": "কর্মী হিসাব থেকে ৬০% মালিক মুনাফা",
+        "type": "income",
+        "color": "emerald",
+        "isCustom": false
+      },
+      {
+        "id": "cat_inc_photocopy",
+        "name": "Photocopy & Laser Print",
+        "nameBn": "ফটোকপি ও লেজার প্রিন্ট",
+        "type": "income",
+        "color": "emerald",
+        "isCustom": false
+      },
+      {
+        "id": "cat_inc_admission",
+        "name": "Online Admission & Form Fillup",
+        "nameBn": "অনলাইন ভর্তি ও আবেদন ফি",
+        "type": "income",
+        "color": "teal",
+        "isCustom": false
+      },
+      {
+        "id": "cat_inc_photo",
+        "name": "Studio & Passport Photo Lab",
+        "nameBn": "স্টুডিও পাসপোর্ট ও ল্যাব ছবি",
+        "type": "income",
+        "color": "cyan",
+        "isCustom": false
+      },
+      {
+        "id": "cat_inc_stationery",
+        "name": "Stationery & Paper Retail",
+        "nameBn": "স্টেশনারি ও পেপার বিক্রয়",
+        "type": "income",
+        "color": "blue",
+        "isCustom": false
+      },
+      {
+        "id": "cat_inc_binding",
+        "name": "Lamination & Spiral Binding",
+        "nameBn": "ল্যামিনেশন ও স্পাইরাল বাইন্ডিং",
+        "type": "income",
+        "color": "amber",
+        "isCustom": false
+      },
+      {
+        "id": "cat_inc_typing",
+        "name": "Bengali/English Typing & CV",
+        "nameBn": "বাংলা/ইংরেজি টাইপিং ও সিভি তৈরি",
+        "type": "income",
+        "color": "indigo",
+        "isCustom": false
+      },
+      {
+        "id": "cat_inc_due_rec",
+        "name": "Customer Due Recovery",
+        "nameBn": "কাস্টমার বকেয়া/বাকি আদায়",
+        "type": "income",
+        "color": "green",
+        "isCustom": false
+      },
+      {
+        "id": "cat_inc_other",
+        "name": "Other Counter Income",
+        "nameBn": "অন্যান্য খুচরা কাউন্টার আয়",
+        "type": "income",
+        "color": "slate",
+        "isCustom": false
+      },
+      {
+        "id": "cat_exp_tea",
+        "name": "Tea, Snacks & Refreshment",
+        "nameBn": "চা-নাস্তা ও আপ্যায়ন",
+        "type": "expense",
+        "color": "amber",
+        "isCustom": false
+      },
+      {
+        "id": "cat_exp_paper",
+        "name": "Paper Reams & Supply Purchase",
+        "nameBn": "পেপার রিম ও মালামাল ক্রয়",
+        "type": "expense",
+        "color": "rose",
+        "isCustom": false
+      },
+      {
+        "id": "cat_exp_toner",
+        "name": "Toner Cartridge & Refill Ink",
+        "nameBn": "টোনার ও প্রিন্টার কালি",
+        "type": "expense",
+        "color": "purple",
+        "isCustom": false
+      },
+      {
+        "id": "cat_exp_electric",
+        "name": "Electricity & Generator Diesel",
+        "nameBn": "বিদ্যুৎ বিল ও জেনারেটর",
+        "type": "expense",
+        "color": "yellow",
+        "isCustom": false
+      },
+      {
+        "id": "cat_exp_rent",
+        "name": "Shop Rent & Market Service Charge",
+        "nameBn": "দোকান ভাড়া ও মার্কেট সার্ভিস চার্জ",
+        "type": "expense",
+        "color": "red",
+        "isCustom": false
+      },
+      {
+        "id": "cat_exp_wifi",
+        "name": "Internet Router & WiFi Bill",
+        "nameBn": "ইন্টারনেট ও রাউটার বিল",
+        "type": "expense",
+        "color": "sky",
+        "isCustom": false
+      },
+      {
+        "id": "cat_exp_transport",
+        "name": "Transport & Delivery Freight",
+        "nameBn": "যাতায়াত ও মালামাল পরিবহন",
+        "type": "expense",
+        "color": "orange",
+        "isCustom": false
+      },
+      {
+        "id": "cat_exp_repair",
+        "name": "Machine Servicing & Spares",
+        "nameBn": "মেশিন সার্ভিসিং ও যন্ত্রাংশ মেরামত",
+        "type": "expense",
+        "color": "stone",
+        "isCustom": false
+      },
+      {
+        "id": "cat_exp_staff_adv",
+        "name": "Staff Salary Advance / Food",
+        "nameBn": "কর্মচারী অগ্রিম বেতন / খোরাকি",
+        "type": "expense",
+        "color": "pink",
+        "isCustom": false
+      },
+      {
+        "id": "cat_exp_misc",
+        "name": "Miscellaneous Retail Petty Cash",
+        "nameBn": "বিবিধ খুচরা দোকান খরচ",
+        "type": "expense",
+        "color": "neutral",
+        "isCustom": false
+      }
+    ]
+  },
+  "stampConfigs": [
+    {
+      "id": "cartridge_paper",
+      "name": "Cartridge Legal Paper",
+      "nameBn": "কার্টিজ পেপার (দলিল/চুক্তির কাগজ)",
+      "faceValue": 0,
+      "defaultBuyPrice": 5,
+      "defaultSalePrice": 10,
+      "currentStock": 100,
+      "lowStockThreshold": 30,
+      "category": "cartridge",
+      "descriptionBn": "জুডিশিয়াল স্ট্যাম্পের সাথে সংযুক্ত দলিল ড্রাফটিং ও লিগ্যাল প্রিন্টিং পেপার"
+    },
+    {
+      "id": "stamp_50",
+      "name": "50 Taka Non-Judicial Stamp",
+      "nameBn": "৫০ টাকার নন-জুডিশিয়াল স্ট্যাম্প",
+      "faceValue": 50,
+      "defaultBuyPrice": 55,
+      "defaultSalePrice": 70,
+      "currentStock": 30,
+      "lowStockThreshold": 10,
+      "category": "stamp",
+      "descriptionBn": "হলফনামা, সাধারণ অঙ্গীকারনামা ও প্রত্যয়নপত্রে ব্যবহৃত হয়"
+    },
+    {
+      "id": "stamp_100",
+      "name": "100 Taka Non-Judicial Stamp",
+      "nameBn": "১০০ টাকার নন-জুডিশিয়াল স্ট্যাম্প",
+      "faceValue": 100,
+      "defaultBuyPrice": 105,
+      "defaultSalePrice": 120,
+      "currentStock": 50,
+      "lowStockThreshold": 10,
+      "category": "stamp",
+      "descriptionBn": "চুক্তিপত্র, ভাড়ানামা, বায়না ও নোটারি পাবলিক কার্যাদিতে সর্বাধিক ব্যবহৃত"
+    }
+  ],
+  "stampSales": [],
+  "stampPurchases": [],
+  "assistanceRequests": [
+    {
+      "id": "req_demo_01",
+      "requestNumber": "REQ-001",
+      "customerName": "আব্দুল করিম",
+      "customerPhone": "01712345678",
+      "category": "college_admission",
+      "topic": "Tejgaon College Admission Form",
+      "topicBn": "তেজগাঁও কলেজ অনার্স ভর্তি ফরম পূরণে জরুরি সহায়তা",
+      "location": "কাউন্টার ২ (সাইবার স্টেশন)",
+      "notes": "ছবি ও স্বাক্ষর রিসাইজ সংক্রান্ত সহায়তা প্রয়োজন",
+      "status": "attending",
+      "assignedStaffName": "Md. Saiful Islam",
+      "createdAt": "2026-09-25T08:55:31.098Z",
+      "attendingAt": "2026-09-25T09:00:31.098Z"
+    },
+    {
+      "id": "req_demo_02",
+      "requestNumber": "REQ-002",
+      "customerName": "সুলতানা রহমান",
+      "customerPhone": "01898765432",
+      "category": "order_help",
+      "topic": "Online Cart & bKash Payment Query",
+      "topicBn": "অনলাইন স্টোরে কার্ট চেকআউট ও বিকাশ পেমেন্ট সাহায্য",
+      "location": "অনলাইন ওয়েবসাইট গ্রাহক",
+      "notes": "বিকাশ ট্রানজেকশন আইডি প্রদান নিয়ে প্রশ্ন",
+      "status": "pending",
+      "createdAt": "2026-09-25T09:06:31.098Z"
+    }
+  ],
+  "lastUpdatedAt": "2026-10-17T10:44:46.575Z",
+  "lastSyncedAt": "2026-10-17T10:34:18.108Z",
+  "testKey": "value"
 }

@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Filter out any obsolete demo staff, keep real accounts
+          // Filter valid active staff accounts
           return parsed.filter(u => u && u.id);
         }
       }

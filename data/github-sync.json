@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "token": "",
+  "owner": "sent9696",
+  "repo": "saiful-enterprise",
+  "branch": "main",
+  "filePath": "data/database.json",
+  "commitAuthorName": "Saiful Enterprise CMS",
+  "commitAuthorEmail": "sent9696@gmail.com",
+  "lastSyncStatus": "idle"
+}

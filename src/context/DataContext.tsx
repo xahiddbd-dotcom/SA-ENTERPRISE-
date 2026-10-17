@@ -622,7 +622,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // preserve client modifications and push to server disk!
           if (localTimestamp > serverTimestamp && localTimestamp - serverTimestamp > 1000) {
             console.log('Local client changes are newer than disk database, syncing client state to server');
-            syncFullDatabaseToServer();
+            syncFullDatabaseToServer().catch(() => {});
           } else {
             // Server database is authoritative; hydrate state safely without erasing missing properties
             if (d.settings) {
@@ -652,7 +652,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         } else {
           // Initialize server disk database on first launch
-          syncFullDatabaseToServer();
+          syncFullDatabaseToServer().catch(() => {});
         }
         isHydratedRef.current = true;
         setIsServerSyncing(false);

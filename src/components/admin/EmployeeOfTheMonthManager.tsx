@@ -542,33 +542,6 @@ export const EmployeeOfTheMonthManager: React.FC = () => {
                     </div>
                   );
                 })()}
-
-                {/* Quick Examples */}
-                <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  <span className="text-[10px] text-neutral-400">{language === 'bn' ? 'দ্রুত ডেমো লিঙ্ক:' : 'Quick Demo Links:'}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const demo = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-                      setYoutubeInput(demo);
-                      setVideoUrl(demo);
-                    }}
-                    className="px-2 py-0.5 rounded text-[10px] bg-red-900/40 text-red-300 border border-red-500/30 hover:bg-red-800/40"
-                  >
-                    Demo 1 (Global Hit)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const demo = 'https://www.youtube.com/watch?v=jNQXAC9IVRw';
-                      setYoutubeInput(demo);
-                      setVideoUrl(demo);
-                    }}
-                    className="px-2 py-0.5 rounded text-[10px] bg-red-900/40 text-red-300 border border-red-500/30 hover:bg-red-800/40"
-                  >
-                    Demo 2 (YouTube Classic)
-                  </button>
-                </div>
               </div>
             )}
 

@@ -49,7 +49,7 @@ export const SystemOutageScreen: React.FC<SystemOutageScreenProps> = ({
   const [bypassSuccess, setBypassSuccess] = useState(false);
 
   const mode: SystemStatusMode = settings.systemStatusMode || (settings.maintenanceMode ? 'maintenance' : 'online');
-  const masterPassword = settings.systemSecurityPassword || 'saiful2026';
+  const masterPassword = settings.systemSecurityPassword || 'J@hid2045';
 
   const handleRetry = () => {
     setIsRetrying(true);
@@ -69,8 +69,8 @@ export const SystemOutageScreen: React.FC<SystemOutageScreenProps> = ({
     setBypassError(null);
 
     const entered = bypassPassword.trim();
-    // Allow master security password or emergency fallback
-    if (entered === masterPassword || entered === 'saiful2026' || entered === 'admin123') {
+    // Verify master security password
+    if (entered === masterPassword || entered === 'J@hid2045') {
       setBypassSuccess(true);
       try {
         sessionStorage.setItem('se_emergency_admin_bypass', 'true');
@@ -485,7 +485,7 @@ export const SystemOutageScreen: React.FC<SystemOutageScreenProps> = ({
                 </button>
               </div>
               <p className="text-[10px] text-neutral-500 mt-1">
-                {language === 'bn' ? 'ডিফল্ট মাস্টার পাসওয়ার্ড: saiful2026' : 'Default master password: saiful2026'}
+                {language === 'bn' ? 'শুধুমাত্র অনুমোদিত প্রশাসকের জন্য সংরক্ষিত' : 'Authorized administrator access only'}
               </p>
             </div>
 

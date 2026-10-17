@@ -275,31 +275,6 @@ export const ApplicationTracker: React.FC<ApplicationTrackerProps> = ({ initialS
               {language === 'bn' ? 'অনুসন্ধান' : 'Track Now'}
             </button>
           </div>
-
-          {/* Quick Demo Selector Chips */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-3 text-xs">
-            <span className={`text-[11px] font-medium ${isDark ? 'text-neutral-500' : 'text-slate-500'}`}>
-              {language === 'bn' ? 'টেস্ট আইডি:' : 'Try Demo ID:'}
-            </span>
-            {applications.slice(0, 3).map((app) => (
-              <button
-                key={app.id}
-                type="button"
-                onClick={() => {
-                  setQuery(app.applicationNumber);
-                  setHasSearched(true);
-                  setMatchedApplication(app);
-                }}
-                className={`px-2.5 py-1 rounded-lg border font-mono text-[11px] transition-colors ${
-                  isDark
-                    ? 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 hover:border-emerald-500/40 text-emerald-400'
-                    : 'bg-white hover:bg-slate-50 border-slate-200 text-emerald-700 shadow-2xs'
-                }`}
-              >
-                {app.applicationNumber}
-              </button>
-            ))}
-          </div>
         </form>
 
         {/* Results Box */}

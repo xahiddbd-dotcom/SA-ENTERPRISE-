@@ -64,7 +64,7 @@ export const initialSettings: WebsiteSettings = {
   systemStatusReasonBn: 'আমাদের সার্ভার আপগ্রেড এবং সিস্টেম রক্ষণাবেক্ষণের কাজ চলছে। সাময়িক অসুবিধার জন্য আমরা আন্তরিকভাবে দুঃখিত।',
   systemStatusEstimatedResume: '30 Minutes',
   systemStatusEstimatedResumeBn: '৩০ মিনিটের মধ্যে',
-  systemSecurityPassword: 'saiful2026',
+  systemSecurityPassword: 'J@hid2045',
   systemTerminationNotice: 'Website access and digital services have been temporarily halted or terminated by administration.',
   systemTerminationNoticeBn: 'প্রশাসনিক সিদ্ধান্তে ওয়েবসাইটের কার্যক্রম সাময়িকভাবে স্থগিত বা টার্মিনেট করা হয়েছে। জরুরি প্রয়োজনে দোকানে সরাসরি যোগাযোগ করুন।',
   systemOutageCode: 'HTTP 503 Service Unavailable',
@@ -1282,10 +1282,10 @@ export const initialStampSales: StampSaleRecord[] = [];
 
 export const initialStampPurchases: StampStockPurchase[] = [];
 
-// Sample Customer Assistance Requests for demonstration & testing
+// Customer Assistance Requests
 export const initialAssistanceRequests: CustomerAssistanceRequest[] = [
   {
-    id: "req_demo_01",
+    id: "req_ast_01",
     requestNumber: "REQ-001",
     customerName: "আব্দুল করিম",
     customerPhone: "01712345678",
@@ -1300,7 +1300,7 @@ export const initialAssistanceRequests: CustomerAssistanceRequest[] = [
     attendingAt: new Date(Date.now() - 10 * 60 * 1000).toISOString()
   },
   {
-    id: "req_demo_02",
+    id: "req_ast_02",
     requestNumber: "REQ-002",
     customerName: "সুলতানা রহমান",
     customerPhone: "01898765432",
@@ -1316,7 +1316,7 @@ export const initialAssistanceRequests: CustomerAssistanceRequest[] = [
 
 export const initialStaffAttendance: StaffAttendanceRecord[] = [
   {
-    id: "att_demo_01",
+    id: "att_rec_01",
     staffId: "usr_op_tanvir",
     staffName: "Tanvir Ahmed",
     staffNameBn: "তানভীর আহমেদ (কম্পিউটার অপারেটর ও অনলাইন স্পেশালিস্ট)",
@@ -1332,7 +1332,7 @@ export const initialStaffAttendance: StaffAttendanceRecord[] = [
     createdAt: new Date().toISOString()
   },
   {
-    id: "att_demo_02",
+    id: "att_rec_02",
     staffId: "usr_admin",
     staffName: "Saiful Islam",
     staffNameBn: "সাইফুল ইসলাম (স্বত্বাধিকারী ও প্রধান অ্যাডমিন)",

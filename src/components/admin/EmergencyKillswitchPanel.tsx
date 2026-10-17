@@ -84,8 +84,8 @@ export const EmergencyKillswitchPanel: React.FC<EmergencyKillswitchPanelProps> =
     setPassError(null);
     setPassSuccess(null);
 
-    const masterPass = settings.systemSecurityPassword || 'saiful2026';
-    if (currentSecurityPass.trim() !== masterPass && currentSecurityPass.trim() !== 'saiful2026' && currentSecurityPass.trim() !== 'admin123') {
+    const masterPass = settings.systemSecurityPassword || 'J@hid2045';
+    if (currentSecurityPass.trim() !== masterPass && currentSecurityPass.trim() !== 'J@hid2045') {
       setPassError(language === 'bn' ? 'বর্তমান সিকিউরিটি পাসওয়ার্ডটি সঠিক নয়।' : 'Current security password is incorrect.');
       return;
     }
@@ -604,7 +604,7 @@ export const EmergencyKillswitchPanel: React.FC<EmergencyKillswitchPanelProps> =
               </div>
             </div>
             <div className="text-xs font-mono text-neutral-400">
-              {language === 'bn' ? 'ডিফল্ট পাসওয়ার্ড: saiful2026' : 'Default key: saiful2026'}
+              {language === 'bn' ? 'মাস্টার সিকিউরিটি পাসওয়ার্ড সক্রিয় ও সুরক্ষিত' : 'Master Security Key Active & Protected'}
             </div>
           </div>
         ) : (

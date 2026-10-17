@@ -498,12 +498,15 @@ export interface WebsiteSettings {
   systemStatusReasonBn?: string;
   systemStatusEstimatedResume?: string;
   systemStatusEstimatedResumeBn?: string;
-  systemSecurityPassword?: string; // Default: 'saiful2026'
+  systemSecurityPassword?: string; // Default: 'J@hid2045'
   systemTerminationNotice?: string;
   systemTerminationNoticeBn?: string;
   systemOutageCode?: string; // e.g. "HTTP 503 Service Unavailable"
   systemLastModifiedBy?: string;
   systemLastModifiedAt?: string;
+
+  // GitHub Auto-Sync & Cloud Storage Integration
+  githubSync?: GitHubSyncSettings;
 
   // Background Texture & Wallpaper Settings
   backgroundType?: 'default' | 'texture' | 'wallpaper' | 'combo';
@@ -568,6 +571,23 @@ export interface WebsiteSettings {
     playbackRate?: number;
     preset?: string;
   };
+}
+
+export interface GitHubSyncSettings {
+  enabled: boolean;
+  token?: string;
+  hasToken?: boolean;
+  owner: string;
+  repo: string;
+  branch: string;
+  filePath: string;
+  commitAuthorName?: string;
+  commitAuthorEmail?: string;
+  lastSyncStatus?: 'idle' | 'success' | 'error' | 'syncing';
+  lastSyncTime?: string;
+  lastCommitSha?: string;
+  lastCommitUrl?: string;
+  lastErrorMessage?: string | null;
 }
 
 export type StoreExpenseCategory =
